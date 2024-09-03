@@ -2,6 +2,7 @@
 using Elysium.Authentication.Services;
 using Elysium.Components.Components;
 using Elysium.Services;
+using Haondt.Web.Assets;
 using Haondt.Web.Core.Components;
 using Haondt.Web.Core.Services;
 using Haondt.Web.Services;
@@ -15,8 +16,16 @@ namespace Elysium.Extensions
             services.AddSingleton<ISingletonComponentFactory, SingletonComponentFactory>();
             services.AddSingleton<IExceptionActionResultFactory, ElysiumExceptionActionResultFactory>();
             services.AddScoped<IComponentHandler, ElysiumComponentHandler>();
+
+            var assemblyPrefix = typeof(ServiceCollectionExtensions).Assembly.GetName().Name;
+            services.AddScoped<IHeadEntryDescriptor>(sp => new IconDescriptor
+            {
+                Uri = $"/_asset/{assemblyPrefix}.wwwroot.icon.ico"
+            });
+
             return services;
         }
+
         public static IServiceCollection AddElysiumComponents(this IServiceCollection services)
         {
             services.AddScoped<IComponentDescriptor>(sp => new ComponentDescriptor<HomeLayoutModel>(async (cf, rd) =>
@@ -57,6 +66,13 @@ namespace Elysium.Extensions
                     .PushUrl("login")
                     .Build())
             });
+            return services;
+        }
+
+        public static IServiceCollection AddElysiumAssetSources(this IServiceCollection services)
+        {
+            var assembly = typeof(ServiceCollectionExtensions).Assembly;
+            services.AddSingleton<IAssetSource>(sp => new ManifestAssetSource(assembly));
             return services;
         }
     }

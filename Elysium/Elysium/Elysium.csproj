@@ -8,8 +8,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Haondt.Web" Version="1.0.0-alpha-20240903080419" />
-    <PackageReference Include="Haondt.Web.BulmaCSS" Version="1.0.0-alpha-20240903080419" />
+    <Content Remove="wwwroot\icon.ico" />
+    <Content Remove="wwwroot\icon.svg" />
+    <Content Remove="wwwroot\logo.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\icon.ico" />
+    <EmbeddedResource Include="wwwroot\icon.svg" />
+    <EmbeddedResource Include="wwwroot\logo.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Haondt.Web" Version="1.0.0-alpha-20240903104854" />
+    <PackageReference Include="Haondt.Web.BulmaCSS" Version="1.0.0-alpha-20240903104854" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
   </ItemGroup>
 

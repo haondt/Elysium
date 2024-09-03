@@ -22,6 +22,7 @@ builder.Services
     .UseBulmaCSS(builder.Configuration)
     .AddElysiumServices()
     .AddElysiumComponents()
+    .AddElysiumAssetSources()
     .AddElysiumPersistenceServices(builder.Configuration)
     .AddElysiumAuthenticationServices(builder.Configuration);
 

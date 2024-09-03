@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Haondt.Identity" Version="1.0.0-alpha-20240903080419" />
-    <PackageReference Include="Haondt.Persistence" Version="1.0.0-alpha-20240903080419" />
-    <PackageReference Include="Haondt.Web" Version="1.0.0-alpha-20240903080419" />
+    <PackageReference Include="Haondt.Identity" Version="1.0.0-alpha-20240903104854" />
+    <PackageReference Include="Haondt.Persistence" Version="1.0.0-alpha-20240903104854" />
+    <PackageReference Include="Haondt.Web" Version="1.0.0-alpha-20240903104854" />
   </ItemGroup>
 
   <ItemGroup>
