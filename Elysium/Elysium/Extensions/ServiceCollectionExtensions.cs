@@ -22,6 +22,10 @@ namespace Elysium.Extensions
             {
                 Uri = $"/_asset/{assemblyPrefix}.wwwroot.icon.ico"
             });
+            services.AddScoped<IHeadEntryDescriptor>(sp => new StyleSheetDescriptor
+            {
+                Uri = $"/_asset/{assemblyPrefix}.wwwroot.bulma-custom.css"
+            });
 
             return services;
         }

@@ -11,7 +11,7 @@
             <div class="column is-flex is-flex-direction-row is-justify-content-center is-align-items-center">
                 <div class="card" style="width:400px;">
                     <div class="card-content is-flex is-flex-direction-column is-align-items-center">
-                        <form style="width:100%;">
+                        <form style="width:100%;" hx-post="_event/LoginUser">
                             <div class="field">
                                 <div class="control">
                                     <input class="input" type="text" placeholder="username" name="username" />
@@ -22,7 +22,7 @@
                                     <input class="input" type="password" placeholder="password" name="password" autocomplete="current-password" />
                                 </div>
                             </div>
-                            <button class="button is-primary is-dark" style="width:100%;">Sign in</button>
+                            <button class="button is-primary is-outlined" style="width:100%;">Sign in</button>
                         </form>
                         <hr style="width:100%;"/>
                         <button class="button is-ghost">Sign up</button>

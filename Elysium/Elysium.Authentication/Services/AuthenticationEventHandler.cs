@@ -65,7 +65,7 @@ namespace Elysium.Authentication.Services
                     isPersistent: true, lockoutOnFailure: false);
 
                 if (!result.Succeeded)
-                    return new(new UnauthorizedAccessException());
+                    return await GetLoginComponentAsync();
 
                 var homePage = await componentFactory.GetPlainComponent<HomeLayoutModel>();
                 if (homePage.IsSuccessful)
@@ -75,5 +75,15 @@ namespace Elysium.Authentication.Services
 
             return new(Optional.Null<IComponent>());
         }
+
+        public  async Task<Result<Optional<IComponent>>> GetLoginComponentAsync()
+        {
+           var result = await componentFactory.GetPlainComponent<LoginModel>(configureResponse: m => m.SetStatusCode = 401);
+            if (!result.IsSuccessful)
+                return new(result.Error);
+            return new(new Optional<IComponent>(result.Value));
+        }
+
+
     }
 }
