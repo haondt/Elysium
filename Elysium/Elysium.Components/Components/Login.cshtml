@@ -1,2 +1,34 @@
 ﻿@model Elysium.Components.Components.LoginModel
-<div>this is the login form</div>
+<div >
+    <div class="fixed-grid has-2-cols" style="margin-top: 200px">
+        <div class="grid">
+            <div class="cell is-flex is-flex-direction-row is-justify-content-center is-align-items-center">
+                <div class="is-flex is-flex-direction-column is-align-items-flex-start">
+                    <img style="height:50px;" src="@Url.Content("~/_asset/Elysium.wwwroot.logo.svg")" />
+                    <h2 class="subtitle is-4">A poorly cobbled together social network.</h2>
+                </div>
+            </div>
+            <div class="cell is-flex is-flex-direction-row is-justify-content-center is-align-items-center">
+                <div class="card" style="width:400px;">
+                    <div class="card-content is-flex is-flex-direction-column is-align-items-center">
+                        <form style="width:100%;">
+                            <div class="field">
+                                <div class="control">
+                                    <input class="input" type="text" placeholder="username" name="username" />
+                                </div>
+                            </div>
+                            <div class="field">
+                                <div class="control">
+                                    <input class="input" type="password" placeholder="password" name="password" autocomplete="current-password" />
+                                </div>
+                            </div>
+                            <button class="button is-primary is-dark" style="width:100%;">Sign in</button>
+                        </form>
+                        <hr style="width:100%;"/>
+                        <button class="button is-ghost">Sign up</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
