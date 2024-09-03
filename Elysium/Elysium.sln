@@ -7,6 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium", "Elysium\Elysium.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.GrainInterfaces", "Elysium.GrainInterfaces\Elysium.GrainInterfaces.csproj", "{9E172F09-6C07-483C-936A-BDC73ECA5810}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Authentication", "Elysium.Authentication\Elysium.Authentication.csproj", "{42C062A3-FF61-4DDB-A0C1-1F83599BA7FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Persistence", "Elysium.Persistence\Elysium.Persistence.csproj", "{1F016566-A8F1-4517-83A7-B95AADDB279E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Core", "Elysium.Core\Elysium.Core.csproj", "{FEBEDE7B-0A81-4177-868F-B459D796703F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +27,18 @@ Global
 		{9E172F09-6C07-483C-936A-BDC73ECA5810}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E172F09-6C07-483C-936A-BDC73ECA5810}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E172F09-6C07-483C-936A-BDC73ECA5810}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42C062A3-FF61-4DDB-A0C1-1F83599BA7FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42C062A3-FF61-4DDB-A0C1-1F83599BA7FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42C062A3-FF61-4DDB-A0C1-1F83599BA7FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42C062A3-FF61-4DDB-A0C1-1F83599BA7FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F016566-A8F1-4517-83A7-B95AADDB279E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F016566-A8F1-4517-83A7-B95AADDB279E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F016566-A8F1-4517-83A7-B95AADDB279E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F016566-A8F1-4517-83A7-B95AADDB279E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEBEDE7B-0A81-4177-868F-B459D796703F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEBEDE7B-0A81-4177-868F-B459D796703F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEBEDE7B-0A81-4177-868F-B459D796703F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEBEDE7B-0A81-4177-868F-B459D796703F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
