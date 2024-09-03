@@ -23,6 +23,7 @@ namespace Elysium.Authentication.Extensions
                 .AddUserStore<ElysiumUserStore>()
                 .AddRoleStore<ElysiumRoleStore>();
             services.AddScoped<IEventHandler, AuthenticationEventHandler>();
+            services.AddScoped<ISessionService, SessionService>();
             return services;
         }
     }

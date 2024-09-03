@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Elysium.Services
 {
-    public class ElysiumExceptionActionResultFactory(IComponentFactory componentFactory) : IExceptionActionResultFactory
+    public class ElysiumExceptionActionResultFactory(ISingletonComponentFactory componentFactoryFactory) : IExceptionActionResultFactory
     {
         public async Task<Result<IActionResult>> CreateAsync(Exception exception, HttpContext context)
         {
@@ -20,7 +20,7 @@ namespace Elysium.Services
                 _ => new ErrorModel { ErrorCode = 500, Message = "Elysium ran into an unrecoverable error." }
             };
 
-            var component = await componentFactory.GetComponent(result, configureResponse: m => m.SetStatusCode = result.ErrorCode);
+            var component = await componentFactoryFactory.CreateComponentFactory().GetComponent(result, configureResponse: m => m.SetStatusCode = result.ErrorCode);
 
             if (!component.IsSuccessful)
                 return new(component.Error);

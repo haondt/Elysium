@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddApplicationPart(typeof(Haondt.Web.Extensions.ServiceCollectionExtensions).Assembly)
     .AddApplicationPart(typeof(Haondt.Web.BulmaCSS.Extensions.ServiceCollectionExtensions).Assembly)
-    .AddApplicationPart(typeof(Elysium.Components.Extensions.ServiceCollectionExtensions).Assembly);
+    .AddApplicationPart(typeof(Elysium.Components.Components.HomeLayoutModel).Assembly);
 
 builder.Configuration.AddEnvironmentVariables();
 

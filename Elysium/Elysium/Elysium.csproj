@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Haondt.Web" Version="1.0.0-alpha-20240903062408" />
-    <PackageReference Include="Haondt.Web.BulmaCSS" Version="1.0.0-alpha-20240903062408" />
+    <PackageReference Include="Haondt.Web" Version="1.0.0-alpha-20240903080419" />
+    <PackageReference Include="Haondt.Web.BulmaCSS" Version="1.0.0-alpha-20240903080419" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
   </ItemGroup>
 
