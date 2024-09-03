@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Persistence", "Elys
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Core", "Elysium.Core\Elysium.Core.csproj", "{FEBEDE7B-0A81-4177-868F-B459D796703F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Components", "Elysium.Components\Elysium.Components.csproj", "{640F39C5-014F-4FF9-89FE-4CEF59729D8B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{FEBEDE7B-0A81-4177-868F-B459D796703F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FEBEDE7B-0A81-4177-868F-B459D796703F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FEBEDE7B-0A81-4177-868F-B459D796703F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{640F39C5-014F-4FF9-89FE-4CEF59729D8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{640F39C5-014F-4FF9-89FE-4CEF59729D8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{640F39C5-014F-4FF9-89FE-4CEF59729D8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{640F39C5-014F-4FF9-89FE-4CEF59729D8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
