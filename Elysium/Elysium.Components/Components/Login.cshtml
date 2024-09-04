@@ -14,13 +14,34 @@
                     <form style="width:100%;" hx-post="/_event/LoginUser">
                         <div class="field">
                             <div class="control">
-                                <input class="input" type="text" placeholder="username" name="username" autocomplete="username"/>
+                                <input 
+                                    class="input 
+                                        @if(Model.DangerUsername) { <text>is-danger</text> }
+                                    "
+                                    type="text" 
+                                    placeholder="username" name="username" 
+                                    autocomplete="username" 
+                                    @if(!string.IsNullOrEmpty(Model.ExistingUsername)){ <text>value=@Model.ExistingUsername</text> }
+                                />
                             </div>
                         </div>
                         <div class="field">
                             <div class="control">
-                                <input class="input" type="password" placeholder="password" name="password" autocomplete="current-password" />
+                                <input class="input
+                                        @if(Model.DangerPassword) { <text>is-danger</text> }
+                                    "
+                                    type="password" placeholder="password" name="password" autocomplete="current-password"
+                                />
                             </div>
+                            @if(Model.Errors.Count > 0)
+                            {
+                                <div class="is-flex is-flex-direction-column" style="width:100%;">
+                                @foreach(var error in Model.Errors)
+                                {
+                                    <p class="help is-danger">@error</p>
+                                }
+                                </div>
+                            }
                         </div>
                         <button class="button is-primary is-outlined" style="width:100%;">Sign in</button>
                     </form>

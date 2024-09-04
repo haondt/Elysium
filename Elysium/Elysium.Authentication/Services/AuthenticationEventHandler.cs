@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Identity;
 using Elysium.Authentication.Exceptions;
 using Elysium.Core.Models;
 using Elysium.Components.Components;
+using Haondt.Web.Components;
+using Haondt.Web.Core.Services;
 
 namespace Elysium.Authentication.Services
 {
@@ -63,17 +65,30 @@ namespace Elysium.Authentication.Services
                     });
 
                 await signInManager.SignInAsync(user, isPersistent: true);
+                return await GetHomeLoaderComponentAsync();
             }
 
             if (LOGIN_USER_EVENT.Equals(eventName))
             {
                 var passwordResult = requestData.Form.GetValue<string>("password");
-                if (!passwordResult.IsSuccessful)
-                    return new(passwordResult.Error);
-
                 var usernameResult = requestData.Form.GetValue<string>("username");
-                if (!usernameResult.IsSuccessful)
-                    return new(usernameResult.Error);
+                if (!usernameResult.IsSuccessful || !passwordResult.IsSuccessful)
+                {
+                    var model = new LoginModel();
+                    if (usernameResult.IsSuccessful)
+                        model.ExistingUsername = usernameResult.Value;
+                    else
+                    {
+                        model.DangerUsername = true;
+                        model.Errors.Add("Username is required.");
+                    }
+                    if (!passwordResult.IsSuccessful)
+                    {
+                        model.DangerPassword = true;
+                        model.Errors.Add("Password is required.");
+                    }
+                    return await GetLoginComponentAsync(model);
+                }
 
                 var result = await signInManager.PasswordSignInAsync(
                     usernameResult.Value,
@@ -81,23 +96,52 @@ namespace Elysium.Authentication.Services
                     isPersistent: true, lockoutOnFailure: false);
 
                 if (!result.Succeeded)
-                    return await GetLoginComponentAsync();
+                    return await GetLoginComponentAsync(new LoginModel
+                    { 
+                        ExistingUsername = usernameResult.Value,
+                        Errors = ["Incorrect username or password."]
+                    });
 
-                var homePage = await componentFactory.GetPlainComponent<HomeLayoutModel>();
-                if (homePage.IsSuccessful)
-                    return new(new Optional<IComponent>(homePage.Value));
-                return new(homePage.Error);
+                return await GetHomeLoaderComponentAsync();
             }
 
             return new(Optional.Null<IComponent>());
         }
 
-        public  async Task<Result<Optional<IComponent>>> GetLoginComponentAsync()
+        public  async Task<Result<Optional<IComponent>>> GetHomeLoaderComponentAsync()
         {
-           var result = await componentFactory.GetPlainComponent<LoginModel>(configureResponse: m => m.SetStatusCode = 401);
-            if (!result.IsSuccessful)
-                return new(result.Error);
-            return new(new Optional<IComponent>(result.Value));
+            var closeModalComponent = await componentFactory.GetPlainComponent<CloseModalModel>();
+            if (!closeModalComponent.IsSuccessful)
+                return new(closeModalComponent.Error);
+
+            var loaderComponent = await componentFactory.GetPlainComponent(new LoaderModel
+            {
+                Target = $"/_component/{ComponentDescriptor<HomeLayoutModel>.TypeIdentity}"
+            });
+            if (!loaderComponent.IsSuccessful)
+                return new(loaderComponent.Error);
+
+            var appendComponent = await componentFactory.GetPlainComponent(new AppendComponentLayoutModel
+            {
+                Components = [loaderComponent.Value, closeModalComponent.Value]
+            }, configureResponse: m =>
+            {
+                m.ConfigureHeadersAction = new HxHeaderBuilder()
+                    .ReSwap("innerHTML")
+                    .ReTarget("#content")
+                    .PushUrl("home")
+                    .Build();
+            });
+
+            return new(appendComponent);
+        }
+
+        public  async Task<Result<Optional<IComponent>>> GetLoginComponentAsync(LoginModel model, int? statusCode = 401)
+        {
+            var loginComponent = statusCode.HasValue
+                ? await componentFactory.GetPlainComponent(model, configureResponse: m => m.SetStatusCode = statusCode.Value)
+                : await componentFactory.GetPlainComponent(model);
+            return new(loginComponent);
         }
         public  async Task<Result<Optional<IComponent>>> GetRegisterComponentAsync(RegisterModalModel model, int? statusCode = 400)
         {

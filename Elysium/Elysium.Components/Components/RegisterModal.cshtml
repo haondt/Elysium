@@ -1,7 +1,18 @@
 ﻿@model Elysium.Components.Components.RegisterModalModel
 
 <div id="modal" class="modal is-active is-justify-content-flex-start" hx-swap-oob="true" style="padding-top:150px;">
-    <div class="modal-background" _="on click remove .is-active from #modal"></div>
+    <div class="modal-background" 
+        _="
+            on click 
+                remove .is-active from #modal
+                set <#modal />'s innerHTML to ''
+            end 
+            on keydown from elsewhere
+                if the event's key is 'Escape'
+                    remove .is-active from #modal
+                    set <#modal />'s innerHTML to ''
+                end
+            end"></div>
     <div class="modal-content" style="width:auto;">
             <div class="card" style="width:400px;--bulma-card-shadow:none;">
                 <header class="card-header">
@@ -31,23 +42,20 @@
                                     type="password" placeholder="password" name="password" autocomplete="new-password"
                                 />
                             </div>
+                            @if(Model.Errors.Count > 0)
+                            {
+                                <div class="is-flex is-flex-direction-column" style="width:100%;">
+                                @foreach(var error in Model.Errors)
+                                {
+                                    <p class="help is-danger">@error</p>
+                                }
+                                </div>
+                            }
                         </div>
+                        <hr style="width:100%;"/>
+                        <div class="is-flex is-justify-content-center"><input class="button  is-info" type="submit" value="Register" /></div>
                     </form>
-                    @if(Model.Errors.Count > 0)
-                    {
-                        <div class="is-flex is-flex-direction-column" style="width:100%;">
-                        @foreach(var error in Model.Errors)
-                        {
-                            <p class="help is-danger">@error</p>
-                        }
-                        </div>
-                    }
                 </div>
-                <footer class="card-footer">
-                    <div class="card-footer-item">
-                        <button class="button  is-info" _="on click send submit to <#registerUserForm />">Register</button>
-                    </div>
-                </footer>
             </div>
     </div>
 </div>
