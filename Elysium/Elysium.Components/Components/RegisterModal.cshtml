@@ -1,1 +1,31 @@
 ﻿@model Elysium.Components.Components.RegisterModalModel
+
+<div id="modal" class="modal is-active is-justify-content-flex-start" hx-swap-oob="true" style="padding-top:150px;">
+    <div class="modal-background" _="on click remove .is-active from #modal"></div>
+    <div class="modal-content" style="width:auto;">
+            <div class="card" style="width:400px;--bulma-card-shadow:none;">
+                <header class="card-header">
+                    <p class="card-header-title">Create New Account</p>
+                </header>
+                <div class="card-content is-flex is-flex-direction-column is-align-items-center">
+                    <form style="width:100%;" hx-post="/_event/LoginUser">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" type="text" placeholder="username" name="username" autocomplete="username" />
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" type="password" placeholder="password" name="password" autocomplete="new-password" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <footer class="card-footer">
+                    <div class="card-footer-item">
+                        <button class="button  is-info">Register</button>
+                    </div>
+                </footer>
+            </div>
+    </div>
+</div>

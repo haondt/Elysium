@@ -86,6 +86,13 @@ namespace Elysium.Extensions
                     .PushUrl("/identity/login")
                     .Build())
             });
+            services.AddScoped<IComponentDescriptor>(_ => new ComponentDescriptor<RegisterModalModel>(new RegisterModalModel())
+            {
+                ViewPath = "~/Components/RegisterModal.cshtml",
+                ConfigureResponse = new(m => m.ConfigureHeadersAction = new HxHeaderBuilder()
+                    .ReSwap("none")
+                    .Build())
+            });
             return services;
         }
 
