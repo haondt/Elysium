@@ -29,12 +29,24 @@ namespace Elysium.Authentication.Services
             if (REGISTER_USER_EVENT.Equals(eventName))
             {
                 var passwordResult = requestData.Form.GetValue<string>("password");
-                if (!passwordResult.IsSuccessful)
-                    return new(passwordResult.Error);
-
                 var usernameResult = requestData.Form.GetValue<string>("username");
-                if (!usernameResult.IsSuccessful)
-                    return new(usernameResult.Error);
+                if (!usernameResult.IsSuccessful || !passwordResult.IsSuccessful)
+                {
+                    var model = new RegisterModalModel();
+                    if (usernameResult.IsSuccessful)
+                        model.ExistingUsername = usernameResult.Value;
+                    else
+                    {
+                        model.DangerUsername = true;
+                        model.Errors.Add("Username is required.");
+                    }
+                    if (!passwordResult.IsSuccessful)
+                    {
+                        model.DangerPassword = true;
+                        model.Errors.Add("Password is required.");
+                    }
+                    return await GetRegisterComponentAsync(model);
+                }
 
                 var user = new UserIdentity
                 {
@@ -44,7 +56,11 @@ namespace Elysium.Authentication.Services
                 var result = await userManager.CreateAsync(user, passwordResult.Value);
 
                 if (!result.Succeeded)
-                    return new(new IdentityErrorsException(result.Errors));
+                    return await GetRegisterComponentAsync(new RegisterModalModel
+                    {
+                        ExistingUsername = usernameResult.Value,
+                        Errors = result.Errors.Select(e => $"{e.Description}").ToList()
+                    });
 
                 await signInManager.SignInAsync(user, isPersistent: true);
             }
@@ -82,6 +98,13 @@ namespace Elysium.Authentication.Services
             if (!result.IsSuccessful)
                 return new(result.Error);
             return new(new Optional<IComponent>(result.Value));
+        }
+        public  async Task<Result<Optional<IComponent>>> GetRegisterComponentAsync(RegisterModalModel model, int? statusCode = 400)
+        {
+            var registerComponent = statusCode.HasValue
+                ? await componentFactory.GetPlainComponent(model, configureResponse: m => m.SetStatusCode = statusCode.Value)
+                : await componentFactory.GetPlainComponent(model);
+            return new (registerComponent);
         }
 
 

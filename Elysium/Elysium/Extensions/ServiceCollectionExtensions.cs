@@ -29,7 +29,16 @@ namespace Elysium.Extensions
             {
                 Uri = $"/_asset/{assemblyPrefix}.wwwroot.bulma-custom.css"
             });
-
+            services.AddScoped<IHeadEntryDescriptor>(_ => new MetaDescriptor
+            {
+                Name = "htmx-config",
+                Content = @"{
+                    ""responseHandling"": [
+                        { ""code"": ""204"", ""swap"": false },
+                        { ""code"": "".*"", ""swap"": true }
+                    ]
+                }",
+            });
             return services;
         }
 

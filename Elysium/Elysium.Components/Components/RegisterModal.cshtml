@@ -8,22 +8,43 @@
                     <p class="card-header-title">Create New Account</p>
                 </header>
                 <div class="card-content is-flex is-flex-direction-column is-align-items-center">
-                    <form style="width:100%;" hx-post="/_event/LoginUser">
+                    <img style="height:30px;margin-bottom:30px;" src="@Url.Content("~/_asset/Elysium.wwwroot.logo.svg")" />
+                    <form id="registerUserForm" style="width:100%;" hx-post="/_event/RegisterUser">
                         <div class="field">
                             <div class="control">
-                                <input class="input" type="text" placeholder="username" name="username" autocomplete="username" />
+                                <input 
+                                    class="input 
+                                        @if(Model.DangerUsername) { <text>is-danger</text> }
+                                    "
+                                    type="text" 
+                                    placeholder="username" name="username" 
+                                    autocomplete="username" 
+                                    @if(!string.IsNullOrEmpty(Model.ExistingUsername)){ <text>value=@Model.ExistingUsername</text> }
+                                    />
                             </div>
                         </div>
                         <div class="field">
                             <div class="control">
-                                <input class="input" type="password" placeholder="password" name="password" autocomplete="new-password" />
+                                <input class="input
+                                        @if(Model.DangerPassword) { <text>is-danger</text> }
+                                    "
+                                    type="password" placeholder="password" name="password" autocomplete="new-password" />
                             </div>
                         </div>
                     </form>
+                    @if(Model.Errors.Count > 0)
+                    {
+                        <div class="is-flex is-flex-direction-column" style="width:100%;">
+                        @foreach(var error in Model.Errors)
+                        {
+                            <p class="help is-danger">@error</p>
+                        }
+                        </div>
+                    }
                 </div>
                 <footer class="card-footer">
                     <div class="card-footer-item">
-                        <button class="button  is-info">Register</button>
+                        <button class="button  is-info" _="on click send submit to <#registerUserForm />">Register</button>
                     </div>
                 </footer>
             </div>
