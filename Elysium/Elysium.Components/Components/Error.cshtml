@@ -7,3 +7,8 @@
 @Model.Message
 </div>
 
+@if(Model.Title.HasValue)
+{
+    <title hx-swap-oob="outerHTML;title">@Model.Title.Value</title>
+}
+

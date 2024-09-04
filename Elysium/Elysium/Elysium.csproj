@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -22,8 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Haondt.Web" Version="1.0.0-alpha-20240903104854" />
-    <PackageReference Include="Haondt.Web.BulmaCSS" Version="1.0.0-alpha-20240903104854" />
+    <PackageReference Include="Haondt.Web" Version="1.0.0-alpha-20240903195351" />
+    <PackageReference Include="Haondt.Web.BulmaCSS" Version="1.0.0-alpha-20240903195351" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
   </ItemGroup>
 
@@ -31,10 +31,6 @@
     <ProjectReference Include="..\Elysium.Authentication\Elysium.Authentication.csproj" />
     <ProjectReference Include="..\Elysium.Components\Elysium.Components.csproj" />
     <ProjectReference Include="..\Elysium.Persistence\Elysium.Persistence.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Middlewares\" />
   </ItemGroup>
 
 </Project>

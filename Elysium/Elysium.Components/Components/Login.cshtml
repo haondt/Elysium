@@ -1,33 +1,35 @@
 ﻿@model Elysium.Components.Components.LoginModel
 <div class="is-flex is-flex-direction-row is-justify-content-center is-align-items-center" style="margin-top:50px;">
-        <div class="columns pr-6 pl-6">
-            <div class="column is-flex is-flex-direction-row is-justify-content-center is-align-items-center">
-                <div class="is-flex is-flex-direction-column is-align-items-flex-start">
-                    <img style="height:50px;" src="@Url.Content("~/_asset/Elysium.wwwroot.logo.svg")" />
-                    <h2 class="subtitle is-4">A poorly cobbled together social network.</h2>
-                </div>
+  <div class="columns pr-6 pl-6">
+        <div class="column is-flex is-flex-direction-row is-justify-content-center is-align-items-center">
+            <div class="is-flex is-flex-direction-column is-align-items-flex-start">
+                <img style="height:50px;" src="@Url.Content("~/_asset/Elysium.wwwroot.logo.svg")" />
+                <h2 class="subtitle is-4">A poorly cobbled together social network.</h2>
             </div>
-            <div class="column is-flex-grow-0" style="height:75px;width:0px;"></div>
-            <div class="column is-flex is-flex-direction-row is-justify-content-center is-align-items-center">
-                <div class="card" style="width:400px;">
-                    <div class="card-content is-flex is-flex-direction-column is-align-items-center">
-                        <form style="width:100%;" hx-post="_event/LoginUser">
-                            <div class="field">
-                                <div class="control">
-                                    <input class="input" type="text" placeholder="username" name="username" />
-                                </div>
+        </div>
+        <div class="column is-flex-grow-0" style="height:75px;width:0px;"></div>
+        <div class="column is-flex is-flex-direction-row is-justify-content-center is-align-items-center">
+            <div class="card" style="width:400px;">
+                <div class="card-content is-flex is-flex-direction-column is-align-items-center">
+                    <form style="width:100%;" hx-post="/_event/LoginUser">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" type="text" placeholder="username" name="username" />
                             </div>
-                            <div class="field">
-                                <div class="control">
-                                    <input class="input" type="password" placeholder="password" name="password" autocomplete="current-password" />
-                                </div>
+                        </div>
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" type="password" placeholder="password" name="password" autocomplete="current-password" />
                             </div>
-                            <button class="button is-primary is-outlined" style="width:100%;">Sign in</button>
-                        </form>
-                        <hr style="width:100%;"/>
-                        <button class="button is-ghost">Sign up</button>
-                    </div>
+                        </div>
+                        <button class="button is-primary is-outlined" style="width:100%;">Sign in</button>
+                    </form>
+                    <hr style="width:100%;"/>
+                    <button class="button is-ghost">Sign up</button>
                 </div>
             </div>
         </div>
+    </div>
 </div>
+
+<title hx-swap-oob="outerHTML;title">Elysium - Sign in or sign up</title>

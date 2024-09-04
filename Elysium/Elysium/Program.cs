@@ -6,6 +6,7 @@ using Elysium.Persistence.Extensions;
 using Elysium.Components.Extensions;
 using Elysium.Extensions;
 using Haondt.Web.Core.Middleware;
+using Elysium.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,5 +35,6 @@ var app = builder.Build();
 app.UseStaticFiles();
 app.MapControllers();
 app.UseMiddleware<ExceptionHandlerMiddleware>();
+app.UseMiddleware<UnmappedRouteHandlerMiddleware>();
 //app.UseAuthentication();
 app.Run();

@@ -4,8 +4,10 @@ using Elysium.Components.Components;
 using Elysium.Services;
 using Haondt.Web.Assets;
 using Haondt.Web.Core.Components;
+using Haondt.Web.Core.Http;
 using Haondt.Web.Core.Services;
 using Haondt.Web.Services;
+using Haondt.Web.Core.Extensions;
 
 namespace Elysium.Extensions
 {
@@ -14,6 +16,7 @@ namespace Elysium.Extensions
         public static IServiceCollection AddElysiumServices(this IServiceCollection services)
         {
             services.AddSingleton<ISingletonComponentFactory, SingletonComponentFactory>();
+            services.AddSingleton<ISingletonPageComponentFactory, SingletonPageComponentFactory>();
             services.AddSingleton<IExceptionActionResultFactory, ElysiumExceptionActionResultFactory>();
             services.AddScoped<IComponentHandler, ElysiumComponentHandler>();
 
@@ -53,7 +56,20 @@ namespace Elysium.Extensions
             {
                 ViewPath = "~/Components/Feed.cshtml",
             });
-            services.AddScoped<IComponentDescriptor>(_ => new ComponentDescriptor<ErrorModel>()
+            services.AddScoped<IComponentDescriptor>(_ => new ComponentDescriptor<ErrorModel>((componentFactory, requestData) =>
+            {
+                var errorCodeResult = requestData.Query.GetValue<int>("errorCode");
+                var messageResult = requestData.Query.GetValue<string>("message");
+                if (!errorCodeResult.IsSuccessful || !messageResult.IsSuccessful)
+                    return new(new InvalidOperationException("Not enough information to construct ErrorModel"));
+                var titleResult = requestData.Query.GetValue<string>("title");
+                return new(new ErrorModel
+                {
+                    ErrorCode = errorCodeResult.Value,
+                    Message = messageResult.Value,
+                    Title = titleResult
+                });
+            })
             {
                 ViewPath = "~/Components/Error.cshtml",
                 ConfigureResponse = new(m => m.ConfigureHeadersAction = new HxHeaderBuilder()
@@ -67,7 +83,7 @@ namespace Elysium.Extensions
                 ConfigureResponse = new(m => m.ConfigureHeadersAction = new HxHeaderBuilder()
                     .ReTarget("#content")
                     .ReSwap("innerHTML")
-                    .PushUrl("login")
+                    .PushUrl("/identity/login")
                     .Build())
             });
             return services;

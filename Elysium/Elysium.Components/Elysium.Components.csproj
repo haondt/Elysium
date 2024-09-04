@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Haondt.Web.Core" Version="1.0.0-alpha-20240903104854" />
+    <PackageReference Include="Haondt.Web.Core" Version="1.0.0-alpha-20240903195351" />
   </ItemGroup>
 
 </Project>
