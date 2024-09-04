@@ -10,5 +10,6 @@ namespace Elysium.Components.Components
         public required int ErrorCode { get; set; }
         public required string Message { get; set; }
         public Optional<string> Title { get; set; }
+        public Optional<string> Details { get; set; }
     }
 }

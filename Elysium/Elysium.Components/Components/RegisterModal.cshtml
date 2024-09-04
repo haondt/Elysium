@@ -20,7 +20,7 @@
                                     placeholder="username" name="username" 
                                     autocomplete="username" 
                                     @if(!string.IsNullOrEmpty(Model.ExistingUsername)){ <text>value=@Model.ExistingUsername</text> }
-                                    />
+                                />
                             </div>
                         </div>
                         <div class="field">
@@ -28,7 +28,8 @@
                                 <input class="input
                                         @if(Model.DangerPassword) { <text>is-danger</text> }
                                     "
-                                    type="password" placeholder="password" name="password" autocomplete="new-password" />
+                                    type="password" placeholder="password" name="password" autocomplete="new-password"
+                                />
                             </div>
                         </div>
                     </form>

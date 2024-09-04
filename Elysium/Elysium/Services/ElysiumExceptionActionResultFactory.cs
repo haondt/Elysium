@@ -1,14 +1,16 @@
 ﻿using DotNext;
 using Elysium.Components.Components;
+using Haondt.Web.Components;
 using Haondt.Web.Core.Components;
 using Haondt.Web.Core.Exceptions;
 using Haondt.Web.Core.Extensions;
 using Haondt.Web.Core.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Elysium.Services
 {
-    public class ElysiumExceptionActionResultFactory(ISingletonComponentFactory componentFactoryFactory) : IExceptionActionResultFactory
+    public class ElysiumExceptionActionResultFactory(ISingletonComponentFactory componentFactoryFactory, IOptions<ErrorSettings> errorOptions) : IExceptionActionResultFactory
     {
         public async Task<Result<IActionResult>> CreateAsync(Exception exception, HttpContext context)
         {
@@ -20,12 +22,35 @@ namespace Elysium.Services
                 _ => new ErrorModel { ErrorCode = 500, Message = "Elysium ran into an unrecoverable error." }
             };
 
-            var component = await componentFactoryFactory.CreateComponentFactory().GetComponent(result, configureResponse: m => m.SetStatusCode = result.ErrorCode);
+            if (errorOptions.Value.ShowErrorInfo)
+                result.Details = exception.ToString();
 
-            if (!component.IsSuccessful)
-                return new(component.Error);
+            var componentFactory = componentFactoryFactory.CreateComponentFactory();
 
-            return Components.Extensions.ComponentExtensions.CreateView(component.Value, context.Response.AsResponseData());
+            var errorComponent = await componentFactory.GetPlainComponent(result, configureResponse: m => m.SetStatusCode = result.ErrorCode);
+            if (!errorComponent.IsSuccessful)
+                return new(errorComponent.Error);
+
+            var closeModalComponent = await componentFactory.GetPlainComponent<CloseModalModel>();
+            if (!closeModalComponent.IsSuccessful)
+                return new(closeModalComponent.Error);
+
+            var appendComponent = await componentFactory.GetComponent(new AppendComponentLayoutModel
+            {
+                Components = [errorComponent.Value, closeModalComponent.Value]
+            }, configureResponse: m =>
+            {
+                m.SetStatusCode = result.ErrorCode;
+                m.ConfigureHeadersAction = new HxHeaderBuilder()
+                    .ReSwap("innerHTML")
+                    .ReTarget("#content")
+                    .Build();
+            })
+               ;
+            if (!appendComponent.IsSuccessful)
+                return new(appendComponent.Error);
+
+            return Components.Extensions.ComponentExtensions.CreateView(appendComponent.Value, context.Response.AsResponseData());
         }
     }
 }

@@ -3,10 +3,11 @@ using Elysium.Components.Extensions;
 using Elysium.Services;
 using Haondt.Web.Core.Extensions;
 using Haondt.Web.Services;
+using Microsoft.Extensions.Options;
 
 namespace Elysium.Middlewares
 {
-    public class UnmappedRouteHandlerMiddleware(RequestDelegate next, ISingletonPageComponentFactory pageFactory)
+    public class UnmappedRouteHandlerMiddleware(RequestDelegate next, ISingletonPageComponentFactory pageFactory, IOptions<ErrorSettings> errorOptions)
     {
         public async Task InvokeAsync(HttpContext context)
         {
@@ -24,10 +25,13 @@ namespace Elysium.Middlewares
             if (!string.IsNullOrEmpty(context.Response.ContentType))
                 return;
 
+            var message = errorOptions.Value.ShowErrorInfo
+                ? $"The request url {context.Request.Path} was not found"
+                : "404 Not Found";
             var component = await pageFactory.GetComponent<ErrorModel>(new Dictionary<string, string>
             {
                 { "errorCode", "404" },
-                { "message", "Not Found" },
+                { "message", message },
                 { "title", "404 Not Found" }
             });
 

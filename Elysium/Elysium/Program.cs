@@ -21,7 +21,7 @@ builder.Services
     .AddHaondtWebCoreServices()
     .AddHaondtWebServices(builder.Configuration)
     .UseBulmaCSS(builder.Configuration)
-    .AddElysiumServices()
+    .AddElysiumServices(builder.Configuration)
     .AddElysiumComponents()
     .AddElysiumAssetSources()
     .AddElysiumPersistenceServices(builder.Configuration)

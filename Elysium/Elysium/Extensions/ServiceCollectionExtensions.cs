@@ -13,8 +13,9 @@ namespace Elysium.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddElysiumServices(this IServiceCollection services)
+        public static IServiceCollection AddElysiumServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.Configure<ErrorSettings>(configuration.GetSection(nameof(ErrorSettings)));
             services.AddSingleton<ISingletonComponentFactory, SingletonComponentFactory>();
             services.AddSingleton<ISingletonPageComponentFactory, SingletonPageComponentFactory>();
             services.AddSingleton<IExceptionActionResultFactory, ElysiumExceptionActionResultFactory>();
@@ -72,11 +73,13 @@ namespace Elysium.Extensions
                 if (!errorCodeResult.IsSuccessful || !messageResult.IsSuccessful)
                     return new(new InvalidOperationException("Not enough information to construct ErrorModel"));
                 var titleResult = requestData.Query.GetValue<string>("title");
+                var detailsResult = requestData.Query.GetValue<string>("details");
                 return new(new ErrorModel
                 {
                     ErrorCode = errorCodeResult.Value,
                     Message = messageResult.Value,
-                    Title = titleResult
+                    Title = titleResult,
+                    Details = detailsResult,
                 });
             })
             {
@@ -94,6 +97,10 @@ namespace Elysium.Extensions
                     .ReSwap("innerHTML")
                     .PushUrl("/identity/login")
                     .Build())
+            });
+            services.AddScoped<IComponentDescriptor>(_ => new ComponentDescriptor<CloseModalModel>(new CloseModalModel())
+            {
+                ViewPath = "~/Components/CloseModal.cshtml"
             });
             services.AddScoped<IComponentDescriptor>(_ => new ComponentDescriptor<RegisterModalModel>(new RegisterModalModel())
             {
