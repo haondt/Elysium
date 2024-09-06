@@ -6,6 +6,7 @@ using Haondt.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,12 @@ namespace Elysium.Authentication.Extensions
                 .AddRoleStore<ElysiumRoleStore>();
             services.AddScoped<IEventHandler, AuthenticationEventHandler>();
             services.AddScoped<ISessionService, SessionService>();
+            services.AddOptions<CryptoSettings>()
+                .Bind(configuration.GetSection(nameof(CryptoSettings)))
+                .ValidateOnStart();
+            services.AddSingleton<IValidateOptions<CryptoSettings>, CryptoSettingsValidator>();
+            services.AddScoped<ICryptoService, CryptoService>();
+            services.AddScoped<IUserCryptoService, UserCryptoService>();
             return services;
         }
     }

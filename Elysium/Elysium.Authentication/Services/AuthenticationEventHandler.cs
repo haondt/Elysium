@@ -22,7 +22,8 @@ namespace Elysium.Authentication.Services
     public class AuthenticationEventHandler(
         UserManager<UserIdentity> userManager,
         SignInManager<UserIdentity> signInManager,
-        IComponentFactory componentFactory) : IEventHandler
+        IComponentFactory componentFactory,
+        IUserCryptoService cryptoService) : IEventHandler
     {
         public const string REGISTER_USER_EVENT = "RegisterUser";
         public const string LOGIN_USER_EVENT = "LoginUser";
@@ -50,10 +51,13 @@ namespace Elysium.Authentication.Services
                     return await GetRegisterComponentAsync(model);
                 }
 
+                var (publicKey, encryptedPrivateKey) = cryptoService.GenerateKeyPair();
                 var user = new UserIdentity
                 {
                     Id = UserIdentity.GetStorageKey(usernameResult.Value),
                     Username = usernameResult.Value,
+                    PublicKey = publicKey,
+                    EncryptedPrivateKey = encryptedPrivateKey
                 };
                 var result = await userManager.CreateAsync(user, passwordResult.Value);
 

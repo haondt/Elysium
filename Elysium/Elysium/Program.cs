@@ -38,3 +38,5 @@ app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseMiddleware<UnmappedRouteHandlerMiddleware>();
 //app.UseAuthentication();
 app.Run();
+
+//TODO: sharedInbox
