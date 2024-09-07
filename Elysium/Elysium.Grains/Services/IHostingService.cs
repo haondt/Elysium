@@ -9,7 +9,6 @@ namespace Elysium.Grains.Services
 {
     public interface IHostingService
     {
-        bool IsLocalUserUri(Uri uri);
         Uri GetUriForLocalUser(string username);
         Result<string> GetLocalUserFromUri(Uri uri);
         public Uri GetLocalUserScopedUri(string username, string next);

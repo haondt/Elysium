@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using SimpleBase;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace Elysium.Authentication.Services
 {
@@ -24,7 +25,7 @@ namespace Elysium.Authentication.Services
 
         public string Sign(string data, byte[] privateKey)
         {
-            var signatureBytes = cryptoService.Sign(Convert.FromBase64String(data), _encryptionKey);
+            var signatureBytes = cryptoService.Sign(Encoding.UTF8.GetBytes(data), privateKey);
             return Convert.ToBase64String(signatureBytes);
         }
 

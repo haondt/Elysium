@@ -23,7 +23,8 @@ namespace Elysium.Grains.Services
         /// <param name="recepient"></param>
         /// <param name="activity"></param>
         /// <returns></returns>
-        Task<Optional<Exception>> PublishActivityAsync(Uri sender, Uri recepient, JObject activity);
-        Task<Optional<Exception>> IngestRemoteActivityAsync(IncomingRemoteActivityData data);
+        Task<Optional<Exception>> PublishLocalActivityAsync(Uri sender, Uri recepient, JObject activity);
+        Task<Optional<Exception>> PublishRemoteActivityAsync(Uri sender, Uri recepient, JObject activity);
+        Task<Optional<Exception>> IngestRemoteActivityAsync(OutgoingRemoteActivityData data);
     }
 }

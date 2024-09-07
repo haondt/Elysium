@@ -1,4 +1,5 @@
-﻿using Elysium.Grains.Services;
+﻿using Elysium.GrainInterfaces.Services;
+using Elysium.Grains.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
@@ -19,6 +20,8 @@ namespace Elysium.Grains.Extensions
             services.Configure<HostIntegritySettings>(configuration.GetSection(nameof(HostIntegritySettings)));
             services.Configure<RemoteDocumentSettings>(configuration.GetSection(nameof(RemoteDocumentSettings)));
             services.AddScoped<IActivityPubService, ActivityPubService>();
+            services.AddScoped<ITypedActorServiceFactory, TypedActorServiceFactory>();
+            services.AddSingleton<IUriGrainFactory, UriGrainFactory>();
             services.AddScoped<IDocumentResolver, DocumentResolver>();
             services.AddScoped<IActivityPubJsonNavigator, ActivityPubJsonNavigator>();
             services.AddScoped<IHostingService, HostingService>();

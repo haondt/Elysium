@@ -1,5 +1,6 @@
 ﻿using DotNext;
 using Elysium.GrainInterfaces;
+using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Exceptions;
 using Elysium.Grains.Services;
 using JsonLD.Core;
@@ -15,32 +16,32 @@ using System.Threading.Tasks;
 namespace Elysium.Grains
 {
     public class RemoteDocumentGrain([PersistentState(nameof(DocumentState))] IPersistentState<DocumentState> state,
-        IGrainHttpClient<RemoteDocumentGrain> httpClient, IGrainFactory grainFactory,
+        IUriGrainFactory uriGrainFactory,
+        IGrainFactory grainFactory,
+        IActivityPubHttpService httpService,
         IOptions<RemoteDocumentSettings> options,
-        IJsonLdService jsonLdService) : Grain, IRemoteDocumentGrain
+        IJsonLdService jsonLdService,
+        IOptions<HostingSettings> hostingOptions) : Grain, IRemoteDocumentGrain
     {
         private readonly RemoteDocumentSettings _settings = options.Value;
+        private Optional<RemoteUri> _id;
+        private IInstanceActorGrain _instanceActorGrain = grainFactory.GetGrain<IInstanceActorGrain>(Guid.Empty);
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
             await state.ReadStateAsync();
             await base.OnActivateAsync(cancellationToken);
         }
-        public Task SetValueAsync(JObject value)
+
+        public async Task<Result<JArray>> GetExpandedValueAsync(IHttpMessageAuthor requester)
         {
-            state.State.Value = value;
-            state.State.UpdatedOnUtc = DateTime.UtcNow;
-            return state.WriteStateAsync();
-        }
-        public async Task<Result<JArray>> GetExpandedValueAsync()
-        {
-            var state = await GetValueAsync();
+            var state = await GetValueAsync(requester);
             if (!state.IsSuccessful)
                 return new(state.Error);
 
-            return await jsonLdService.ExpandAsync(state.Value);
+            return await jsonLdService.ExpandAsync(requester, state.Value);
         }
 
-        public async Task<Result<JObject>> GetValueAsync()
+        public async Task<Result<JObject>> GetValueAsync(IHttpMessageAuthor requester)
         {
             if (state.State.Value != null)
             {
@@ -58,7 +59,7 @@ namespace Elysium.Grains
                 }
             }
 
-            var result = await InternalGetValueAsync();
+            var result = await InternalGetValueAsync(requester);
             if (!result.IsSuccessful)
                 return result;
 
@@ -68,37 +69,19 @@ namespace Elysium.Grains
             return state.State.Value;
 
         }
-        private async Task<Result<JObject>> InternalGetValueAsync()
+        private async Task<Result<JObject>> InternalGetValueAsync(IHttpMessageAuthor requester)
         {
-            var uri = new Uri(this.GetPrimaryKeyString());
-            var hostIntegrityGrain = grainFactory.GetGrain<IHostIntegrityGrain>(uri.Host);
-            if (!await hostIntegrityGrain.ShouldSendRequest())
-                return new(new ActivityPubException($"The host {uri.Host} is not in good standing"));
+            if (!_id.HasValue)
+                _id = uriGrainFactory.GetIdentity(this);
 
-            HttpResponseMessage response;
-            try
+            var initialObject = await httpService.GetAsync(new HttpGetData
             {
-                response = await httpClient.HttpClient.GetAsync(uri);
-                response.EnsureSuccessStatusCode();
-            }
-            catch
-            {
-                await hostIntegrityGrain.VoteAgainst();
-                return new(new ActivityPubException($"Unable to retrieve actor model from {uri}"));
-            }
+                Author = requester,
+                Target = _id.Value.Uri
+            });
+            if (!initialObject.IsSuccessful)
+                return initialObject;
 
-            await hostIntegrityGrain.VoteFor();
-            JObject? model;
-            try
-            {
-                model = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
-                if (model == null)
-                    return new(new ActivityPubException($"Unable to deserialize actor model from {uri}"));
-            }
-            catch
-            {
-                return new(new ActivityPubException($"Unable to deserialize actor model from {uri}"));
-            }
 
             return model;
         }

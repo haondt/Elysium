@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Elysium.Grains.Services
 {
-    public interface IGrainHttpClient<T> where T : IGrain
+    public class HttpPostData : HttpRequestData
     {
-        HttpClient HttpClient { get;  }
+        public required string JsonLdPayload { get; set; }
     }
 }

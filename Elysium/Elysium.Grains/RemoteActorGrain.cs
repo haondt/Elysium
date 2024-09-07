@@ -4,7 +4,6 @@ using Elysium.GrainInterfaces;
 using Elysium.Grains.Exceptions;
 using Elysium.Grains.Services;
 using Elysium.GrainInterfaces.Extensions;
-using KristofferStrube.ActivityStreams;
 using Microsoft.Extensions.Caching.Memory;
 using Orleans;
 using Orleans.Runtime;
@@ -26,7 +25,6 @@ namespace Elysium.Grains
         private readonly IUserCryptoService _cryptoService;
         private readonly IActivityPubJsonNavigator _jsonNavigator;
         private readonly IRemoteDocumentGrain _actorStateGrain;
-        private readonly IDispatchRemoteActivityGrain _dispatchGrain;
         private readonly Uri _id;
         private byte[]? _publicKey;
 
@@ -42,7 +40,6 @@ namespace Elysium.Grains
             _cryptoService = cryptoService;
             _jsonNavigator = jsonNavigator;
             _actorStateGrain = grainFactory.GetGrain<IRemoteDocumentGrain>(_id.ToString());
-            _dispatchGrain = grainFactory.GetGrain<IDispatchRemoteActivityGrain>(Guid.Empty);
         }
 
         private async Task<Result<byte[]>> InternalGetPublicKeyAsync()
@@ -79,18 +76,19 @@ namespace Elysium.Grains
             return _publicKey;
         }
 
-        public Task IngestActivityAsync(OutgoingRemoteActivityData activity)
-        {
-            return _dispatchGrain.Send(activity.PrepareForDispatch());
-        }
-
         public async Task<Result<Uri>> GetInboxUriAsync()
         {
+            // todo: proxy this to instance grain?
             var actorState = await _actorStateGrain.GetExpandedValueAsync();
             if (!actorState.IsSuccessful)
                 return new(actorState.Error);
 
             return _jsonNavigator.GetInbox(actorState.Value);
+        }
+
+        public Task PublishEvent(IncomingRemoteActivityData activity)
+        {
+            _activityPubService.PublishLocalActivityAsync
         }
     }
 }

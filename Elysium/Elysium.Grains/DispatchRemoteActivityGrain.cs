@@ -1,7 +1,6 @@
 ﻿using Elysium.GrainInterfaces;
 using Elysium.Grains.Exceptions;
 using Elysium.Grains.Services;
-using KristofferStrube.ActivityStreams;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orleans.Concurrency;

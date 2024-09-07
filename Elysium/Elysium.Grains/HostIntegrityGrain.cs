@@ -15,7 +15,8 @@ namespace Elysium.Grains
         private bool _dirty;
         private IDisposable? _timer;
 
-        public HostIntegrityGrain([PersistentState(nameof(HostIntegrityState))] IPersistentState<HostIntegrityState> state, IOptions<HostIntegritySettings> options)
+        public HostIntegrityGrain([PersistentState(nameof(HostIntegrityState))] IPersistentState<HostIntegrityState> state,
+            IOptions<HostIntegritySettings> options)
         {
             _state = state;
             _settings = options.Value;

@@ -1,4 +1,4 @@
-﻿using KristofferStrube.ActivityStreams;
+﻿using Elysium.GrainInterfaces.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +9,6 @@ namespace Elysium.GrainInterfaces
 {
     public class LocalActorState
     {
-        public Actor? Actor { get; set; }
+        public ActorType ActorType { get; set; }
     }
 }

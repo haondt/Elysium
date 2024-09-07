@@ -5,19 +5,23 @@ VisualStudioVersion = 17.11.35208.52
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium", "Elysium\Elysium.csproj", "{508D15A3-603D-42E5-8A72-DCD153DC60D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.GrainInterfaces", "Elysium.GrainInterfaces\Elysium.GrainInterfaces.csproj", "{9E172F09-6C07-483C-936A-BDC73ECA5810}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.GrainInterfaces", "Elysium.GrainInterfaces\Elysium.GrainInterfaces.csproj", "{9E172F09-6C07-483C-936A-BDC73ECA5810}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Authentication", "Elysium.Authentication\Elysium.Authentication.csproj", "{42C062A3-FF61-4DDB-A0C1-1F83599BA7FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Authentication", "Elysium.Authentication\Elysium.Authentication.csproj", "{42C062A3-FF61-4DDB-A0C1-1F83599BA7FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Persistence", "Elysium.Persistence\Elysium.Persistence.csproj", "{1F016566-A8F1-4517-83A7-B95AADDB279E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Persistence", "Elysium.Persistence\Elysium.Persistence.csproj", "{1F016566-A8F1-4517-83A7-B95AADDB279E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Core", "Elysium.Core\Elysium.Core.csproj", "{FEBEDE7B-0A81-4177-868F-B459D796703F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Core", "Elysium.Core\Elysium.Core.csproj", "{FEBEDE7B-0A81-4177-868F-B459D796703F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Components", "Elysium.Components\Elysium.Components.csproj", "{640F39C5-014F-4FF9-89FE-4CEF59729D8B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Components", "Elysium.Components\Elysium.Components.csproj", "{640F39C5-014F-4FF9-89FE-4CEF59729D8B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Grains", "Elysium.Grains\Elysium.Grains.csproj", "{BC8300F2-312F-46AA-A1D8-2B42367530CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Grains", "Elysium.Grains\Elysium.Grains.csproj", "{BC8300F2-312F-46AA-A1D8-2B42367530CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Silo", "Elysium.Silo\Elysium.Silo.csproj", "{38F4A278-E8CF-496E-9FCF-D840AC12401F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Silo", "Elysium.Silo\Elysium.Silo.csproj", "{38F4A278-E8CF-496E-9FCF-D840AC12401F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Client", "Elysium.Client\Elysium.Client.csproj", "{B80F08DA-BB63-43AE-B01C-5AF1E25402DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.WebFinger", "Elysium.WebFinger\Elysium.WebFinger.csproj", "{54D7FA5E-0CF0-48C1-A64E-4DAD307345F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +61,14 @@ Global
 		{38F4A278-E8CF-496E-9FCF-D840AC12401F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38F4A278-E8CF-496E-9FCF-D840AC12401F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38F4A278-E8CF-496E-9FCF-D840AC12401F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B80F08DA-BB63-43AE-B01C-5AF1E25402DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B80F08DA-BB63-43AE-B01C-5AF1E25402DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B80F08DA-BB63-43AE-B01C-5AF1E25402DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B80F08DA-BB63-43AE-B01C-5AF1E25402DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54D7FA5E-0CF0-48C1-A64E-4DAD307345F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54D7FA5E-0CF0-48C1-A64E-4DAD307345F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54D7FA5E-0CF0-48C1-A64E-4DAD307345F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54D7FA5E-0CF0-48C1-A64E-4DAD307345F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

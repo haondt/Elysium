@@ -5,7 +5,6 @@ using Elysium.Grains.Exceptions;
 using Elysium.Grains.Services;
 using Haondt.Identity.StorageKey;
 using Haondt.Persistence.Services;
-using KristofferStrube.ActivityStreams;
 using Microsoft.Extensions.Options;
 using Elysium.Grains.Extensions;
 using Orleans;
@@ -23,83 +22,89 @@ using Elysium.GrainInterfaces.Services;
 
 namespace Elysium.Grains
 {
-    public class LocalActorGrain : Grain, ILocalActorGrain
+    public abstract class LocalActorGrain : Grain, ILocalActorGrain
     {
+        private readonly IPersistentState<LocalActorState> _state;
         private readonly IActivityPubService _activityPubService;
         private readonly IHostingService _hostingService;
         private readonly IActivityPubJsonNavigator _jsonNavigator;
         private readonly IElysiumStorage _storage;
+        private readonly IJsonLdService _jsonLdService;
         private readonly IUserCryptoService _cryptoService;
-        private readonly IGrainFactory _grainFactory;
-        private readonly string _id;
+        private readonly ITypedActorServiceFactory _typedActorServiceFactory;
+        private readonly IUriGrainFactory _grainFactory;
+        private readonly LocalUri _id;
         private Result<UserIdentity> _userIdentity;
         private Result<byte[]> _signingKey;
-        private ILocalDocumentGrain? _stateGrain;
+        private Result<ITypedActorService> _typedActorService;
 
         public LocalActorGrain(
+            [PersistentState(nameof(LocalActorState))] IPersistentState<LocalActorState> state,
             IActivityPubService activityPubService,
             IHostingService hostingService,
             IActivityPubJsonNavigator jsonNavigator,
             IElysiumStorage storage,
+            IJsonLdService jsonLdService,
             IUserCryptoService cryptoService,
-            IGrainFactory grainFactory)
+            ITypedActorServiceFactory typedActorServiceFactory,
+            IUriGrainFactory grainFactory)
         {
+            _state = state;
             _activityPubService = activityPubService;
             _hostingService = hostingService;
             _jsonNavigator = jsonNavigator;
             _storage = storage;
+            _jsonLdService = jsonLdService;
             _cryptoService = cryptoService;
+            _typedActorServiceFactory = typedActorServiceFactory;
             _grainFactory = grainFactory;
-            _id = this.GetPrimaryKeyString();
+            _id = grainFactory.GetIdentity(this);
         }
 
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
-            _stateGrain = _grainFactory.GetGrain<ILocalDocumentGrain>(_hostingService.GetUriForLocalUser(_id).ToString());
-            var storageKey = UserIdentity.GetStorageKey(_id);
-            _userIdentity = await _storage.Get(storageKey);
-            if (!_userIdentity.IsSuccessful)
-                _signingKey = new(_userIdentity.Error);
-            else
-            {
-                var encryptedPrivateKey = _userIdentity.Value.EncryptedPrivateKey;
-                _signingKey = _cryptoService.DecryptPrivateKey(encryptedPrivateKey);
-            }
-
+            await _state.ReadStateAsync();
+            TryLoadTypedActorService();
             await base.OnActivateAsync(cancellationToken);
         }
-        public Task<Result<byte[]>> GetSigningKey()
+        public async Task<Result<byte[]>> GetSigningKeyAsync()
         {
-            return Task.FromResult(_signingKey);
+            if (!_typedActorService.IsSuccessful)
+                return new(_typedActorService.Error);
+            return new(await _typedActorService.Value.GetSigningKeyAsync());
         }
 
-        //public async Task<Result<string>> GetActorAsync()
-        //{
-        //    if (_state.State.Actor == null)
-        //    {
-        //        var result = InitializeActor();
-        //        if (!result.IsSuccessful)
-        //            return result;
-        //        _state.State.Actor = result.Value;
-        //        await _state.WriteStateAsync();
-        //    }
-        //    return new(_state.State.Actor);
-        //}
-
-        private Result<Actor> InitializeActor()
+        private void TryLoadTypedActorService()
         {
-            if (!_userIdentity.IsSuccessful)
-                return new(_userIdentity.Error);
-            var username = _userIdentity.Value.Username ?? _id;
-            return new Actor
-            {
-                Id = _hostingService.GetUriForLocalUser(username).ToString(),
-                Inbox = new Link { Href = _hostingService.GetLocalUserScopedUri(username, "inbox") },
-                Outbox = new Link { Href = _hostingService.GetLocalUserScopedUri(username, "outbox") },
-                Followers = new Link { Href = _hostingService.GetLocalUserScopedUri(username, "followers") },
-                Following = new Link { Href = _hostingService.GetLocalUserScopedUri(username, "following") },
-            };
+            if (_state.State.ActorType == ActorType.Unknown)
+                return;
+            _typedActorService = _typedActorServiceFactory.Create(_state.State.ActorType);
+        }
+        public async Task<Optional<Exception>> SetActorTypeAsync(ActorType actorType)
+        {
+            if (_state.State.ActorType != ActorType.Unknown)
+                return new(new InvalidOperationException("actor type is already set"));
+            _state.State.ActorType = actorType;
+            await _state.WriteStateAsync();
+            TryLoadTypedActorService();
+            return new();
+        }
 
+        public async Task<Optional<Exception>> InitializeDocument()
+        {
+            if (!_typedActorService.IsSuccessful)
+                return new(_typedActorService.Error);
+
+            var documentGrain = _grainFactory.GetGrain<ILocalDocumentGrain>(_id);
+            if (await documentGrain.HasValueAsync())
+                return new(new InvalidOperationException("document is already initialized"));
+
+            var document = await _typedActorService.Value.GenerateDocumentAsync();
+            if (!document.IsSuccessful)
+                return new(document.Error);
+
+            await documentGrain.SetValueAsync(document.Value);
+            return new();
         }
 
         public async Task<Optional<Exception>> PublishActivityAsync(Activity activity)
@@ -114,6 +119,7 @@ namespace Elysium.Grains
         public Task<OrderedCollection> GetPublishedActivities(Optional<Actor> requester)
         {
             // TODO: pull activities from an event stream
+            // tood: dont forget to dereference the content to avoid spoofing https://www.w3.org/TR/activitypub/#obj
             throw new NotImplementedException();
         }
 
@@ -124,7 +130,10 @@ namespace Elysium.Grains
             throw new NotImplementedException();
         }
 
-        public Task<Optional<Exception>> PublishActivity(ActivityType type, JObject @object)
+        // this uri is the uri of the *activity*, not the object.
+        // you willl have to query the uri to get the activity object, then get the object object from that.
+        // probably a good idea in case the grain or other downstream services makes changes to the object
+        public Task<Result<Uri>> PublishActivity(ActivityType type, JObject @object)
         {
             // todo: c/r/u/d the object on disk, create the activity on disk, send the activity to followers.
             // need to think of a way to link the document back to the user for the outbox,
@@ -138,6 +147,9 @@ namespace Elysium.Grains
             // some info here https://www.w3.org/TR/activitypub/#retrieving-objects
             // i think we can use http header validation to verify who is asking for something
             // and then whether or not they have permission to view it idk, tbd i guess
+
+            // discovering follower inbox needs to be dereferenced in case the inbox is a collection https://www.w3.org/TR/activitypub/#delivery
+
 
 
 

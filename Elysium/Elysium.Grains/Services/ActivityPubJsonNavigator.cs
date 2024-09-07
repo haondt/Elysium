@@ -1,5 +1,6 @@
 ﻿using DotNext;
 using Elysium.Grains.Exceptions;
+using Elysium.Grains.Extensions;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,9 @@ namespace Elysium.Grains.Services
         {
             if (expanded.Count != 1) return new(Error);
             JToken next = expanded.First();
+            //var type = next.GetNamedChild("@type")
+            //    .AsString()
+            //    .ShouldBe("" // there are no constraints on actor type
             var result = next.GetNamedChild("http://www.w3.org/ns/ldp#inbox")
                 .GetNamedChild("@id")
                 .AsString();
@@ -50,6 +54,8 @@ namespace Elysium.Grains.Services
             return target.GetNamedChild("type").AsString();
         }
 
+        public Result<JArray>
+
         public Result<(string, PublicKeyType)> GetPublicKey(JArray expanded)
         {
             if (expanded.Count != 1) return new(Error);
@@ -73,36 +79,6 @@ namespace Elysium.Grains.Services
             return new(updatedStrategy.Error);
         }
 
-    }
-
-    public static class JsonExtensions
-    {
-        private static Exception Error = new ActivityPubException("object was not in the expected format");
-        public static Result<JToken> GetNamedChild(this JToken jtoken, string name)
-        {
-            if (jtoken is not JObject jo) return new (Error);
-            if (!jo.TryGetValue(name, out var value)) return new(Error);
-            return value;
-        }
-        public static Result<JToken> GetNamedChild(this Result<JToken> jtoken, string name)
-        {
-            if (!jtoken.IsSuccessful) return jtoken;
-            return jtoken.Value.GetNamedChild(name);
-        }
-        public static Result<JToken> Single(this Result<JToken> jtoken)
-        {
-            if (!jtoken.IsSuccessful) return jtoken;
-            if (jtoken.Value is not JArray ja) return new(Error);
-            if (ja.Count != 1) return new(Error);
-            return new(ja.Single());
-        }
-        public static Result<string> AsString(this Result<JToken> jtoken)
-        {
-            if (!jtoken.IsSuccessful) return new(jtoken.Error);
-            if (jtoken.Value is not JValue jv) return new(Error);
-            if (jv.Type != JTokenType.String) return new(Error);
-            return jv.ToString();
-        }
     }
 
 }

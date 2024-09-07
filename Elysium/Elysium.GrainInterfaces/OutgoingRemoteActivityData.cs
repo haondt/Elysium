@@ -1,5 +1,4 @@
-﻿using KristofferStrube.ActivityStreams;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +10,6 @@ namespace Elysium.GrainInterfaces
     {
         public required string Payload { get; set; }
         public required List<(string, string)> Headers { get; set; } = [];
-        public required string CompliantRequestTarget { get; set; }
         public required Uri Target { get; set; }
     }
 }

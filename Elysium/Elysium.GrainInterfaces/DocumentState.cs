@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Elysium.GrainInterfaces.Services;
+using Newtonsoft.Json.Linq;
 using Orleans;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace Elysium.GrainInterfaces
     public class DocumentState
     {
         public JObject? Value { get; set; }
+        public LocalUri? Owner { get; set; }
         public DateTime? UpdatedOnUtc { get; set; }
     }
 }

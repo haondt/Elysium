@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.Grains.Services
 {
-    public class GrainHttpClient<T>(HttpClient httpClient) : IGrainHttpClient<T> where T : IGrain
+    public class HttpGetData : HttpRequestData
     {
-        public HttpClient HttpClient => httpClient;
     }
 }

@@ -8,12 +8,12 @@
 
   <ItemGroup>
     <Folder Include="Collections\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="DotNext" Version="5.13.0" />
     <PackageReference Include="json-ld.net" Version="1.0.7-alpha-20240905204054" />
-    <PackageReference Include="KristofferStrube.ActivityStreams" Version="0.2.3" />
     <PackageReference Include="Microsoft.Orleans.Core.Abstractions" Version="8.2.0" />
   </ItemGroup>
 

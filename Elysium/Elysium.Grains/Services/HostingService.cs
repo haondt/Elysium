@@ -1,4 +1,5 @@
 ﻿using DotNext;
+using KristofferStrube.ActivityStreams;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;

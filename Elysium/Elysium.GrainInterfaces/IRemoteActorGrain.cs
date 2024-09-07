@@ -8,9 +8,8 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces
 {
-    public interface IRemoteActorGrain : IGrainWithStringKey
+    public interface IRemoteActorGrain : IGrainWithRemoteUriKey
     {
-        Task IngestActivityAsync(OutgoingRemoteActivityData activity);
         Task<Result<byte[]>> GetPublicKeyAsync();
         Task<Result<Uri>> GetInboxUriAsync();
     }

@@ -1,6 +1,7 @@
 ﻿using DotNext;
 using Elysium.Authentication.Services;
 using Elysium.GrainInterfaces;
+using Elysium.GrainInterfaces.Services;
 using KristofferStrube.ActivityStreams;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
@@ -17,82 +18,51 @@ namespace Elysium.Grains.Services
 {
     public class ActivityPubService : IActivityPubService
     {
-        private readonly IGrainFactory _grainFactory;
+        private readonly IUriGrainFactory _grainFactory;
+        private readonly HostingSettings _hostingSettings;
         private readonly IHostingService _hostingService;
         private readonly IUserCryptoService _cryptoService;
 
-        public ActivityPubService(IGrainFactory grainFactory, IHostingService hostingService, IUserCryptoService cryptoService)
+        public ActivityPubService(IUriGrainFactory grainFactory, IHostingService hostingService, 
+            IOptions<HostingSettings> hostingOptions, IUserCryptoService cryptoService)
         {
             _grainFactory = grainFactory;
+            _hostingSettings = hostingOptions.Value;
             _hostingService = hostingService;
             _cryptoService = cryptoService;
         }
-        public Task<Optional<Exception>> PublishActivityAsync(Uri sender, Uri recepient, JObject activity)
+        public Task<Optional<Exception>> PublishLocalActivityAsync(Uri sender, Uri recepient, JObject activity)
         {
+            if (!sender.Host.Equals(_hostingSettings.Host))
+                return Task.FromResult(new Optional<Exception>(new InvalidOperationException("sender must be a local actor")));
             if (sender == recepient)
                 return Task.FromResult(Optional<Exception>.None);
-            if (_hostingService.IsLocalUserUri(recepient))
-                return SendActivityToLocalGrain(recepient, activity);
-            if (!_hostingService.IsLocalUserUri(sender))
-                return Task.FromResult<Optional<Exception>>(new InvalidOperationException("Cannot publish activities from remote to remote"));
-            return SendActivityToRemoteGrain(sender, recepient, activity);
+            if (!recepient.Host.Equals(_hostingSettings.Host))
+                return SendLocalActivityToLocalGrain(recepient, activity);
+            return SendLocalActivityToRemoteGrain(sender, recepient, activity);
         }
 
-        private Result<ILocalActorGrain> GetLocalGrain(Uri id)
+
+        private async Task<Optional<Exception>> SendLocalActivityToLocalGrain(Uri recepient, JObject activity)
         {
-            var username = _hostingService.GetLocalUserFromUri(id);
-            if (!username.IsSuccessful)
-                return new(username.Error);
-            return new(_grainFactory.GetGrain<ILocalActorGrain>(username.Value));
+            var recepientGrain = _grainFactory.GetGrain<ILocalActorGrain>(recepient);
+            return await recepientGrain.IngestActivityAsync(activity);
         }
 
-        private async Task<Optional<Exception>> SendActivityToLocalGrain(Uri recepient, JObject activity)
+        private async Task<Optional<Exception>> SendLocalActivityToRemoteGrain(Uri sender, Uri recepient, JObject activity)
         {
-            var recepientGrain = GetLocalGrain(recepient);
-            if(!recepientGrain.IsSuccessful)
-                return new(recepientGrain.Error);
-
-            return await recepientGrain.Value.IngestActivityAsync(activity);
-        }
-        private async Task<Optional<Exception>> SendActivityToRemoteGrain(Uri sender, Uri recepient, JObject activity)
-        {
-            var senderGrain = GetLocalGrain(sender);
-            if(!senderGrain.IsSuccessful)
-                return new(senderGrain.Error);
-            var signingKey = await senderGrain.Value.GetSigningKey();
+            var senderGrain = _grainFactory.GetGrain<ILocalActorGrain>(sender);
+            var signingKey = await senderGrain.GetSigningKeyAsync();
             if(!signingKey.IsSuccessful)
                 return new(signingKey.Error);
 
-            var recepientGrain = _grainFactory.GetGrain<IRemoteActorGrain>(recepient.ToString());
-            var recepientInbox = await recepientGrain.GetInboxUriAsync();
-            if (!recepientInbox.IsSuccessful)
-                return new(recepientInbox.Error);
-
-            var payload = JsonSerializer.Serialize(activity);
-            var digest = $"SHA-256={SHA256.HashData(Encoding.UTF8.GetBytes(payload))}";
-            var date = DateTimeOffset.UtcNow.ToString("r", CultureInfo.InvariantCulture);
-            var stringToSign = $"(request-target): post {recepientInbox.Value.AbsolutePath}\nhost: {recepientInbox.Value.Host}\ndate: {date}\ndigest: {digest}";
-            var signature = _cryptoService.Sign(stringToSign, signingKey.Value);
-            var signatureHeader = $"keyId=\"{sender}\",headers=\"(request-target) host date digest\",signature=\"{signature}\"";
-
-            await recepientGrain.IngestActivityAsync(new OutgoingRemoteActivityData
-            {
-                Payload = payload,
-                Target = recepientInbox.Value,
-                CompliantRequestTarget = $"post: {recepientInbox.Value.AbsolutePath}",
-                Headers =
-                [
-                    ( "Host", recepientInbox.Value.Host ),
-                    ( "Date", date ),
-                    ( "Digest", digest ),
-                    ( "Signature", signature )
-                ]
-            });
+            var recepientGrain = _grainFactory.GetGrain<IRemoteActorWorkerGrain>(recepient);
 
             return new();
         }
-        public async Task<Optional<Exception>> IngestRemoteActivityAsync(IncomingRemoteActivityData data)
+        public async Task<Optional<Exception>> IngestRemoteActivityAsync(OutgoingRemoteActivityData data)
         {
+            // TODO: validate acitivty (required fields, etc)
             if (!_hostingService.IsLocalUserUri(data.Target))
                 return new InvalidOperationException("Cannot publish activities from remote to remote");
 
