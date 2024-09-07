@@ -21,5 +21,12 @@ namespace Elysium.Controllers
             var result = await pageFactory.GetComponent<HomeLayoutModel>();
             return result.Value.CreateView(this);
         } 
+
+        [HttpGet("messages")]
+        public async Task<IActionResult> Messages()
+        {
+            var result = await pageFactory.GetComponent<TemporaryMessageComponentLayoutModel>();
+            return result.Value.CreateView(this);
+        } 
     }
 }

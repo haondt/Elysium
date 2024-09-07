@@ -2,7 +2,6 @@
 using Elysium.Authentication.Services;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
-using KristofferStrube.ActivityStreams;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using System;

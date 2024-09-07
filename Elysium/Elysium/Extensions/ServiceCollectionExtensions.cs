@@ -8,6 +8,7 @@ using Haondt.Web.Core.Http;
 using Haondt.Web.Core.Services;
 using Haondt.Web.Services;
 using Haondt.Web.Core.Extensions;
+using Haondt.Web.Components;
 
 namespace Elysium.Extensions
 {
@@ -16,6 +17,7 @@ namespace Elysium.Extensions
         public static IServiceCollection AddElysiumServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<ErrorSettings>(configuration.GetSection(nameof(ErrorSettings)));
+            services.AddScoped<IEventHandler, ElysiumPublishActivityEventHandler>(); 
             services.AddSingleton<ISingletonComponentFactory, SingletonComponentFactory>();
             services.AddSingleton<ISingletonPageComponentFactory, SingletonPageComponentFactory>();
             services.AddSingleton<IExceptionActionResultFactory, ElysiumExceptionActionResultFactory>();
@@ -109,6 +111,59 @@ namespace Elysium.Extensions
                     .ReSwap("none")
                     .Build())
             });
+
+
+            // temporary message model
+            services.AddScoped<IComponentDescriptor>(sp => new ComponentDescriptor<TemporaryMessageComponentLayoutModel>(async (cf, rd) =>
+            {
+                var session = sp.GetRequiredService<ISessionService>();
+                if (!session.IsAuthenticated())
+                    return new Result<TemporaryMessageComponentLayoutModel>(new UnauthorizedAccessException());
+
+                //var loaderComponent = await cf.GetPlainComponent(new LoaderModel
+                //{
+                //    Target = $"/_component/{ComponentDescriptor<TemporaryMessageUpdateModel>.TypeIdentity}"
+                //});
+                //if (!loaderComponent.IsSuccessful)
+                //    return new(loaderComponent.Error);
+
+                //var appendComponent = await cf.GetPlainComponent(new AppendComponentLayoutModel
+                //{
+                //    Components = [loaderComponent.Value, .Value]
+                //}, configureResponse: m =>
+                //{
+                //    m.ConfigureHeadersAction = new HxHeaderBuilder()
+                //        .ReSwap("innerHTML")
+                //        .ReTarget("#content")
+                //        .PushUrl("/home")
+                //        .Build();
+                //});
+
+
+
+                //var feed = await cf.GetComponent(new FeedModel());
+                //if (!feed.IsSuccessful)
+                //    return new Result<FeedModel>(feed.Error);
+                return new(new TemporaryMessageComponentLayoutModel
+                {
+                    Messages = []
+                });
+            })
+            {
+                ViewPath = "~/Components/TemporaryMessageComponentLayout.cshtml",
+                ConfigureResponse = new(m => m.ConfigureHeadersAction = new HxHeaderBuilder()
+                    .ReTarget("#fill-content")
+                    .ReSwap("innerHTML")
+                    .PushUrl("/messages")
+                    .Build())
+            });
+            services.AddScoped<IComponentDescriptor>(_ => new ComponentDescriptor<TemporaryMessageComponentUpdateModel>()
+            {
+                ViewPath = "~/Components/TemporaryMessageComponentUpdate.cshtml",
+            });
+
+            // end temporary message model
+
             return services;
         }
 

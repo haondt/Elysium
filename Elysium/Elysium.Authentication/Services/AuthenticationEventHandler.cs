@@ -16,6 +16,10 @@ using Elysium.Core.Models;
 using Elysium.Components.Components;
 using Haondt.Web.Components;
 using Haondt.Web.Core.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
+using System.Diagnostics.CodeAnalysis;
+using System.Collections;
 
 namespace Elysium.Authentication.Services
 {
@@ -133,7 +137,7 @@ namespace Elysium.Authentication.Services
                 m.ConfigureHeadersAction = new HxHeaderBuilder()
                     .ReSwap("innerHTML")
                     .ReTarget("#content")
-                    .PushUrl("home")
+                    .PushUrl("/home")
                     .Build();
             });
 

@@ -1,0 +1,86 @@
+﻿@model Elysium.Components.Components.TemporaryMessageComponentLayoutModel
+<div id="content" hx-swap-oob="true"></div>
+
+  <section class="section" style="height:100%">
+  <style scoped>
+    .inbox, .outbox {
+      flex: 1;
+      padding: 1rem;
+      margin: 0.5rem;
+      box-sizing: border-box;
+    }
+  </style>
+
+    <div class="container is-flex is-flex-direction-row" style="height:100%">
+      <!-- Inbox Section -->
+      <div class="inbox">
+        <div class="is-flex is-flex-direction-row is-align-items-baseline" style="gap:20px;">
+            <h2 class="title is-4">Inbox</h2>
+            <button class="button">Refresh</button>
+        </div>
+        <div id="inbox" style="overflow-y:auto;height:100%"></div>
+      </div>
+
+      <div style="border-left: 1px solid var(--bulma-border);height: 100%;"></div>
+
+      <!-- Outbox Section -->
+      <div class="outbox">
+        <h2 class="title is-4">Outbox</h2>
+        <form id="message-form" hx-post="/_event/SendMessage">
+          <div class="field">
+            <label class="label">Receiver</label>
+            <div class="control">
+              <input class="input" type="text" placeholder="Receiver name" name="recepient">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">Message</label>
+            <div class="control">
+              <textarea style="resize:none;" class="textarea" placeholder="Type your message" name="message"></textarea>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="control">
+              <button class="button is-primary" type="submit">Send</button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Status Notification Line -->
+        <div id="status-message" class="notification is-hidden">
+          <p id="status-text"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+@* <script>
+document.getElementById('message-form').addEventListener('submit', function(event) {
+  event.preventDefault();
+  const statusMessage = document.getElementById('status-message');
+  const statusText = document.getElementById('status-text');
+
+  // Simulate sending the message
+  // Replace with actual message sending logic
+  const success = Math.random() > 0.5; // Randomly succeed or fail
+
+  if (!success) {
+    statusMessage.className = 'notification is-success'; // Display success message
+    statusText.textContent = 'Message sent successfully!';
+  } else {
+    statusMessage.className = 'notification is-danger'; // Display error message
+    statusText.textContent = 'Failed to send the message.';
+  }
+
+  statusMessage.classList.remove('is-hidden');
+
+  // Optionally, hide the notification after a few seconds
+  setTimeout(() => {
+    statusMessage.classList.add('is-hidden');
+  }, 3000);
+});
+</script>
+
+ *@

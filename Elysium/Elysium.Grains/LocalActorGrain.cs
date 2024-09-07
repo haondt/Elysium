@@ -80,6 +80,7 @@ namespace Elysium.Grains
                 return;
             _typedActorService = _typedActorServiceFactory.Create(_state.State.ActorType);
         }
+
         public async Task<Optional<Exception>> SetActorTypeAsync(ActorType actorType)
         {
             if (_state.State.ActorType != ActorType.Unknown)

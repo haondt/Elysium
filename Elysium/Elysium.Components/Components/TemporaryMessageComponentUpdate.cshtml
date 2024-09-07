@@ -1,0 +1,17 @@
+﻿@model Elysium.Components.Components.TemporaryMessageComponentUpdateModel
+
+@if(Model.AddMessages.Count > 0)
+{
+    @foreach(var message in Model.AddMessages)
+    {
+        <div hx-swap-oob="beforeend:#inbox" >
+            <article class="message" >
+                <p class="has-text-weight-bold">@message.Author</p>
+                <div class="message-body">
+                  <p class="has-text-weight-light">@message.TimeStamp</p>
+                  <p>@message.Text</p>
+                </div>
+            </article>
+        </div>
+    }
+}

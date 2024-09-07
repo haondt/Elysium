@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.GrainInterfaces.Services
+namespace Elysium.Server.Models
 {
     public enum ActivityType
     {

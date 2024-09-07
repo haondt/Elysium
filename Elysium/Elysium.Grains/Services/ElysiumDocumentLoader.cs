@@ -19,12 +19,12 @@ namespace Elysium.Grains.Services
             var uri = new Uri(url);
             if (uri.Host.Equals(hostingOptions.Value.Host))
             {
-                var document = (await documentResolver.GetDocumentAsync(author, new LocalUri { Uri = uri })).Value;
+                var document = (await documentResolver.GetDocumentAsync(author, new LocalUri(default) { Uri = uri })).Value;
                 return new RemoteDocument(url, document);
             }
             else
             {
-                var document = (await documentResolver.GetDocumentAsync(author, new RemoteUri { Uri = uri })).Value;
+                var document = (await documentResolver.GetDocumentAsync(author, new RemoteUri(default) { Uri = uri })).Value;
                 return new RemoteDocument(url, document);
             }
         }

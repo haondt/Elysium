@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.GrainInterfaces.Services
+namespace Elysium.Server.Models
 {
-    public class LocalUri
+    public readonly record struct LocalUri(Uri Uri)
     {
-        public required Uri Uri { get; set; }
+        public Uri Uri { get; init; } = Uri;
     }
 }

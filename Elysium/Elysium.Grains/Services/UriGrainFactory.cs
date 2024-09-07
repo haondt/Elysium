@@ -23,12 +23,12 @@ namespace Elysium.Grains.Services
 
         public LocalUri GetIdentity(IGrainWithLocalUriKey grain)
         {
-            return new LocalUri { Uri = new Uri(grain.GetPrimaryKeyString()) };
+            return new LocalUri(default) { Uri = new Uri(grain.GetPrimaryKeyString()) };
         }
 
         public RemoteUri GetIdentity(IGrainWithRemoteUriKey grain)
         {
-            return new RemoteUri { Uri = new Uri(grain.GetPrimaryKeyString()) };
+            return new RemoteUri(default) { Uri = new Uri(grain.GetPrimaryKeyString()) };
         }
 
     }

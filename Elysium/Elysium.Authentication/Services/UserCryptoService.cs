@@ -1,4 +1,5 @@
 ﻿using DotNext;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
 using SimpleBase;
 using System.Security.Cryptography;
@@ -6,19 +7,22 @@ using System.Text;
 
 namespace Elysium.Authentication.Services
 {
-    public class UserCryptoService(IOptions<CryptoSettings> options, ICryptoService cryptoService) : IUserCryptoService
+    public class UserCryptoService(ICryptoService cryptoService,
+        IDataProtectionProvider dataProtector) : IUserCryptoService
     {
-        private readonly byte[] _encryptionKey = Convert.FromBase64String(options.Value.EncryptionKey);
-        private readonly byte[] _iv = Convert.FromBase64String(options.Value.IV);
+        private readonly IDataProtector _dataProtector = dataProtector.CreateProtector($"{nameof(UserCryptoService)}.v1");
         public byte[] DecryptPrivateKey(string encryptedPrivateKey)
         {
-            return cryptoService.AesDecrypt(Convert.FromBase64String(encryptedPrivateKey), _encryptionKey, _iv);
+            return _dataProtector.Unprotect(Convert.FromBase64String(encryptedPrivateKey));
+            //return cryptoService.AesDecrypt(Convert.FromBase64String(encryptedPrivateKey), _encryptionKey, _iv);
         }
         public (string PublicKey, string EncryptedPrivateKey) GenerateKeyPair()
         {
 
             var (publicKey, privateKey) = cryptoService.GenerateKeyPair();
-            var encryptedPrivateKey = cryptoService.AesEncrypt(privateKey, _encryptionKey, _iv);
+            var encryptedPrivateKey = _dataProtector.Protect(publicKey);
+
+            //var encryptedPrivateKey = cryptoService.AesEncrypt(privateKey, _encryptionKey, _iv);
 
             return (Convert.ToBase64String(publicKey), Convert.ToBase64String(encryptedPrivateKey));
         }

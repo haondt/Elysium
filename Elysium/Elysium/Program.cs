@@ -7,6 +7,7 @@ using Elysium.Components.Extensions;
 using Elysium.Extensions;
 using Haondt.Web.Core.Middleware;
 using Elysium.Middlewares;
+using Elysium.Client.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,7 @@ builder.Services
     .AddElysiumServices(builder.Configuration)
     .AddElysiumComponents()
     .AddElysiumAssetSources()
+    .AddElysiumClientServices()
     .AddElysiumPersistenceServices(builder.Configuration)
     .AddElysiumAuthenticationServices(builder.Configuration);
 
