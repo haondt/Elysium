@@ -1,5 +1,5 @@
 ﻿using DotNext;
-using Elysium.Server.Models;
+using Elysium.Hosting.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +11,8 @@ namespace Elysium.Server.Services
     public interface IHostingService
     {
         bool IsLocalHost(Uri uri);
-        LocalUri GetUriForLocalUser(string username);
+        Result<LocalUri> GetUriForLocalUser(string username);
         Result<string> GetUsernameFromLocalUri(LocalUri uri);
-        public LocalUri GetLocalUserScopedUri(string username, string next);
+        public Result<LocalUri> GetLocalUserScopedUri(string username, string next);
     }
 }

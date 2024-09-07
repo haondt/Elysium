@@ -1,6 +1,6 @@
 ﻿using DotNext;
+using Elysium.ActivityPub.Models;
 using Elysium.Core.Models;
-using Elysium.Server.Models;
 using Haondt.Identity.StorageKey;
 using Newtonsoft.Json.Linq;
 using System;

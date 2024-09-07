@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Server.Models
+namespace Elysium.ActivityPub.Models
 {
     public enum ActivityType
     {

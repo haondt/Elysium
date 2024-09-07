@@ -1,4 +1,5 @@
-﻿using Elysium.Authentication.Services;
+﻿using Elysium.Authentication.Constants;
+using Elysium.Authentication.Services;
 using Elysium.Core.Models;
 using Haondt.Identity.StorageKey;
 using Haondt.Persistence.Extensions;
@@ -23,6 +24,10 @@ namespace Elysium.Authentication.Extensions
             services.AddIdentity<UserIdentity, RoleIdentity>()
                 .AddUserStore<ElysiumUserStore>()
                 .AddRoleStore<ElysiumRoleStore>();
+            services.Configure<IdentityOptions>(o =>
+            {
+                o.User.AllowedUserNameCharacters = AuthenticationConstants.ALLOWED_USERNAME_CHARACTERS;
+            });
             services.AddScoped<IEventHandler, AuthenticationEventHandler>();
             services.AddScoped<ISessionService, SessionService>();
             services.AddScoped<ICryptoService, CryptoService>();

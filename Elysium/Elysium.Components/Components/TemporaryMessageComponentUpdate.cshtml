@@ -15,3 +15,17 @@
         </div>
     }
 }
+
+@if(Model.ErrorMessage.HasValue)
+{
+    <div id="status-message" hx-swap-oob="true" class="notification is-danger">
+          <p>@Model.ErrorMessage.Value</p>
+    </div>
+}
+
+@if(Model.NotifySuccess)
+{
+    <div id="status-message" hx-swap-oob="true" class="notification is-success">
+          <p>Message sent!</p>
+    </div>
+}

@@ -1,13 +1,14 @@
 ﻿using DotNext;
-using Elysium.Grains.Exceptions;
-using Elysium.Grains.Extensions;
+using Elysium.Core.Exceptions;
+using Elysium.Core.Extensions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Elysium.Grains.Extensions
+namespace Elysium.Core.Extensions
 {
     public static class JsonExtensions
     {
-        private static Exception Error = new ActivityPubException("object was not in the expected format");
+        private static Exception Error = new JsonNavigationException("object was not in the expected format");
         public static Result<JToken> GetNamedChild(this JToken jtoken, string name)
         {
             if (jtoken is not JObject jo) return new(Error);

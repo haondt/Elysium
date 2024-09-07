@@ -1,5 +1,5 @@
 ﻿using DotNext;
-using Elysium.Server.Models;
+using Elysium.Hosting.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;

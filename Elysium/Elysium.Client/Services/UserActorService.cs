@@ -2,8 +2,8 @@
 using Elysium.Authentication.Services;
 using Elysium.Core.Models;
 using Elysium.GrainInterfaces.Services;
+using Elysium.Hosting.Models;
 using Elysium.Persistence.Services;
-using Elysium.Server.Models;
 using Elysium.Server.Services;
 using Haondt.Identity.StorageKey;
 using Newtonsoft.Json.Linq;
@@ -22,7 +22,7 @@ namespace Elysium.Client.Services
 
         public async Task<Result<byte[]>> GetSigningKeyAsync(LocalUri id)
         {
-            var username = hostingService.GetLocalUserFromUri(id);
+            var username = hostingService.GetUsernameFromLocalUri(id);
             if (!username.IsSuccessful)
                 return new(username.Error);
 

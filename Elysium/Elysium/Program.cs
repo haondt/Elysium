@@ -3,7 +3,7 @@ using Haondt.Web.BulmaCSS.Extensions;
 using Haondt.Web.Core.Extensions;
 using Haondt.Web.Extensions;
 using Elysium.Persistence.Extensions;
-using Elysium.Components.Extensions;
+using Elysium.Hosting.Extensions;
 using Elysium.Extensions;
 using Haondt.Web.Core.Middleware;
 using Elysium.Middlewares;
@@ -26,6 +26,7 @@ builder.Services
     .AddElysiumComponents()
     .AddElysiumAssetSources()
     .AddElysiumClientServices()
+    .AddElysiumHostingServices(builder.Configuration)
     .AddElysiumPersistenceServices(builder.Configuration)
     .AddElysiumAuthenticationServices(builder.Configuration);
 

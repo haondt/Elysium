@@ -1,8 +1,8 @@
 ﻿using DotNext;
+using Elysium.ActivityPub;
 using Elysium.Authentication.Services;
 using Elysium.Client.Services;
 using Elysium.Components.Components;
-using Elysium.Server.Models;
 using Haondt.Web.Core.Components;
 using Haondt.Web.Core.Extensions;
 using Haondt.Web.Core.Http;
@@ -10,7 +10,10 @@ using Haondt.Web.Services;
 
 namespace Elysium.Services
 {
-    public class ElysiumPublishActivityEventHandler(IActivityPubClientService activityPubService, ISessionService sessionService, IComponentFactory componentFactory) : IEventHandler
+    public class ElysiumPublishActivityEventHandler(
+        IActivityPubClientService activityPubService,
+        ISessionService sessionService,
+        IComponentFactory componentFactory) : IEventHandler
     {
         public const string SEND_MESSAGE_EVENT = "SendMessage";
 
@@ -28,38 +31,55 @@ namespace Elysium.Services
 
                 var messageResult = requestData.Form.GetValue<string>("message");
                 if (!messageResult.IsSuccessful)
-                    return new(new InvalidOperationException()); // TODO: return the correct component
+                    return await GetMessageErrorComponentAsync(messageResult.Error.Message);
                 var recepientResult = requestData.Form.GetValue<string>("recepient");
                 if (!recepientResult.IsSuccessful)
-                    return new(new InvalidOperationException()); // TODO: return the correct component
+                    return await GetMessageErrorComponentAsync(recepientResult.Error.Message);
 
-                var updaterComponent = await componentFactory.GetPlainComponent(new TemporaryMessageComponentUpdateModel
+                var acitivityObjectDetails = new MessageDetails
                 {
-                    AddMessages =
-                    [
-                        new() {
-                            Author = userKey.ToString(),
-                            Text = messageResult.Value,
-                            TimeStamp = DateTime.UtcNow
-                        },
-                        new() {
-                            Author = userKey.ToString(),
-                            Text = messageResult.Value,
-                            TimeStamp = DateTime.UtcNow
-                        },
-                        new() {
-                            Author = userKey.ToString(),
-                            Text = messageResult.Value,
-                            TimeStamp = DateTime.UtcNow
-                        }
-                    ]
-                });
+                    Text = messageResult.Value,
+                    Recepient = new Uri(recepientResult.Value)
+                };
 
-                if (updaterComponent.IsSuccessful)
-                    return new(updaterComponent);
-                return new(updaterComponent.Error);
+                var activityObject = ActivityCompositor.Composit(acitivityObjectDetails);
+                if (!activityObject.IsSuccessful)
+                {
+                    return await GetMessageErrorComponentAsync(activityObject.Error.Message);
+                } 
 
-                //activityPubService.PublishActivityAsync(userKey.Value, ActivityType.Create, );
+                return new(await componentFactory.GetPlainComponent(new TemporaryMessageComponentUpdateModel
+                {
+                    NotifySuccess = true,
+                }));
+                //activityPubService.PublishActivityAsync(userKey.Value, ActivityType.Create,  );
+
+
+                //var updaterComponent = await componentFactory.GetPlainComponent(new TemporaryMessageComponentUpdateModel
+                //{
+                //    AddMessages =
+                //    [
+                //        new() {
+                //            Author = userKey.ToString(),
+                //            Text = messageResult.Value,
+                //            TimeStamp = DateTime.UtcNow
+                //        },
+                //        new() {
+                //            Author = userKey.ToString(),
+                //            Text = messageResult.Value,
+                //            TimeStamp = DateTime.UtcNow
+                //        },
+                //        new() {
+                //            Author = userKey.ToString(),
+                //            Text = messageResult.Value,
+                //            TimeStamp = DateTime.UtcNow
+                //        }
+                //    ]
+                //});
+
+                //if (!updaterComponent.IsSuccessful)
+                //    return new(updaterComponent.Error);
+                //return new(updaterComponent);
             }
 
             return new(Optional.Null<IComponent>());
@@ -69,9 +89,13 @@ namespace Elysium.Services
         {
             return new(await componentFactory.GetPlainComponent<LoginModel>(configureResponse: m => m.SetStatusCode = 401));
         }
-        //private async Task<Result<Optional<IComponent>>> GetMessageErrorComponentAsync(string errorMessage)
-        //{
-        //    return new(await componentFactory.GetPlainComponent<LoginModel>(configureResponse: m => m.SetStatusCode = 401));
-        //}
+
+        private async Task<Result<Optional<IComponent>>> GetMessageErrorComponentAsync(string errorMessage)
+        {
+            return new(await componentFactory.GetPlainComponent(new TemporaryMessageComponentUpdateModel
+            {
+                ErrorMessage = errorMessage
+            }));
+        }
     }
 }

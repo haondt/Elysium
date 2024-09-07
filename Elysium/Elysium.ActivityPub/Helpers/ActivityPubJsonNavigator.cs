@@ -1,6 +1,7 @@
 ﻿using DotNext;
-using Elysium.Grains.Exceptions;
-using Elysium.Grains.Extensions;
+using Elysium.ActivityPub.Models;
+using Elysium.Core.Exceptions;
+using Elysium.Core.Extensions;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -8,12 +9,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains.Services
+namespace Elysium.ActivityPub.Helpers
 {
-    public class ActivityPubJsonNavigator : IActivityPubJsonNavigator
+    public class ActivityPubJsonNavigator
     {
 
-        private static Exception Error = new ActivityPubException("object was not in the expected format");
+        private static Exception Error = new JsonNavigationException("object was not in the expected format");
 
         public Result<Uri> GetInbox(JArray expanded)
         {
@@ -54,23 +55,22 @@ namespace Elysium.Grains.Services
             return target.GetNamedChild("type").AsString();
         }
 
-        public Result<JArray>
 
         public Result<(string, PublicKeyType)> GetPublicKey(JArray expanded)
         {
             if (expanded.Count != 1) return new(Error);
             JToken next = expanded.First();
-            var deprecatedStrategy = next.GetNamedChild("https://w3id.org/security#publicKey")
-                .GetNamedChild("https://w3id.org/security#publicKeyPem")
+            var deprecatedStrategy = next.GetNamedChild(JsonLdTypes.PUBLIC_KEY)
+                .GetNamedChild(JsonLdTypes.PUBLIC_KEY_PEM)
                 .GetNamedChild("@value")
                 .AsString();
 
             if (deprecatedStrategy.IsSuccessful)
                 return new((deprecatedStrategy.Value, PublicKeyType.Pem));
 
-            var updatedStrategy = next.GetNamedChild("https://w3id.org/security#assertionMethod")
+            var updatedStrategy = next.GetNamedChild(JsonLdTypes.ASSERTION_METHOD)
                 .Single()
-                .GetNamedChild("https://w3id.org/security#publicKeyMultibase")
+                .GetNamedChild(JsonLdTypes.PUBLIC_KEY_MULTIBASE)
                 .GetNamedChild("@value")
                 .AsString();
 

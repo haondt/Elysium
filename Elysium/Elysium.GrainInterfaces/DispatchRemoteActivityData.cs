@@ -1,5 +1,5 @@
 ﻿using Elysium.GrainInterfaces.Services;
-using Elysium.Server.Models;
+using Elysium.Hosting.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Elysium.Server\Elysium.Server.csproj" />
+    <ProjectReference Include="..\Elysium.Hosting\Elysium.Hosting.csproj" />
   </ItemGroup>
 
 </Project>

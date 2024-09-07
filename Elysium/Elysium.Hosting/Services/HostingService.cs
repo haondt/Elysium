@@ -1,13 +1,16 @@
 ﻿using DotNext;
-using Elysium.Server.Models;
+using Elysium.Authentication.Constants;
+using Elysium.Hosting.Models;
+using Elysium.Server.Services;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Elysium.Server.Services
+namespace Elysium.Hosting.Services
 {
     public class HostingService(IOptions<HostingSettings> options) : IHostingService
     {
@@ -40,10 +43,13 @@ namespace Elysium.Server.Services
             return new($"{localizedUsername.Value}@{_hostingSettings.Host}");
         }
 
-        public LocalUri GetUriForLocalUser(string username)
+        public Result<LocalUri> GetUriForLocalUser(string username)
         {
             // COMEHERE
-
+            var pattern = $"^([{AuthenticationConstants.ALLOWED_USERNAME_CHARACTERS.Replace("]", @"\]")}])@{Regex.Escape(_hostingSettings.Host)}$";
+            var match = Regex.Match(username, pattern);
+            if (!match.Success)
+                return new(new InvalidOperationException("unable to parse username as a local user"));
 
             return new LocalUri
             {
@@ -51,16 +57,19 @@ namespace Elysium.Server.Services
                 {
                     Host = _hostingSettings.Host,
                     Scheme = _hostingSettings.Scheme,
-                    Path = $"/users/{username}"
+                    Path = $"/users/{match.Groups[1].Value}"
                 }.Uri
             };
         }
 
-        public LocalUri GetLocalUserScopedUri(string username, string next)
+        public Result<LocalUri> GetLocalUserScopedUri(string username, string next)
         {
             var userUri = GetUriForLocalUser(username);
+            if (!userUri.IsSuccessful)
+                return userUri;
+
             next = next.TrimStart('/');
-            return new LocalUri { Uri = new(userUri.Uri, next) };
+            return new LocalUri { Uri = new(userUri.Value.Uri, next) };
         }
     }
 }

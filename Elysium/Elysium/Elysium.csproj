@@ -22,15 +22,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Haondt.Web" Version="1.0.0-alpha-20240907122245" />
-    <PackageReference Include="Haondt.Web.BulmaCSS" Version="1.0.0-alpha-20240907122245" />
+    <PackageReference Include="Haondt.Web" Version="1.0.0-alpha-20240907124741" />
+    <PackageReference Include="Haondt.Web.BulmaCSS" Version="1.0.0-alpha-20240907124741" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Elysium.ActivityPub\Elysium.ActivityPub.csproj" />
     <ProjectReference Include="..\Elysium.Authentication\Elysium.Authentication.csproj" />
     <ProjectReference Include="..\Elysium.Client\Elysium.Client.csproj" />
     <ProjectReference Include="..\Elysium.Components\Elysium.Components.csproj" />
+    <ProjectReference Include="..\Elysium.Hosting\Elysium.Hosting.csproj" />
     <ProjectReference Include="..\Elysium.Persistence\Elysium.Persistence.csproj" />
   </ItemGroup>
 

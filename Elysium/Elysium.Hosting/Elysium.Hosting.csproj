@@ -8,13 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="DotNext" Version="5.13.0" />
-    <PackageReference Include="Microsoft.Orleans.Client" Version="8.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Elysium.ActivityPub\Elysium.ActivityPub.csproj" />
     <ProjectReference Include="..\Elysium.Authentication\Elysium.Authentication.csproj" />
-    <ProjectReference Include="..\Elysium.GrainInterfaces\Elysium.GrainInterfaces.csproj" />
   </ItemGroup>
 
 </Project>
