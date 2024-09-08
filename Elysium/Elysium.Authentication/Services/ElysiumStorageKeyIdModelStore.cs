@@ -14,8 +14,10 @@ namespace Elysium.Authentication.Services
     {
         public async Task<IdentityResult> CreateAsync(T user, CancellationToken cancellationToken)
         {
-            var getUser = await storage.Get(user.Id);
-            if (getUser.IsSuccessful)
+            var getUser = await storage.ContainsKey(user.Id);
+            if (!getUser.IsSuccessful)
+                return IdentityResult.Failed(new IdentityError { Code = "0", Description = "Could not check if user exists" });
+            if (getUser.Value)
                 return IdentityResult.Failed(new IdentityError { Code = "0", Description = "User already exists" });
             var createUser = await storage.Set(user.Id, user);
             if (createUser.HasValue)

@@ -34,6 +34,11 @@ namespace Elysium.Extensions
             {
                 Uri = $"/_asset/{assemblyPrefix}.wwwroot.bulma-custom.css"
             });
+            services.AddScoped<IHeadEntryDescriptor>(sp => new ScriptDescriptor
+            {
+                Uri = "https://kit.fontawesome.com/afd44816da.js",
+                CrossOrigin = "anonymous"
+            });
             services.AddScoped<IHeadEntryDescriptor>(_ => new MetaDescriptor
             {
                 Name = "htmx-config",

@@ -13,3 +13,4 @@
     - local - public objects from anyone on your instance  (all local outboxes w/ public)
     - federated - public objects from anyone followed by someone on your instance (all local inboxes w/ public)
 - make `IElysiumStorage` transient
+- add a settings object to configure htmx & hyperscript versions. This can be run through the `ScriptDescriptor`
