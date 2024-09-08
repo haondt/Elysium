@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Client.Services
+namespace Elysium.GrainInterfaces
 {
-    public enum DocumentRetrievalReason
+    public class RegisteredActorState
     {
-        Success,
-        NotFound,
-        Forbidden
     }
 }

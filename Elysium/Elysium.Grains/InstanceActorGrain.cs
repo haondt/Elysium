@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 namespace Elysium.Grains
 {
     [StatelessWorker]
-    class InstanceActorGrain : Grain, IInstanceActorGrain
+    class InstanceActorGrain : Grain, IInstanceActorAuthorGrain
     {
-        public Task<Optional<Exception>> GenerateDocumentAsync()
+        public Task<string> GetKeyIdAsync()
         {
             throw new NotImplementedException();
         }
 
-        public Task<Optional<Exception>> GetDocumentAsync()
+        public Task<Result<string>> SignAsync(string stringToSign)
         {
             throw new NotImplementedException();
         }

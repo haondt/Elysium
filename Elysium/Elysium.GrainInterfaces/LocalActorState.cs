@@ -9,6 +9,5 @@ namespace Elysium.GrainInterfaces
 {
     public class LocalActorState
     {
-        public ActorType ActorType { get; set; }
     }
 }

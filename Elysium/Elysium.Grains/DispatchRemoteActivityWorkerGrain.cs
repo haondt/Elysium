@@ -2,6 +2,7 @@
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Services;
+using Elysium.Hosting.Models;
 using Microsoft.Extensions.Logging;
 using Orleans.Streams;
 using System;
@@ -14,13 +15,14 @@ namespace Elysium.Grains
 {
     [ImplicitStreamSubscription("DispatchRemoteActivityStream")]
     public class DispatchRemoteActivityWorkerGrain(
-        IUriGrainFactory uriGrainFactory, 
+        IGrainFactory<LocalUri> uriGrainFactory, 
         IGrainFactory grainFactory, 
         ILogger<DispatchRemoteActivityWorkerGrain> logger,
         IActivityPubHttpService httpService) : Grain, IDispatchRemoteActivityWorkerGrain
     {
         private readonly IDispatchRemoteActivityGrain _dispatcher = grainFactory.GetGrain<IDispatchRemoteActivityGrain>(Guid.Empty);
         private long _id;
+        private StreamSubscriptionHandle<DispatchRemoteActivityData>? _subscription;
 
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
@@ -28,8 +30,15 @@ namespace Elysium.Grains
             var streamProvider = this.GetStreamProvider("SimpleStreamProvider");
             var streamId = StreamId.Create("DispatchRemoteActivityStream", _id);
             var stream = streamProvider.GetStream<DispatchRemoteActivityData>(streamId);
-            var subscription = await stream.SubscribeAsync(OnNextAsync);
+            _subscription = await stream.SubscribeAsync(OnNextAsync);
             await base.OnActivateAsync(cancellationToken);
+        }
+
+        public override async Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
+        {
+            if (_subscription != null)
+                await _subscription.UnsubscribeAsync();
+            await base.OnDeactivateAsync(reason, cancellationToken);
         }
 
         public async Task OnNextAsync(DispatchRemoteActivityData data, StreamSequenceToken? token)
@@ -50,7 +59,7 @@ namespace Elysium.Grains
             {
                 JsonLdPayload = data.Payload,
                 Target = data.Target,
-                Author = uriGrainFactory.GetGrain<ILocalActorWorkerGrain>(data.Sender)
+                Author = uriGrainFactory.GetGrain<ILocalActorAuthorGrain>(data.Sender)
             });
 
             if (result.HasValue)

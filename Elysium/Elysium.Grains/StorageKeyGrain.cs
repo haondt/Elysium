@@ -13,11 +13,11 @@ using System.Threading.Tasks;
 namespace Elysium.Grains
 {
 
-    public class UserIdentityGrain(
-        IGrainFactory<StorageKey<UserIdentity>> grainFactory,
-        IElysiumStorage storage) : Grain, IUserIdentityGrain
+    public class StorageKeyGrain<T>(
+        IGrainFactory<StorageKey<T>> grainFactory,
+        IElysiumStorage storage) : Grain, IStorageKeyGrain<T>
     {
-        private Result<UserIdentity> _identity;
+        private Result<T> _identity;
 
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
@@ -27,7 +27,7 @@ namespace Elysium.Grains
             await base.OnActivateAsync(cancellationToken);
         }
 
-        public Task<Result<UserIdentity>> GetIdentityAsync()
+        public Task<Result<T>> GetIdentityAsync()
         {
             return Task.FromResult(_identity);
         }

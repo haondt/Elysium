@@ -79,13 +79,18 @@ namespace Elysium.Hosting.Services
             var localizedUsername = GetLocalizedUsernameFromUsername(username);
             if (!localizedUsername.IsSuccessful)
                 return new(localizedUsername.Error);
+            return GetUriForLocalizedUsername(username);
+        }
+
+        public Result<LocalUri> GetUriForLocalizedUsername(string localizedUsername)
+        {
             return new LocalUri
             {
                 Uri = new UriBuilder
                 {
                     Host = _host,
                     Scheme = Uri.UriSchemeHttps,
-                    Path = $"/users/{localizedUsername.Value}"
+                    Path = $"/users/{localizedUsername}"
                 }.Uri
             };
         }
@@ -113,9 +118,13 @@ namespace Elysium.Hosting.Services
             var userUri = GetUriForLocalUsername(username);
             if (!userUri.IsSuccessful)
                 return userUri;
+            return GetLocalUserScopedUri(userUri.Value, next);
+        }
 
+        public LocalUri GetLocalUserScopedUri(LocalUri userUri, string next)
+        {
             next = next.TrimStart('/');
-            return new LocalUri { Uri = new(userUri.Value.Uri, next) };
+            return new LocalUri { Uri = new(userUri.Uri, next) };
         }
 
         public string GetUsernameFromLocalizedUsername(string username)

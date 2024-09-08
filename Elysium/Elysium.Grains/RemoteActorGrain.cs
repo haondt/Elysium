@@ -3,8 +3,10 @@ using Elysium.ActivityPub.Helpers;
 using Elysium.ActivityPub.Models;
 using Elysium.Authentication.Services;
 using Elysium.GrainInterfaces;
+using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Exceptions;
 using Elysium.Grains.Services;
+using Elysium.Hosting.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Orleans;
 using Orleans.Runtime;
@@ -21,23 +23,20 @@ namespace Elysium.Grains
 {
     public class RemoteActorGrain : Grain, IRemoteActorGrain
     {
-        private readonly IGrainFactory _grainFactory;
-        private readonly IActivityPubService _activityPubService;
+        private readonly IGrainFactory<RemoteUri> _grainFactory;
         private readonly IUserCryptoService _cryptoService;
         private readonly IRemoteDocumentGrain _actorStateGrain;
-        private readonly Uri _id;
+        private readonly RemoteUri _id;
         private byte[]? _publicKey;
 
         public RemoteActorGrain(
-            IGrainFactory grainFactory,
-            IActivityPubService activityPubService,
+            IGrainFactory<RemoteUri> grainFactory,
             IUserCryptoService cryptoService)
         {
-            _id = new Uri(this.GetPrimaryKeyString());
+            _id = grainFactory.GetIdentity(this);
             _grainFactory = grainFactory;
-            _activityPubService = activityPubService;
             _cryptoService = cryptoService;
-            _actorStateGrain = grainFactory.GetGrain<IRemoteDocumentGrain>(_id.ToString());
+            _actorStateGrain = grainFactory.GetGrain<IRemoteDocumentGrain>(_id);
         }
 
         private async Task<Result<byte[]>> InternalGetPublicKeyAsync()

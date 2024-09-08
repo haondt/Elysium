@@ -15,10 +15,11 @@ using System.Threading.Tasks;
 
 namespace Elysium.Client.Services
 {
-    public class UserActorService(IUserCryptoService cryptoService, IElysiumStorage elysiumStorage,
-        IHostingService hostingService) : IPersonActorService
+    public class UserActorService(
+        IUserCryptoService cryptoService, 
+        IElysiumStorage elysiumStorage,
+        IHostingService hostingService) : IUserActorService
     {
-        public ActorType ActorType => ActorType.Person;
 
         public async Task<Result<byte[]>> GetSigningKeyAsync(LocalUri id)
         {
@@ -49,7 +50,7 @@ namespace Elysium.Client.Services
             throw new NotImplementedException();
         }
 
-        public Task<Result<JObject>> GenerateDocumentAsync()
+        public Task<Result<JObject>> GenerateIdentityDocumentAsync(LocalUri uri)
         {
             throw new NotImplementedException();
             //if (!_typedActorService.IsSuccessful)
@@ -85,7 +86,8 @@ namespace Elysium.Client.Services
 
         }
 
-        Task<Result<byte[]>> ITypedActorService.GetPublicKeyAsync()
+
+        public Task<Result<byte[]>> GetPublicKeyAsync(LocalUri uri)
         {
             throw new NotImplementedException();
         }

@@ -21,8 +21,7 @@ namespace Elysium.Grains.Extensions
         {
             services.Configure<HostIntegritySettings>(configuration.GetSection(nameof(HostIntegritySettings)));
             services.Configure<RemoteDocumentSettings>(configuration.GetSection(nameof(RemoteDocumentSettings)));
-            services.AddScoped<IActivityPubService, ActivityPubService>();
-            services.AddScoped<ITypedActorServiceFactory, TypedActorServiceFactory>();
+            services.AddScoped<ITypedActorServiceProvider, TypedActorServiceFactory>();
             services.AddSingleton<IGrainFactory<LocalUri>, LocalUriGrainFactory>();
             services.AddSingleton<IGrainFactory<RemoteUri>, RemoteUriGrainFactory>();
             services.AddSingleton<IGrainFactory<StorageKey<UserIdentity>>, StorageKeyGrainFactory<UserIdentity>>();

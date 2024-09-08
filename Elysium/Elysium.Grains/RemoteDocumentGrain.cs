@@ -17,7 +17,6 @@ using System.Threading.Tasks;
 namespace Elysium.Grains
 {
     public class RemoteDocumentGrain([PersistentState(nameof(DocumentState))] IPersistentState<DocumentState> state,
-        IUriGrainFactory uriGrainFactory,
         IGrainFactory grainFactory,
         IActivityPubHttpService httpService,
         IOptions<RemoteDocumentSettings> options,
@@ -25,7 +24,7 @@ namespace Elysium.Grains
     {
         private readonly RemoteDocumentSettings _settings = options.Value;
         private Optional<RemoteUri> _id;
-        private IInstanceActorGrain _instanceActorGrain = grainFactory.GetGrain<IInstanceActorGrain>(Guid.Empty);
+        private IInstanceActorAuthorGrain _instanceActorGrain = grainFactory.GetGrain<IInstanceActorAuthorGrain>(Guid.Empty);
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
             await state.ReadStateAsync();

@@ -4,9 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.GrainInterfaces.Services
+namespace Elysium.GrainInterfaces
 {
-    public interface IPersonActorService : ITypedActorService
+    public enum GuardianReason
     {
+        Success,
+        NotFound,
+        Forbidden,
+        Conflict
     }
 }

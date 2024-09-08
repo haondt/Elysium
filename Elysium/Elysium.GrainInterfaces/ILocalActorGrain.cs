@@ -18,12 +18,11 @@ namespace Elysium.GrainInterfaces
     ///<remarks><see href="https://www.w3.org/TR/activitypub/#actors"/></remarks> 
     public interface ILocalActorGrain : IGrain<LocalUri>
     {
-        Task<Optional<Exception>> InitializeDocument();
+        //Task<Optional<Exception>> InitializeDocument();
 
 
         Task<Optional<Exception>> IngestActivityAsync(JObject activity);
         //Task<OrderedCollection> GetPublishedActivities(Optional<Actor> requester);
-        Task<Result<byte[]>> GetSigningKeyAsync();
 
         /// <summary>
         /// Ask the grain to publish a new activity.
@@ -38,7 +37,7 @@ namespace Elysium.GrainInterfaces
         /// <param name="type"></param>
         /// <param name="object"></param>
         /// <returns>the <see cref="Uri"/> of the created activity</returns>
-        Task<Result<Uri>> PublishActivity(ActivityType type, JObject @object);
+        Task<Result<(LocalUri ActivityUri, LocalUri ObjectUri)>> PublishActivity(ActivityType type, JArray @object);
 
         /// <summary>
         /// Ask the grain to publish a transient activity.

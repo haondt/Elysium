@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces
 {
-    public interface ILocalActorWorkerGrain : IGrain<LocalUri>
+    public interface ILocalActorAuthorGrain : IGrain<LocalUri>, IHttpMessageAuthor
     {
     }
 }

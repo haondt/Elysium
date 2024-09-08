@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces
 {
-    public interface IUserIdentityGrain : IGrain<StorageKey<UserIdentity>>
+    public interface IStorageKeyGrain<T> : IGrain<StorageKey<T>>
     {
-        public Task<Result<UserIdentity>> GetIdentityAsync();
+        public Task<Result<T>> GetIdentityAsync();
     }
 }

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.Grains.Services
 {
-    public class DocumentResolver(IUriGrainFactory grainFactory, IHostingService hostingService) : IDocumentResolver
+    public class DocumentResolver(IGrainFactory<RemoteUri> grainFactory, IHostingService hostingService) : IDocumentResolver
     {
         //private Task<bool> VerifyReadPermissions()
         //{

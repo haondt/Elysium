@@ -20,7 +20,7 @@ namespace Elysium.Grains
         private readonly IRemoteActorGrain _actorGrain;
         private readonly IDispatchRemoteActivityGrain _dispatchGrain;
 
-        public RemoteActorWorkerGrain(IUriGrainFactory uriGrainFactory, IGrainFactory grainFactory)
+        public RemoteActorWorkerGrain(IGrainFactory<RemoteUri> uriGrainFactory, IGrainFactory grainFactory)
         {
             _id = uriGrainFactory.GetIdentity(this);
             _actorGrain = uriGrainFactory.GetGrain<IRemoteActorGrain>(_id);

@@ -20,7 +20,7 @@ namespace Elysium.Grains
         IGrainFactory grainFactory
         ) : Grain, ILocalDocumentGrain
     {
-        IInstanceActorGrain _instanceActorGrain = grainFactory.GetGrain<IInstanceActorGrain>(Guid.Empty);
+        IInstanceActorAuthorGrain _instanceActorGrain = grainFactory.GetGrain<IInstanceActorAuthorGrain>(Guid.Empty);
 
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {

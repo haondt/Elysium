@@ -27,7 +27,7 @@ namespace Elysium.ActivityPub.Helpers
         public ActivityPubJsonBuilder Id(Uri id)
         {
             _state.SetDefault(0, JObjectFactory, JObjectFactory)
-                .Set("@id", new JArray { id.ToString() });
+                .Set("@id", new JArray { id.AbsoluteUri });
             return this;
         }
         private ActivityPubJsonBuilder SetKeyValue(string key, string value)
@@ -42,14 +42,37 @@ namespace Elysium.ActivityPub.Helpers
                 .Set(key, new JArray { new JObject { { "@id", value } } });
             return this;
         }
-        public ActivityPubJsonBuilder Inbox(Uri uri) => SetKeyId(JsonLdTypes.INBOX, uri.ToString());
-        public ActivityPubJsonBuilder Outbox(Uri uri) => SetKeyId(JsonLdTypes.OUTBOX, uri.ToString());
-        public ActivityPubJsonBuilder Followers(Uri uri) => SetKeyId(JsonLdTypes.FOLLOWERS, uri.ToString());
-        public ActivityPubJsonBuilder Following(Uri uri) => SetKeyId(JsonLdTypes.FOLLOWING, uri.ToString());
-        public ActivityPubJsonBuilder PreferredUsername(string username) => SetKeyValue(JsonLdTypes.PREFERRED_USERNAME, username.ToString());
+
+        private ActivityPubJsonBuilder SetKeyIds(string key, IEnumerable<string> values)
+        {
+            var jArray = new JArray();
+            foreach (var value in values)
+                jArray.Add(new JObject { { "@id", value } });
+            _state.SetDefault(0, JObjectFactory, JObjectFactory)
+                .Set(key, jArray);
+            return this;
+        }
+
+        private ActivityPubJsonBuilder ClearKey(string key)
+        {
+            _state.SetDefault(0, JObjectFactory, JObjectFactory)
+                .Remove(key);
+            return this;
+        }
+
+        public ActivityPubJsonBuilder Inbox(Uri uri) => SetKeyId(JsonLdTypes.INBOX, uri.AbsoluteUri);
+        public ActivityPubJsonBuilder Outbox(Uri uri) => SetKeyId(JsonLdTypes.OUTBOX, uri.AbsoluteUri);
+        public ActivityPubJsonBuilder Followers(Uri uri) => SetKeyId(JsonLdTypes.FOLLOWERS, uri.AbsoluteUri);
+        public ActivityPubJsonBuilder Following(Uri uri) => SetKeyId(JsonLdTypes.FOLLOWING, uri.AbsoluteUri);
+        public ActivityPubJsonBuilder PreferredUsername(string username) => SetKeyValue(JsonLdTypes.PREFERRED_USERNAME, username);
+        public ActivityPubJsonBuilder AttributedTo(Uri uri) => SetKeyId(JsonLdTypes.ATTRIBUTED_TO, uri.AbsoluteUri);
         public ActivityPubJsonBuilder Content(string content) => SetKeyValue(JsonLdTypes.CONTENT, content);
-        public ActivityPubJsonBuilder Cc(Uri uri) => SetKeyId(JsonLdTypes.CC, uri.ToString());
-        public ActivityPubJsonBuilder To(Uri uri) => SetKeyId(JsonLdTypes.TO, uri.ToString());
+        public ActivityPubJsonBuilder Cc(Uri uri) => SetKeyId(JsonLdTypes.CC, uri.AbsoluteUri);
+        public ActivityPubJsonBuilder To(Uri uri) => SetKeyId(JsonLdTypes.TO, uri.AbsoluteUri);
+        public ActivityPubJsonBuilder To(List<Uri>? uris) => (uris == null || uris.Count == 0) ? ClearKey(JsonLdTypes.TO) : SetKeyIds(JsonLdTypes.TO, uris.Select(uri => uri.AbsoluteUri));
+        public ActivityPubJsonBuilder Cc(List<Uri>? uris) => (uris == null || uris.Count == 0) ? ClearKey(JsonLdTypes.CC) : SetKeyIds(JsonLdTypes.CC, uris.Select(uri => uri.AbsoluteUri));
+        public ActivityPubJsonBuilder Bto(List<Uri>? uris) => (uris == null || uris.Count == 0) ? ClearKey(JsonLdTypes.BTO) : SetKeyIds(JsonLdTypes.BTO, uris.Select(uri => uri.AbsoluteUri));
+        public ActivityPubJsonBuilder Bcc(List<Uri>? uris) => (uris == null || uris.Count == 0) ? ClearKey(JsonLdTypes.BCC) : SetKeyIds(JsonLdTypes.BCC, uris.Select(uri => uri.AbsoluteUri));
         public ActivityPubJsonBuilder Published(DateTime dateTime)
         {
             _state.SetDefault(0, JObjectFactory, JObjectFactory)
@@ -63,6 +86,8 @@ namespace Elysium.ActivityPub.Helpers
                 });
             return this;
         }
+        public ActivityPubJsonBuilder Object(Uri uri) => SetKeyId(JsonLdTypes.OBJECT, uri.AbsoluteUri);
+        public ActivityPubJsonBuilder Actor(Uri uri) => SetKeyId(JsonLdTypes.ACTOR, uri.AbsoluteUri);
         public Result<JArray> Build()
         {
             return _state;

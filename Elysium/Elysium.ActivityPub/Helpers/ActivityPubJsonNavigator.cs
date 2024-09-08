@@ -23,8 +23,8 @@ namespace Elysium.ActivityPub.Helpers
             //var type = next.GetNamedChild("@type")
             //    .AsString()
             //    .ShouldBe("" // there are no constraints on actor type
-            var result = next.GetNamedChild("http://www.w3.org/ns/ldp#inbox")
-                .GetNamedChild("@id")
+            var result = next.Get("http://www.w3.org/ns/ldp#inbox")
+                .Get("@id")
                 .AsString();
 
             if (!result.IsSuccessful)
@@ -41,7 +41,7 @@ namespace Elysium.ActivityPub.Helpers
         /// <returns></returns>
         public Optional<string> GetId(JObject target)
         {
-            return target.GetNamedChild("id").AsString();
+            return target.Get("id").AsString();
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Elysium.ActivityPub.Helpers
         /// <returns></returns>
         public Result<string> GetType(JObject target)
         {
-            return target.GetNamedChild("type").AsString();
+            return target.Get("type").AsString();
         }
 
 
@@ -60,18 +60,18 @@ namespace Elysium.ActivityPub.Helpers
         {
             if (expanded.Count != 1) return new(Error);
             JToken next = expanded.First();
-            var deprecatedStrategy = next.GetNamedChild(JsonLdTypes.PUBLIC_KEY)
-                .GetNamedChild(JsonLdTypes.PUBLIC_KEY_PEM)
-                .GetNamedChild("@value")
+            var deprecatedStrategy = next.Get(JsonLdTypes.PUBLIC_KEY)
+                .Get(JsonLdTypes.PUBLIC_KEY_PEM)
+                .Get("@value")
                 .AsString();
 
             if (deprecatedStrategy.IsSuccessful)
                 return new((deprecatedStrategy.Value, PublicKeyType.Pem));
 
-            var updatedStrategy = next.GetNamedChild(JsonLdTypes.ASSERTION_METHOD)
+            var updatedStrategy = next.Get(JsonLdTypes.ASSERTION_METHOD)
                 .Single()
-                .GetNamedChild(JsonLdTypes.PUBLIC_KEY_MULTIBASE)
-                .GetNamedChild("@value")
+                .Get(JsonLdTypes.PUBLIC_KEY_MULTIBASE)
+                .Get("@value")
                 .AsString();
 
             if (updatedStrategy.IsSuccessful)

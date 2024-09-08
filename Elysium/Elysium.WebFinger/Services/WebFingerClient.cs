@@ -7,6 +7,7 @@ namespace Elysium.WebFinger.Services
         public Result<JsonResourceDescriptor> GetAsync(WebFingerQuery query)
         {
             // TODO
+            throw new NotImplementedException();
 
         }
     }

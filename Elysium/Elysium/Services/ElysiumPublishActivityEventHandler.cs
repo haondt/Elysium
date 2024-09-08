@@ -1,5 +1,7 @@
 ﻿using DotNext;
 using Elysium.ActivityPub;
+using Elysium.ActivityPub.Helpers.ActivityCompositor;
+using Elysium.ActivityPub.Models;
 using Elysium.Authentication.Services;
 using Elysium.Client.Services;
 using Elysium.Components.Components;
@@ -44,20 +46,21 @@ namespace Elysium.Services
                 var activityObjectDetails = new MessageDetails
                 {
                     Text = messageResult.Value,
-                    Recepient = recepientUri.Value
+                    Recepient = recepientUri.Value,
                 };
 
                 var activityObject = ActivityCompositor.Composit(activityObjectDetails);
                 if (!activityObject.IsSuccessful)
-                {
                     return await GetMessageErrorComponentAsync(activityObject.Error.Message);
-                } 
+
+                var publishResult = await activityPubService.PublishActivityAsync(userKey.Value, ActivityType.Create,  activityObject.Value);
+                if (!publishResult.IsSuccessful)
+                    return await GetMessageErrorComponentAsync(publishResult.Error.Message);
 
                 return new(await componentFactory.GetPlainComponent(new TemporaryMessageComponentUpdateModel
                 {
                     NotifySuccess = true,
                 }));
-                //activityPubService.PublishActivityAsync(userKey.Value, ActivityType.Create,  );
 
 
                 //var updaterComponent = await componentFactory.GetPlainComponent(new TemporaryMessageComponentUpdateModel
