@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Elysium.ActivityPub\Elysium.ActivityPub.csproj" />
     <ProjectReference Include="..\Elysium.Hosting\Elysium.Hosting.csproj" />
   </ItemGroup>
 

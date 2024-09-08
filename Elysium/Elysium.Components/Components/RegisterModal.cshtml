@@ -22,16 +22,16 @@
                     <img style="height:30px;margin-bottom:30px;" src="@Url.Content("~/_asset/Elysium.wwwroot.logo.svg")" />
                     <form id="registerUserForm" style="width:100%;" hx-post="/_event/RegisterUser">
                         <div class="field">
-                            <div class="control">
+                            <div class="control is-flex is-align-items-center" style="gap:10px;">
                                 <input 
                                     class="input 
                                         @if(Model.DangerUsername) { <text>is-danger</text> }
                                     "
                                     type="text" 
-                                    placeholder="username" name="username" 
+                                    placeholder="username" name="localizedUsername" 
                                     autocomplete="username" 
-                                    @if(!string.IsNullOrEmpty(Model.ExistingUsername)){ <text>value=@Model.ExistingUsername</text> }
-                                />
+                                    @if(!string.IsNullOrEmpty(Model.ExistingLocalizedUsername)){ <text>value=@Model.ExistingLocalizedUsername</text> }
+                                /> <span class="tag is-medium">@@@Model.Host</span>
                             </div>
                         </div>
                         <div class="field">

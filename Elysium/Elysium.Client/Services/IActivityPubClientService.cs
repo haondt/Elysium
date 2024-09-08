@@ -14,6 +14,8 @@ namespace Elysium.Client.Services
 
     public interface IActivityPubClientService
     {
+        // Todo: method that parses @foo@baz.bar and turns it into https://baz.bar/x/y/z/foo
+        //Task<Result<>>
 
         // uri = id of the object
         // existing id will be ignored

@@ -19,6 +19,9 @@ using Elysium.Persistence.Services;
 using Newtonsoft.Json.Linq;
 using Elysium.Authentication.Services;
 using Elysium.GrainInterfaces.Services;
+using Elysium.Server.Services;
+using Elysium.Hosting.Models;
+using Elysium.ActivityPub.Models;
 
 namespace Elysium.Grains
 {
@@ -27,12 +30,11 @@ namespace Elysium.Grains
         private readonly IPersistentState<LocalActorState> _state;
         private readonly IActivityPubService _activityPubService;
         private readonly IHostingService _hostingService;
-        private readonly IActivityPubJsonNavigator _jsonNavigator;
         private readonly IElysiumStorage _storage;
         private readonly IJsonLdService _jsonLdService;
         private readonly IUserCryptoService _cryptoService;
         private readonly ITypedActorServiceFactory _typedActorServiceFactory;
-        private readonly IUriGrainFactory _grainFactory;
+        private readonly IGrainFactory<RemoteUri> _remoteGrainFactory;
         private readonly LocalUri _id;
         private Result<UserIdentity> _userIdentity;
         private Result<byte[]> _signingKey;
@@ -42,22 +44,21 @@ namespace Elysium.Grains
             [PersistentState(nameof(LocalActorState))] IPersistentState<LocalActorState> state,
             IActivityPubService activityPubService,
             IHostingService hostingService,
-            IActivityPubJsonNavigator jsonNavigator,
             IElysiumStorage storage,
             IJsonLdService jsonLdService,
             IUserCryptoService cryptoService,
             ITypedActorServiceFactory typedActorServiceFactory,
-            IUriGrainFactory grainFactory)
+            IGrainFactory<RemoteUri> remoteGrainFactory,
+            IGrainFactory<LocalUri> grainFactory)
         {
             _state = state;
             _activityPubService = activityPubService;
             _hostingService = hostingService;
-            _jsonNavigator = jsonNavigator;
             _storage = storage;
             _jsonLdService = jsonLdService;
             _cryptoService = cryptoService;
             _typedActorServiceFactory = typedActorServiceFactory;
-            _grainFactory = grainFactory;
+            _remoteGrainFactory = remoteGrainFactory;
             _id = grainFactory.GetIdentity(this);
         }
 
@@ -71,7 +72,7 @@ namespace Elysium.Grains
         {
             if (!_typedActorService.IsSuccessful)
                 return new(_typedActorService.Error);
-            return new(await _typedActorService.Value.GetSigningKeyAsync());
+            return await _typedActorService.Value.GetSigningKeyAsync(_id);
         }
 
         private void TryLoadTypedActorService()
@@ -93,42 +94,45 @@ namespace Elysium.Grains
 
         public async Task<Optional<Exception>> InitializeDocument()
         {
-            if (!_typedActorService.IsSuccessful)
-                return new(_typedActorService.Error);
-
-            var documentGrain = _grainFactory.GetGrain<ILocalDocumentGrain>(_id);
-            if (await documentGrain.HasValueAsync())
-                return new(new InvalidOperationException("document is already initialized"));
-
-            var document = await _typedActorService.Value.GenerateDocumentAsync();
-            if (!document.IsSuccessful)
-                return new(document.Error);
-
-            await documentGrain.SetValueAsync(document.Value);
-            return new();
-        }
-
-        public async Task<Optional<Exception>> PublishActivityAsync(Activity activity)
-        {
-            _userIdentity.Value;
-            // Do not use journaled grains because activities must be deleteable / updateable
-            // TODO: push activity to an event stream (?)
-            foreach(var follower in //TODO : pull followers from an event stream
-            await _activityPubService.PublishActivity()
-        }
-
-        public Task<OrderedCollection> GetPublishedActivities(Optional<Actor> requester)
-        {
-            // TODO: pull activities from an event stream
-            // tood: dont forget to dereference the content to avoid spoofing https://www.w3.org/TR/activitypub/#obj
             throw new NotImplementedException();
+            //if (!_typedActorService.IsSuccessful)
+            //    return new(_typedActorService.Error);
+
+            //var documentGrain = _grainFactory.GetGrain<ILocalDocumentGrain>(_id);
+            //if (await documentGrain.HasValueAsync())
+            //    return new(new InvalidOperationException("document is already initialized"));
+
+            //var document = await _typedActorService.Value.GenerateDocumentAsync();
+            //if (!document.IsSuccessful)
+            //    return new(document.Error);
+
+            //await documentGrain.SetValueAsync(document.Value);
+            //return new();
         }
+
+        //public async Task<Optional<Exception>> PublishActivityAsync(Activity activity)
+        //{
+        //    throw new NotImplementedException();
+        //    //_userIdentity.Value;
+        //    //// Do not use journaled grains because activities must be deleteable / updateable
+        //    //// TODO: push activity to an event stream (?)
+        //    //foreach(var follower in //TODO : pull followers from an event stream
+        //    //await _activityPubService.PublishActivity()
+        //}
+
+        //public Task<OrderedCollection> GetPublishedActivities(Optional<Actor> requester)
+        //{
+        //    // TODO: pull activities from an event stream
+        //    // tood: dont forget to dereference the content to avoid spoofing https://www.w3.org/TR/activitypub/#obj
+        //    throw new NotImplementedException();
+        //}
 
         public Task<Optional<Exception>> IngestActivityAsync(JObject activity)
         {
-            // see https://www.w3.org/TR/activitypub/#inbox-forwarding
-            var activityId = _jsonNavigator.GetId(activity);
             throw new NotImplementedException();
+            // see https://www.w3.org/TR/activitypub/#inbox-forwarding
+            //var activityId = _jsonNavigator.GetId(activity);
+            //throw new NotImplementedException();
         }
 
         // this uri is the uri of the *activity*, not the object.
@@ -156,6 +160,12 @@ namespace Elysium.Grains
 
 
 
+            throw new NotImplementedException();
+        }
+
+
+        public Task<Optional<Exception>> PublishTransientActivity(ActivityType type, JObject @object)
+        {
             throw new NotImplementedException();
         }
     }

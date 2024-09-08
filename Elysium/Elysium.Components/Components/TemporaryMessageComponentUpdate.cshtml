@@ -18,14 +18,14 @@
 
 @if(Model.ErrorMessage.HasValue)
 {
-    <div id="status-message" hx-swap-oob="true" class="notification is-danger">
-          <p>@Model.ErrorMessage.Value</p>
-    </div>
+    <p id="status-message" hx-swap-oob="true" class="help is-danger">
+          @Model.ErrorMessage.Value
+    </p>
 }
 
 @if(Model.NotifySuccess)
 {
-    <div id="status-message" hx-swap-oob="true" class="notification is-success">
-          <p>Message sent!</p>
-    </div>
+    <p id="status-message" hx-swap-oob="true" class="help is-success">
+        Message sent successfully!
+    </p>
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces
 {
-    public interface IGrainWithRemoteUriKey : IGrainWithStringKey
+    public interface IGrain<T> : IGrainWithStringKey
     {
     }
 }

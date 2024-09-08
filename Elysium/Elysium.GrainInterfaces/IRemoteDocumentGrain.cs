@@ -1,5 +1,6 @@
 ﻿using DotNext;
 using Elysium.GrainInterfaces.Services;
+using Elysium.Hosting.Models;
 using Newtonsoft.Json.Linq;
 using Orleans;
 using Orleans.Concurrency;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces
 {
-    public interface IRemoteDocumentGrain : IGrainWithRemoteUriKey
+    public interface IRemoteDocumentGrain : IGrain<RemoteUri>
     {
         [AlwaysInterleave]
         public Task<Result<JObject>> GetValueAsync(IHttpMessageAuthor requester, bool skipCachingFirstLayer);

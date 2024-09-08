@@ -58,9 +58,9 @@ namespace Elysium.Core.Extensions
             where TValue : JToken
         {
             if (!target.IsSuccessful) return new(target.Error);
-            while (target.Value.Count < index)
+            while (target.Value.Count <= index)
                 target.Value.Add(fillerValueFactory());
-            if (target.Value.Count == index)
+            if (target.Value.Count == index + 1)
                 target.Value[index] = defaultValueFactory();
             if (target.Value[index] is not TValue castedValue) return new(Error);
             return castedValue;

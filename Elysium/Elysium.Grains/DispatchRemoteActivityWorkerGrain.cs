@@ -49,7 +49,7 @@ namespace Elysium.Grains
             var result = await httpService.PostAsync(new HttpPostData
             {
                 JsonLdPayload = data.Payload,
-                Target = data.Target.Uri,
+                Target = data.Target,
                 Author = uriGrainFactory.GetGrain<ILocalActorWorkerGrain>(data.Sender)
             });
 

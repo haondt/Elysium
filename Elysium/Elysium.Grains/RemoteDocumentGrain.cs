@@ -3,6 +3,7 @@ using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Exceptions;
 using Elysium.Grains.Services;
+using Elysium.Hosting.Models;
 using JsonLD.Core;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -20,8 +21,7 @@ namespace Elysium.Grains
         IGrainFactory grainFactory,
         IActivityPubHttpService httpService,
         IOptions<RemoteDocumentSettings> options,
-        IJsonLdService jsonLdService,
-        IOptions<HostingSettings> hostingOptions) : Grain, IRemoteDocumentGrain
+        IJsonLdService jsonLdService) : Grain, IRemoteDocumentGrain
     {
         private readonly RemoteDocumentSettings _settings = options.Value;
         private Optional<RemoteUri> _id;
@@ -32,16 +32,18 @@ namespace Elysium.Grains
             await base.OnActivateAsync(cancellationToken);
         }
 
-        public async Task<Result<JArray>> GetExpandedValueAsync(IHttpMessageAuthor requester)
+        // TODO: I forget what skipCachingFirstLayer is for
+        // also, need to add option to use instance actor instead of requester? Or i guess the call can just inject the instance actor as the requester
+        public async Task<Result<JArray>> GetExpandedValueAsync(IHttpMessageAuthor requester, bool skipCachingFirstLayer = false)
         {
-            var state = await GetValueAsync(requester);
+            var state = await GetValueAsync(requester, skipCachingFirstLayer);
             if (!state.IsSuccessful)
                 return new(state.Error);
 
             return await jsonLdService.ExpandAsync(requester, state.Value);
         }
 
-        public async Task<Result<JObject>> GetValueAsync(IHttpMessageAuthor requester)
+        public async Task<Result<JObject>> GetValueAsync(IHttpMessageAuthor requester, bool skipCachingFirstLayer = false)
         {
             if (state.State.Value != null)
             {
@@ -71,20 +73,20 @@ namespace Elysium.Grains
         }
         private async Task<Result<JObject>> InternalGetValueAsync(IHttpMessageAuthor requester)
         {
-            if (!_id.HasValue)
-                _id = uriGrainFactory.GetIdentity(this);
+            //if (!_id.HasValue)
+            //    _id = uriGrainFactory.GetIdentity(this);
 
-            var initialObject = await httpService.GetAsync(new HttpGetData
-            {
-                Author = requester,
-                Target = _id.Value.Uri
-            });
-            if (!initialObject.IsSuccessful)
-                return initialObject;
+            //var initialObject = await httpService.GetAsync(new HttpGetData
+            //{
+            //    Author = requester,
+            //    Target = _id.Value
+            //});
+            //if (!initialObject.IsSuccessful)
+            //    return initialObject;
 
-
-            return model;
+            throw new NotImplementedException();
         }
+
 
     }
 }

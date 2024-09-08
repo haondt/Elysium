@@ -1,6 +1,7 @@
 ﻿using DotNext;
+using Elysium.ActivityPub.Models;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Server.Models;
+using Elysium.Hosting.Models;
 using Newtonsoft.Json.Linq;
 using Orleans;
 using System;
@@ -15,9 +16,8 @@ namespace Elysium.GrainInterfaces
     /// Grain representation of a local actor
     /// </summary>
     ///<remarks><see href="https://www.w3.org/TR/activitypub/#actors"/></remarks> 
-    public interface ILocalActorGrain : IGrainWithLocalUriKey
+    public interface ILocalActorGrain : IGrain<LocalUri>
     {
-        Task<Optional<Exception>> SetActorType(ActorType actorType);
         Task<Optional<Exception>> InitializeDocument();
 
 

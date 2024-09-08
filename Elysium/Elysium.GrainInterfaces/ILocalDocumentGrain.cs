@@ -1,6 +1,6 @@
 ﻿using DotNext;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Server.Models;
+using Elysium.Hosting.Models;
 using Newtonsoft.Json.Linq;
 using Orleans;
 using Orleans.Concurrency;
@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces
 {
-    public interface ILocalDocumentGrain : IGrainWithLocalUriKey
+    public interface ILocalDocumentGrain : IGrain<LocalUri>
     {
         public Task<bool> HasValueAsync(Uri requester);
         public Task<Optional<Exception>> SetValueAsync(LocalUri actor, JObject value);

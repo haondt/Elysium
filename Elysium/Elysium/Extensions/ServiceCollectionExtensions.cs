@@ -9,6 +9,7 @@ using Haondt.Web.Core.Services;
 using Haondt.Web.Services;
 using Haondt.Web.Core.Extensions;
 using Haondt.Web.Components;
+using Elysium.Server.Services;
 
 namespace Elysium.Extensions
 {
@@ -20,6 +21,7 @@ namespace Elysium.Extensions
             services.AddScoped<IEventHandler, ElysiumPublishActivityEventHandler>(); 
             services.AddSingleton<ISingletonComponentFactory, SingletonComponentFactory>();
             services.AddSingleton<ISingletonPageComponentFactory, SingletonPageComponentFactory>();
+            services.AddScoped<IEventHandler, AuthenticationEventHandler>();
             services.AddSingleton<IExceptionActionResultFactory, ElysiumExceptionActionResultFactory>();
             services.AddScoped<IComponentHandler, ElysiumComponentHandler>();
 
@@ -91,7 +93,16 @@ namespace Elysium.Extensions
                     .ReSwap("innerHTML")
                     .Build())
             });
-            services.AddScoped<IComponentDescriptor>(_ => new ComponentDescriptor<LoginModel>(new LoginModel())
+            services.AddScoped<IComponentDescriptor>(sp => new ComponentDescriptor<LoginModel>(() =>
+            {
+                var hostingService = sp.GetRequiredService<IHostingService>();
+                var host = hostingService.GetHost();
+
+                return new Result<LoginModel>(new LoginModel
+                {
+                    Host = host
+                });
+            })
             {
                 ViewPath = "~/Components/Login.cshtml",
                 ConfigureResponse = new(m => m.ConfigureHeadersAction = new HxHeaderBuilder()
@@ -104,7 +115,16 @@ namespace Elysium.Extensions
             {
                 ViewPath = "~/Components/CloseModal.cshtml"
             });
-            services.AddScoped<IComponentDescriptor>(_ => new ComponentDescriptor<RegisterModalModel>(new RegisterModalModel())
+            services.AddScoped<IComponentDescriptor>(sp => new ComponentDescriptor<RegisterModalModel>(() =>
+            {
+                var hostingService = sp.GetRequiredService<IHostingService>();
+                var host = hostingService.GetHost();
+
+                return new Result<RegisterModalModel>(new RegisterModalModel
+                {
+                    Host = host
+                });
+            })
             {
                 ViewPath = "~/Components/RegisterModal.cshtml",
                 ConfigureResponse = new(m => m.ConfigureHeadersAction = new HxHeaderBuilder()

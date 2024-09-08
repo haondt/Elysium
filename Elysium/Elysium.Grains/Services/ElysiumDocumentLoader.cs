@@ -1,4 +1,6 @@
 ﻿using Elysium.GrainInterfaces.Services;
+using Elysium.Hosting.Models;
+using Elysium.Server.Services;
 using JsonLD.Core;
 using Microsoft.Extensions.Options;
 using System;
@@ -12,21 +14,41 @@ namespace Elysium.Grains.Services
     public class ElysiumDocumentLoader(
         IDocumentResolver documentResolver,
         IHttpMessageAuthor author, 
-        IOptions<HostingSettings> hostingOptions) : DocumentLoader
+        IHostingService hostingService) : DocumentLoader
     {
         public override async Task<RemoteDocument> LoadDocumentAsync(string url)
         {
             var uri = new Uri(url);
-            if (uri.Host.Equals(hostingOptions.Value.Host))
+            if (hostingService.IsLocalHost(uri))
             {
-                var document = (await documentResolver.GetDocumentAsync(author, new LocalUri(default) { Uri = uri })).Value;
+                var document = (await documentResolver.GetDocumentAsync(author, new LocalUri { Uri = uri })).Value;
                 return new RemoteDocument(url, document);
             }
             else
             {
-                var document = (await documentResolver.GetDocumentAsync(author, new RemoteUri(default) { Uri = uri })).Value;
+                var document = (await documentResolver.GetDocumentAsync(author, new RemoteUri { Uri = uri })).Value;
                 return new RemoteDocument(url, document);
             }
         }
     }
+
+    //public class ElysiumRemoteDocumentLoader(
+    //    IDocumentResolver documentResolver,
+    //    IHostingService hostingService) : DocumentLoader
+    //{
+    //    public override async Task<RemoteDocument> LoadDocumentAsync(string url)
+    //    {
+    //        var uri = new Uri(url);
+    //        if (hostingService.IsLocalHost(uri))
+    //        {
+    //            var document = (await documentResolver.GetDocumentAsync(author, new RemoteUri { Uri = uri })).Value;
+    //            return new RemoteDocument(url, document);
+    //        }
+    //        else
+    //        {
+    //            var document = (await documentResolver.GetDocumentAsync(author, new LocalUri { Uri = uri })).Value;
+    //            return new RemoteDocument(url, document);
+    //        }
+    //    }
+    //}
 }

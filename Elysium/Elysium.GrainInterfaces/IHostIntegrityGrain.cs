@@ -1,4 +1,5 @@
-﻿using Orleans;
+﻿using Elysium.Hosting.Models;
+using Orleans;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces
 {
-    public interface IHostIntegrityGrain : IGrainWithRemoteUriKey
+    public interface IHostIntegrityGrain : IGrain<RemoteUri>
     {
         public Task VoteAgainst();
         public Task<bool> ShouldSendRequest();

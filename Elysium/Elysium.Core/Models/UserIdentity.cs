@@ -11,7 +11,7 @@ namespace Elysium.Core.Models
     {
         public required StorageKey<UserIdentity> Id { get; set; }
         public string? PasswordHash { get; set; }
-        public string? Username { get; set; }
+        public string? LocalizedUsername { get; set; }
         public required string EncryptedPrivateKey { get; set; }
         public required string PublicKey { get; set; }
         public string? NormalizedUsername { get; set; }

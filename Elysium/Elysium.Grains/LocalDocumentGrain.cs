@@ -2,6 +2,7 @@
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Services;
+using Elysium.Hosting.Models;
 using Elysium.Persistence.Services;
 using JsonLD.Core;
 using Newtonsoft.Json.Linq;
@@ -61,6 +62,16 @@ namespace Elysium.Grains
                 return new(state.Error);
 
             return await jsonLdService.ExpandAsync(_instanceActorGrain, state.Value);
+        }
+
+        public Task<Optional<Exception>> SetValueAsync(LocalUri actor, JObject value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Optional<Exception>> UpdateValueAsync(JObject value)
+        {
+            throw new NotImplementedException();
         }
     }
 }

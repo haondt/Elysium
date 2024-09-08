@@ -1,5 +1,8 @@
-﻿using Elysium.GrainInterfaces.Services;
+﻿using Elysium.Core.Models;
+using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Services;
+using Elysium.Hosting.Models;
+using Haondt.Identity.StorageKey;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
@@ -16,23 +19,15 @@ namespace Elysium.Grains.Extensions
     {
         public static IServiceCollection AddElysiumGrainServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.Configure<HostingSettings>(configuration.GetSection(nameof(HostingSettings)));
             services.Configure<HostIntegritySettings>(configuration.GetSection(nameof(HostIntegritySettings)));
             services.Configure<RemoteDocumentSettings>(configuration.GetSection(nameof(RemoteDocumentSettings)));
             services.AddScoped<IActivityPubService, ActivityPubService>();
             services.AddScoped<ITypedActorServiceFactory, TypedActorServiceFactory>();
-            services.AddSingleton<IUriGrainFactory, UriGrainFactory>();
+            services.AddSingleton<IGrainFactory<LocalUri>, LocalUriGrainFactory>();
+            services.AddSingleton<IGrainFactory<RemoteUri>, RemoteUriGrainFactory>();
+            services.AddSingleton<IGrainFactory<StorageKey<UserIdentity>>, StorageKeyGrainFactory<UserIdentity>>();
             services.AddScoped<IDocumentResolver, DocumentResolver>();
-            services.AddScoped<IActivityPubJsonNavigator, ActivityPubJsonNavigator>();
-            services.AddScoped<IHostingService, HostingService>();
-            services.AddHttpClient<IGrainHttpClient<RemoteDocumentGrain>, GrainHttpClient<RemoteDocumentGrain>>(client =>
-            {
-                client.DefaultRequestHeaders.Add("Accept", "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"");
-            }).AddPolicyHandler(HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .OrTransientHttpStatusCode()
-                .WaitAndRetryAsync(3, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt))));
-            services.AddHttpClient<IGrainHttpClient<DispatchRemoteActivityWorkerGrain>, GrainHttpClient<DispatchRemoteActivityWorkerGrain>>(client =>
+            services.AddHttpClient<IActivityPubHttpService, ActivityPubHttpService>(client =>
             {
                 client.DefaultRequestHeaders.Add("Accept", "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"");
             }).AddPolicyHandler(HttpPolicyExtensions

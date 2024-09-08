@@ -2,6 +2,8 @@
 using Elysium.Authentication.Services;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
+using Elysium.Hosting.Models;
+using Newtonsoft.Json;
 using Orleans.Concurrency;
 using System;
 using System.Collections.Generic;
@@ -17,7 +19,6 @@ namespace Elysium.Grains
         private readonly LocalUri _id;
         private Optional<byte[]> _signingKey;
         ILocalActorGrain _actorGrain;
-        private readonly IDispatchRemoteActivityGrain _dispatchGrain;
         private readonly IUserCryptoService _cryptoService;
         public LocalActorWorkerGrain(IUriGrainFactory grainFactory, IUserCryptoService cryptoService)
         {
@@ -28,18 +29,7 @@ namespace Elysium.Grains
 
         public Task IngestActivityAsync(OutgoingRemoteActivityData activity)
         {
-            var payload = JsonSerializer.Serialize(activity);
-            var recepientInbox = await recepientGrain.GetInboxUriAsync();
-            if (!recepientInbox.IsSuccessful)
-                return new(recepientInbox.Error);
-
-            var dispatchData = new DispatchRemoteActivityData
-            {
-                Payload = activity.Payload,
-                Headers = activity.Headers,
-                Target = activity.Target
-            };
-            return _dispatchGrain.Send(dispatchData);
+            throw new NotImplementedException();
         }
 
         public Task PublishEvent(IncomingRemoteActivityData activity)

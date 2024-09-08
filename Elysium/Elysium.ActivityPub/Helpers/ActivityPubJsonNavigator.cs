@@ -56,7 +56,7 @@ namespace Elysium.ActivityPub.Helpers
         }
 
 
-        public Result<(string, PublicKeyType)> GetPublicKey(JArray expanded)
+        public Result<(string PublicKey, PublicKeyType PublicKeyType)> GetPublicKey(JArray expanded)
         {
             if (expanded.Count != 1) return new(Error);
             JToken next = expanded.First();

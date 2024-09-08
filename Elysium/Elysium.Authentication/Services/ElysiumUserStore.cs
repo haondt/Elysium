@@ -38,7 +38,7 @@ namespace Elysium.Authentication.Services
 
         public Task<string?> GetUserNameAsync(UserIdentity user, CancellationToken cancellationToken)
         {
-            return Task.FromResult(user.Username);
+            return Task.FromResult(user.LocalizedUsername);
         }
 
         public Task<bool> HasPasswordAsync(UserIdentity user, CancellationToken cancellationToken)
@@ -60,7 +60,7 @@ namespace Elysium.Authentication.Services
 
         public Task SetUserNameAsync(UserIdentity user, string? userName, CancellationToken cancellationToken)
         {
-            user.Username = userName;
+            user.LocalizedUsername = userName;
             return Task.CompletedTask;
         }
     }

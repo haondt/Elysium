@@ -28,7 +28,6 @@ namespace Elysium.Authentication.Extensions
             {
                 o.User.AllowedUserNameCharacters = AuthenticationConstants.ALLOWED_USERNAME_CHARACTERS;
             });
-            services.AddScoped<IEventHandler, AuthenticationEventHandler>();
             services.AddScoped<ISessionService, SessionService>();
             services.AddScoped<ICryptoService, CryptoService>();
             services.AddScoped<IUserCryptoService, UserCryptoService>();

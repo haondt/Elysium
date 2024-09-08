@@ -15,16 +15,16 @@
                 <div class="card-content is-flex is-flex-direction-column is-align-items-center">
                     <form style="width:100%;" hx-post="/_event/LoginUser">
                         <div class="field">
-                            <div class="control">
+                            <div class="control is-flex is-align-items-center" style="gap:10px;">
                                 <input 
                                     class="input 
                                         @if(Model.DangerUsername) { <text>is-danger</text> }
                                     "
                                     type="text" 
-                                    placeholder="username" name="username" 
+                                    placeholder="username" name="localizedUsername" 
                                     autocomplete="username" 
-                                    @if(!string.IsNullOrEmpty(Model.ExistingUsername)){ <text>value=@Model.ExistingUsername</text> }
-                                />
+                                    @if(!string.IsNullOrEmpty(Model.ExistingLocalizedUsername)){ <text>value=@Model.ExistingLocalizedUsername</text> }
+                                /> <span class="tag is-medium">@@@Model.Host</span>
                             </div>
                         </div>
                         <div class="field">

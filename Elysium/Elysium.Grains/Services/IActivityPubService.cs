@@ -1,6 +1,6 @@
 ﻿using DotNext;
 using Elysium.GrainInterfaces;
-using KristofferStrube.ActivityStreams;
+using Elysium.Hosting.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -23,8 +23,8 @@ namespace Elysium.Grains.Services
         /// <param name="recepient"></param>
         /// <param name="activity"></param>
         /// <returns></returns>
-        Task<Optional<Exception>> PublishLocalActivityAsync(Uri sender, Uri recepient, JObject activity);
-        Task<Optional<Exception>> PublishRemoteActivityAsync(Uri sender, Uri recepient, JObject activity);
-        Task<Optional<Exception>> IngestRemoteActivityAsync(OutgoingRemoteActivityData data);
+        Task<Optional<Exception>> PublishLocalActivityAsync(LocalUri sender, LocalUri recepient, JObject activity);
+        Task<Optional<Exception>> PublishRemoteActivityAsync(LocalUri sender, RemoteUri recepient, JObject activity);
+        Task<Optional<Exception>> IngestRemoteActivityAsync(IncomingRemoteActivityData data);
     }
 }

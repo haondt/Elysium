@@ -22,16 +22,21 @@ namespace Elysium.Client.Services
 
         public async Task<Result<byte[]>> GetSigningKeyAsync(LocalUri id)
         {
-            var username = hostingService.GetUsernameFromLocalUri(id);
-            if (!username.IsSuccessful)
-                return new(username.Error);
+            //var username = hostingService.GetUsernameFromLocalUri(id);
+            //if (!username.IsSuccessful)
+            //    return new(username.Error);
 
-            var storageKey = UserIdentity.GetStorageKey(username.Value);
-            var encryptedPrivateKey = await elysiumStorage.Get(storageKey);
-            if (!encryptedPrivateKey.IsSuccessful)
-                return new(encryptedPrivateKey.Error);
-            var privateKey = cryptoService.DecryptPrivateKey(encryptedPrivateKey.Value.EncryptedPrivateKey);
-            return new(privateKey);
+            //var storageKey = UserIdentity.GetStorageKey(username.Value);
+            //var encryptedPrivateKey = await elysiumStorage.Get(storageKey);
+            //if (!encryptedPrivateKey.IsSuccessful)
+            //    return new(encryptedPrivateKey.Error);
+            //var privateKey = cryptoService.DecryptPrivateKey(encryptedPrivateKey.Value.EncryptedPrivateKey);
+            //return new(privateKey);
+
+            // this can just use IUserIdentityGrain for the encrypted private key lookup
+
+
+
         //var storageKey = UserIdentity.GetStorageKey(_id);
         //_userIdentity = await _storage.Get(storageKey);
         //if (!_userIdentity.IsSuccessful)

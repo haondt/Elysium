@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using System.Diagnostics.CodeAnalysis;
 using System.Collections;
+using Elysium.Server.Services;
 
 namespace Elysium.Authentication.Services
 {
@@ -27,6 +28,7 @@ namespace Elysium.Authentication.Services
         UserManager<UserIdentity> userManager,
         SignInManager<UserIdentity> signInManager,
         IComponentFactory componentFactory,
+        IHostingService hostingService,
         IUserCryptoService cryptoService) : IEventHandler
     {
         public const string REGISTER_USER_EVENT = "RegisterUser";
@@ -36,12 +38,12 @@ namespace Elysium.Authentication.Services
             if (REGISTER_USER_EVENT.Equals(eventName))
             {
                 var passwordResult = requestData.Form.GetValue<string>("password");
-                var usernameResult = requestData.Form.GetValue<string>("username");
-                if (!usernameResult.IsSuccessful || !passwordResult.IsSuccessful)
+                var localizedUsernameResult = requestData.Form.GetValue<string>("localizedUsername");
+                if (!localizedUsernameResult.IsSuccessful || !passwordResult.IsSuccessful)
                 {
-                    var model = new RegisterModalModel();
-                    if (usernameResult.IsSuccessful)
-                        model.ExistingUsername = usernameResult.Value;
+                    var model = new RegisterModalModel { Host = hostingService.GetHost() };
+                    if (localizedUsernameResult.IsSuccessful)
+                        model.ExistingLocalizedUsername = localizedUsernameResult.Value;
                     else
                     {
                         model.DangerUsername = true;
@@ -56,10 +58,11 @@ namespace Elysium.Authentication.Services
                 }
 
                 var (publicKey, encryptedPrivateKey) = cryptoService.GenerateKeyPair();
+                var username = hostingService.GetUsernameFromLocalizedUsername(localizedUsernameResult.Value);
                 var user = new UserIdentity
                 {
-                    Id = UserIdentity.GetStorageKey(usernameResult.Value),
-                    Username = usernameResult.Value,
+                    Id = UserIdentity.GetStorageKey(username),
+                    LocalizedUsername = localizedUsernameResult.Value,
                     PublicKey = publicKey,
                     EncryptedPrivateKey = encryptedPrivateKey
                 };
@@ -68,7 +71,8 @@ namespace Elysium.Authentication.Services
                 if (!result.Succeeded)
                     return await GetRegisterComponentAsync(new RegisterModalModel
                     {
-                        ExistingUsername = usernameResult.Value,
+                        ExistingLocalizedUsername = localizedUsernameResult.Value,
+                        Host = hostingService.GetHost(),
                         Errors = result.Errors.Select(e => $"{e.Description}").ToList()
                     });
 
@@ -79,12 +83,12 @@ namespace Elysium.Authentication.Services
             if (LOGIN_USER_EVENT.Equals(eventName))
             {
                 var passwordResult = requestData.Form.GetValue<string>("password");
-                var usernameResult = requestData.Form.GetValue<string>("username");
-                if (!usernameResult.IsSuccessful || !passwordResult.IsSuccessful)
+                var localizedUsernameResult = requestData.Form.GetValue<string>("localizedUsername");
+                if (!localizedUsernameResult.IsSuccessful || !passwordResult.IsSuccessful)
                 {
-                    var model = new LoginModel();
-                    if (usernameResult.IsSuccessful)
-                        model.ExistingUsername = usernameResult.Value;
+                    var model = new LoginModel { Host = hostingService.GetHost() };
+                    if (localizedUsernameResult.IsSuccessful)
+                        model.ExistingLocalizedUsername = localizedUsernameResult.Value;
                     else
                     {
                         model.DangerUsername = true;
@@ -99,14 +103,15 @@ namespace Elysium.Authentication.Services
                 }
 
                 var result = await signInManager.PasswordSignInAsync(
-                    usernameResult.Value,
+                    localizedUsernameResult.Value,
                     passwordResult.Value,
                     isPersistent: true, lockoutOnFailure: false);
 
                 if (!result.Succeeded)
                     return await GetLoginComponentAsync(new LoginModel
                     { 
-                        ExistingUsername = usernameResult.Value,
+                        Host = hostingService.GetHost(),
+                        ExistingLocalizedUsername = localizedUsernameResult.Value,
                         Errors = ["Incorrect username or password."]
                     });
 

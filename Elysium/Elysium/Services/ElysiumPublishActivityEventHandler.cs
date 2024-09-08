@@ -3,6 +3,7 @@ using Elysium.ActivityPub;
 using Elysium.Authentication.Services;
 using Elysium.Client.Services;
 using Elysium.Components.Components;
+using Elysium.Server.Services;
 using Haondt.Web.Core.Components;
 using Haondt.Web.Core.Extensions;
 using Haondt.Web.Core.Http;
@@ -12,6 +13,7 @@ namespace Elysium.Services
 {
     public class ElysiumPublishActivityEventHandler(
         IActivityPubClientService activityPubService,
+        IHostingService hostingService,
         ISessionService sessionService,
         IComponentFactory componentFactory) : IEventHandler
     {
@@ -35,14 +37,17 @@ namespace Elysium.Services
                 var recepientResult = requestData.Form.GetValue<string>("recepient");
                 if (!recepientResult.IsSuccessful)
                     return await GetMessageErrorComponentAsync(recepientResult.Error.Message);
+                var recepientUri = await hostingService.GetUriForUsernameAsync(recepientResult.Value);
+                if (!recepientUri.IsSuccessful)
+                    return await GetMessageErrorComponentAsync(recepientUri.Error.Message);
 
-                var acitivityObjectDetails = new MessageDetails
+                var actiivityObjectDetails = new MessageDetails
                 {
                     Text = messageResult.Value,
-                    Recepient = new Uri(recepientResult.Value)
+                    Recepient = recepientUri.Value
                 };
 
-                var activityObject = ActivityCompositor.Composit(acitivityObjectDetails);
+                var activityObject = ActivityCompositor.Composit(actiivityObjectDetails);
                 if (!activityObject.IsSuccessful)
                 {
                     return await GetMessageErrorComponentAsync(activityObject.Error.Message);

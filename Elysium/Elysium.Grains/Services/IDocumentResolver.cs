@@ -1,5 +1,6 @@
 ﻿using DotNext;
 using Elysium.GrainInterfaces.Services;
+using Elysium.Hosting.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace Elysium.Grains.Services
     public interface IDocumentResolver
     {
         Task<Result<JObject>> GetDocumentAsync(IHttpMessageAuthor requester, RemoteUri uri);
-        Task<Result<JObject>> GetDocumentAsync(Uri requester, LocalUri uri);
+        Task<Result<JObject>> GetDocumentAsync(IHttpMessageAuthor requester, LocalUri uri);
+        //Task<Result<JObject>> GetDocumentAsync(RemoteUri requester, LocalUri uri);
     }
 }

@@ -1,9 +1,10 @@
 ﻿using DotNext;
+using Elysium.ActivityPub.Helpers;
+using Elysium.ActivityPub.Models;
 using Elysium.Authentication.Services;
 using Elysium.GrainInterfaces;
 using Elysium.Grains.Exceptions;
 using Elysium.Grains.Services;
-using Elysium.GrainInterfaces.Extensions;
 using Microsoft.Extensions.Caching.Memory;
 using Orleans;
 using Orleans.Runtime;
@@ -23,7 +24,6 @@ namespace Elysium.Grains
         private readonly IGrainFactory _grainFactory;
         private readonly IActivityPubService _activityPubService;
         private readonly IUserCryptoService _cryptoService;
-        private readonly IActivityPubJsonNavigator _jsonNavigator;
         private readonly IRemoteDocumentGrain _actorStateGrain;
         private readonly Uri _id;
         private byte[]? _publicKey;
@@ -31,64 +31,66 @@ namespace Elysium.Grains
         public RemoteActorGrain(
             IGrainFactory grainFactory,
             IActivityPubService activityPubService,
-            IUserCryptoService cryptoService,
-            IActivityPubJsonNavigator jsonNavigator)
+            IUserCryptoService cryptoService)
         {
             _id = new Uri(this.GetPrimaryKeyString());
             _grainFactory = grainFactory;
             _activityPubService = activityPubService;
             _cryptoService = cryptoService;
-            _jsonNavigator = jsonNavigator;
             _actorStateGrain = grainFactory.GetGrain<IRemoteDocumentGrain>(_id.ToString());
         }
 
         private async Task<Result<byte[]>> InternalGetPublicKeyAsync()
         {
-            var actorState = await _actorStateGrain.GetExpandedValueAsync();
-            if (!actorState.IsSuccessful)
-                return new(actorState.Error);
+            //var actorState = await _actorStateGrain.GetExpandedValueAsync();
+            //if (!actorState.IsSuccessful)
+            //    return new(actorState.Error);
 
-            var result = _jsonNavigator.GetPublicKey(actorState.Value);
-            if (!result.IsSuccessful)
-                return new(result.Error);
+            //var result = new ActivityPubJsonNavigator().GetPublicKey(actorState.Value);
+            //if (!result.IsSuccessful)
+            //    return new(result.Error);
 
-            if (result.Value.PublicKeyType == PublicKeyType.Pem)
-                return _cryptoService.DecodePublicKeyFromPemX509( result.Value.PublicKey);
-            if (result.Value.PublicKeyType == PublicKeyType.Multibase)
-                return _cryptoService.DecodeMultibaseString( result.Value.PublicKey);
-            return new(new ActivityPubException($"Unable to decode public key {result.Value.PublicKey}"));
+            //if (result.Value.PublicKeyType == PublicKeyType.Pem)
+            //    return _cryptoService.DecodePublicKeyFromPemX509( result.Value.PublicKey);
+            //if (result.Value.PublicKeyType == PublicKeyType.Multibase)
+            //    return _cryptoService.DecodeMultibaseString( result.Value.PublicKey);
+            //return new(new ActivityPubException($"Unable to decode public key {result.Value.PublicKey}"));
+            throw new NotImplementedException();
         }
 
         public async Task<Result<byte[]>> GetPublicKeyAsync()
         {
-            if (_publicKey != null)
-                return _publicKey;
+            //if (_publicKey != null)
+            //    return _publicKey;
 
-            var actorState = await _actorStateGrain.GetExpandedValueAsync();
-            if (!actorState.IsSuccessful)
-                return new(actorState.Error);
+            //var actorState = await _actorStateGrain.GetExpandedValueAsync();
+            //if (!actorState.IsSuccessful)
+            //    return new(actorState.Error);
 
-            var result = await InternalGetPublicKeyAsync();
-            if (!result.IsSuccessful)
-                return new(result.Error);
+            //var result = await InternalGetPublicKeyAsync();
+            //if (!result.IsSuccessful)
+            //    return new(result.Error);
 
-            _publicKey = result.Value;
-            return _publicKey;
+            //_publicKey = result.Value;
+            //return _publicKey;
+            throw new NotImplementedException();
         }
 
         public async Task<Result<Uri>> GetInboxUriAsync()
         {
             // todo: proxy this to instance grain?
-            var actorState = await _actorStateGrain.GetExpandedValueAsync();
-            if (!actorState.IsSuccessful)
-                return new(actorState.Error);
+            //var actorState = await _actorStateGrain.GetExpandedValueAsync();
+            //if (!actorState.IsSuccessful)
+            //    return new(actorState.Error);
 
-            return _jsonNavigator.GetInbox(actorState.Value);
+            //return _jsonNavigator.GetInbox(actorState.Value);
+            throw new NotImplementedException();
         }
 
         public Task PublishEvent(IncomingRemoteActivityData activity)
         {
-            _activityPubService.PublishLocalActivityAsync
+            //_activityPubService.PublishLocalActivityAsync
+            throw new NotImplementedException();
         }
     }
 }

@@ -13,6 +13,6 @@ namespace Elysium.Grains.Services
         public Task<Optional<Exception>> PostAsync(HttpPostData data);
         public Task<Result<JObject>> GetAsync(HttpGetData data);
 
-        public Task<Result<bool>> VerifySignature(idk bro);
+        //public Task<Result<bool>> VerifySignature(idk bro);
     }
 }
