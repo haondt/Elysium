@@ -1,14 +1,14 @@
 ﻿using Elysium.GrainInterfaces;
-using Elysium.GrainInterfaces.Services;
 using Elysium.Hosting.Models;
 using Microsoft.Extensions.Options;
+using Orleans;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains.Services
+namespace Elysium.GrainInterfaces.Services
 {
     public class LocalUriGrainFactory(IGrainFactory grainFactory) : IGrainFactory<LocalUri>
     {

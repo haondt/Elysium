@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces
 {
+    [GenerateSerializer, Immutable]
     public class DispatchRemoteActivityData 
     {
         public required string Payload { get; set; }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.Hosting.Models
 {
+    [GenerateSerializer, Immutable]
     public readonly record struct LocalUri(Uri Uri)
     {
         public Uri Uri { get; init; } = Uri;

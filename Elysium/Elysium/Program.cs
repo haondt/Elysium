@@ -8,6 +8,7 @@ using Elysium.Extensions;
 using Haondt.Web.Core.Middleware;
 using Elysium.Middlewares;
 using Elysium.Client.Extensions;
+using Orleans.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,14 @@ builder.Services
 
 
 builder.Services.AddMvc();
+
+builder.Services.AddOrleansClient(client => client
+    .UseLocalhostClustering()
+    .Configure<ClusterOptions>(options =>
+    {
+        options.ClusterId = "default";
+        options.ServiceId = "elysium";
+    }));
 
 var app = builder.Build();
 

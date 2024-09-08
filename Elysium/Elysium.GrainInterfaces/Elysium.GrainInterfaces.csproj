@@ -15,6 +15,7 @@
     <PackageReference Include="DotNext" Version="5.13.0" />
     <PackageReference Include="json-ld.net" Version="1.0.7-alpha-20240907194406" />
     <PackageReference Include="Microsoft.Orleans.Core.Abstractions" Version="8.2.0" />
+    <PackageReference Include="Microsoft.Orleans.Sdk" Version="8.2.0" />
   </ItemGroup>
 
   <ItemGroup>

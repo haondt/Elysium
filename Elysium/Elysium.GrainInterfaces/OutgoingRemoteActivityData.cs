@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces
 {
+    [GenerateSerializer, Immutable]
     public class OutgoingRemoteActivityData
     {
         public required string Payload { get; set; }

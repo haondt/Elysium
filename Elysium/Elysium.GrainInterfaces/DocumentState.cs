@@ -10,8 +10,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces
 {
-    [Immutable]
-    [Serializable]
+    [GenerateSerializer, Immutable]
     public class DocumentState
     {
         public JObject? Value { get; set; }

@@ -17,13 +17,13 @@ namespace Elysium.Client.Services
 {
     public class ActivityPubClientService(
         IHostingService hostingService,
-        IGrainFactory<StorageKey<UserIdentity>> userIdentityGrainFactory,
+        IGrainFactory<StorageKey> userIdentityGrainFactory,
         IGrainFactory<LocalUri> grainFactory) : IActivityPubClientService
     {
         public async Task<Result<(LocalUri ActivityUri, LocalUri ObjectUri)>> PublishActivityAsync(StorageKey<UserIdentity> author, ActivityType type, JArray @object)
         {
-            var userIdentityGrain = userIdentityGrainFactory.GetGrain<IStorageKeyGrain<UserIdentity>>(author);
-            var userIdentity = await userIdentityGrain.GetIdentityAsync();
+            var userIdentityGrain = userIdentityGrainFactory.GetGrain<IUserIdentityStorageKeyGrain>(author);
+            var userIdentity = await userIdentityGrain.GetIdentityAsync<UserIdentity>();
             if (!userIdentity.IsSuccessful)
                 return new(userIdentity.Error);
 

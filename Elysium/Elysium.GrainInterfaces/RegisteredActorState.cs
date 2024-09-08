@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces
 {
+    [GenerateSerializer]
     public class RegisteredActorState
     {
     }

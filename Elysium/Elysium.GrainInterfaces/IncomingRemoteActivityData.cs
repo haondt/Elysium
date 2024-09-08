@@ -1,5 +1,6 @@
 ﻿namespace Elysium.GrainInterfaces
 {
+    [GenerateSerializer]
     public class IncomingRemoteActivityData
     {
         public required string Payload { get; set; }
