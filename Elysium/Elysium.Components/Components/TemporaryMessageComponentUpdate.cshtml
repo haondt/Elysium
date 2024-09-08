@@ -5,7 +5,7 @@
     @foreach(var message in Model.AddMessages)
     {
         <div hx-swap-oob="beforeend:#inbox" >
-            <article class="message" >
+            <article class="message">
                 <p class="has-text-weight-bold">@message.Author</p>
                 <div class="message-body">
                   <p class="has-text-weight-light">@message.TimeStamp</p>
@@ -18,14 +18,38 @@
 
 @if(Model.ErrorMessage.HasValue)
 {
-    <p id="status-message" hx-swap-oob="true" class="help is-danger">
+    <p id="status-message" hx-swap-oob="true" class="help is-danger" 
+        _="
+            on load
+                add .created to me
+                then wait 5s
+                then remove .created from me
+                then wait for transitionend
+                then add .is-hidden to me
+            end
+            on deleted
+                remove me
+            end
+        ">
           @Model.ErrorMessage.Value
     </p>
 }
 
 @if(Model.NotifySuccess)
 {
-    <p id="status-message" hx-swap-oob="true" class="help is-success">
+    <p id="status-message" hx-swap-oob="true" class="help is-success"
+        _="
+            on load
+                add .created to me
+                then wait 5s
+                then remove .created from me
+                then wait for transitionend
+                then add .is-hidden to me
+            end
+            on deleted
+                remove me
+            end
+        ">
         Message sent successfully!
     </p>
 }
