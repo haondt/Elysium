@@ -41,13 +41,13 @@ namespace Elysium.Services
                 if (!recepientUri.IsSuccessful)
                     return await GetMessageErrorComponentAsync(recepientUri.Error.Message);
 
-                var actiivityObjectDetails = new MessageDetails
+                var activityObjectDetails = new MessageDetails
                 {
                     Text = messageResult.Value,
                     Recepient = recepientUri.Value
                 };
 
-                var activityObject = ActivityCompositor.Composit(actiivityObjectDetails);
+                var activityObject = ActivityCompositor.Composit(activityObjectDetails);
                 if (!activityObject.IsSuccessful)
                 {
                     return await GetMessageErrorComponentAsync(activityObject.Error.Message);
