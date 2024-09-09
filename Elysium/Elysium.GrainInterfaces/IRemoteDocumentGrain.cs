@@ -1,6 +1,7 @@
-﻿using DotNext;
-using Elysium.GrainInterfaces.Services;
+﻿using Elysium.GrainInterfaces.Services;
 using Elysium.Hosting.Models;
+using Haondt.Core.Models;
+using Haondt.Web.Core.Reasons;
 using Newtonsoft.Json.Linq;
 using Orleans;
 using Orleans.Concurrency;
@@ -15,7 +16,7 @@ namespace Elysium.GrainInterfaces
     public interface IRemoteDocumentGrain : IGrain<RemoteUri>
     {
         [AlwaysInterleave]
-        public Task<Result<JObject>> GetValueAsync(IHttpMessageAuthor requester, bool skipCachingFirstLayer);
-        public Task<Result<JArray>> GetExpandedValueAsync(IHttpMessageAuthor requester, bool skipCachineFirstLayer);
+        public Task<Result<JObject, WebReason>> GetValueAsync(IHttpMessageAuthor requester, bool skipCachingFirstLayer);
+        public Task<Result<JArray, WebReason>> GetExpandedValueAsync(IHttpMessageAuthor requester, bool skipCachineFirstLayer);
     }
 }

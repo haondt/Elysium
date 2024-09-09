@@ -1,6 +1,7 @@
-﻿using DotNext;
-using Elysium.Core.Models;
+﻿using Elysium.Core.Models;
+using Haondt.Core.Models;
 using Haondt.Identity.StorageKey;
+using Haondt.Persistence.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace Elysium.GrainInterfaces
 {
     public interface IStorageKeyGrain<T> : IGrain<StorageKey<T>>
     {
-        public Task<Result<T>> GetAsync();
+        public Task<Result<T, StorageResultReason>> GetAsync();
     }
 
     //public interface IUserIdentityStorageKeyGrain : IStorageKeyGrain<UserIdentity> { }

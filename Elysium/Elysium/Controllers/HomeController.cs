@@ -19,14 +19,14 @@ namespace Elysium.Controllers
         public async Task<IActionResult> Home()
         {
             var result = await pageFactory.GetComponent<HomeLayoutModel>();
-            return result.Value.CreateView(this);
+            return result.CreateView(this);
         } 
 
         [HttpGet("messages")]
         public async Task<IActionResult> Messages()
         {
             var result = await pageFactory.GetComponent<TemporaryMessageComponentLayoutModel>();
-            return result.Value.CreateView(this);
+            return result.CreateView(this);
         } 
     }
 }

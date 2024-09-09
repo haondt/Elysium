@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.Hosting.Models;
+﻿using Elysium.Hosting.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -11,8 +10,8 @@ namespace Elysium.GrainInterfaces.Services
 {
     public interface ITypedActorService
     {
-        public Task<Result<byte[]>> GetSigningKeyAsync(LocalUri uri);
-        public Task<Result<byte[]>> GetPublicKeyAsync(LocalUri uri);
-        public Task<Result<JObject>> GenerateIdentityDocumentAsync(LocalUri uri);
+        public Task<byte[]> GetSigningKeyAsync(LocalUri uri);
+        public Task<byte[]> GetPublicKeyAsync(LocalUri uri);
+        public Task<JObject> GenerateIdentityDocumentAsync(LocalUri uri);
     }
 }

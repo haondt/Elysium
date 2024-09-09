@@ -14,22 +14,16 @@ namespace Elysium.Authentication.Services
     {
         public async Task<IdentityResult> CreateAsync(T user, CancellationToken cancellationToken)
         {
-            var getUser = await storage.ContainsKey(user.Id);
-            if (!getUser.IsSuccessful)
-                return IdentityResult.Failed(new IdentityError { Code = "0", Description = "Could not check if user exists" });
-            if (getUser.Value)
+            var hasUser = await storage.ContainsKey(user.Id);
+            if (hasUser)
                 return IdentityResult.Failed(new IdentityError { Code = "0", Description = "User already exists" });
-            var createUser = await storage.Set(user.Id, user);
-            if (createUser.HasValue)
-                return IdentityResult.Failed(new IdentityError { Code = "0", Description = createUser.Value.ToString() });
+            await storage.Set(user.Id, user);
             return IdentityResult.Success;
         }
 
         public async Task<IdentityResult> DeleteAsync(T user, CancellationToken cancellationToken)
         {
-            var result = await storage.Delete(user.Id);
-            if(result.HasValue)
-                return IdentityResult.Failed(new IdentityError { Code = "0", Description = result.Value.ToString() });
+            _ = await storage.Delete(user.Id);
             return IdentityResult.Success;
         }
 
@@ -49,14 +43,10 @@ namespace Elysium.Authentication.Services
 
         public async Task<IdentityResult> UpdateAsync(T user, CancellationToken cancellationToken)
         {
-            var getUser = await storage.ContainsKey(user.Id);
-            if (!getUser.IsSuccessful)
-                return IdentityResult.Failed(new IdentityError { Code = "0", Description = "Could not check if user exists" });
-            if (!getUser.Value)
+            var hasUser = await storage.ContainsKey(user.Id);
+            if (!hasUser)
                 return IdentityResult.Failed(new IdentityError { Code = "0", Description = "User does not exist" });
-            var setUser = await storage.Set(user.Id, user);
-            if (setUser.HasValue)
-                return IdentityResult.Failed(new IdentityError { Code = "0", Description = setUser.Value.ToString() });
+            await storage.Set(user.Id, user);
             return IdentityResult.Success;
         }
     }

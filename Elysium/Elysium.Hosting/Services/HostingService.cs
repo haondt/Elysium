@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.Authentication.Constants;
+﻿using Elysium.Authentication.Constants;
 using Elysium.Core.Models;
 using Elysium.Hosting.Models;
 using Elysium.Persistence.Services;
@@ -43,26 +42,15 @@ namespace Elysium.Hosting.Services
         //    return new(remaining);
         //}
 
-        public async Task<Result<Uri>> GetUriForUsernameAsync(string username)
+        public async Task<Uri> GetUriForUsernameAsync(string username)
         {
             if (username.Count(c => c == '@') != 1)
-                return new(new InvalidOperationException("unable to parse username"));
+                throw new InvalidOperationException("unable to parse username");
             var host = username.Split('@')[^1];
             var partialUri = new UriBuilder { Host = host, Scheme = Uri.UriSchemeHttps }.Uri;
             if (IsLocalHost(partialUri))
-            {
-                var result = GetUriForLocalUsername(username);
-                if (result.IsSuccessful)
-                    return result.Value.Uri;
-                return new(result.Error);
-            }
-            else
-            {
-                var result = await GetUriForRemoteUsernameAsync(username);
-                if (result.IsSuccessful)
-                    return result.Value.Uri;
-                return new(result.Error);
-            }
+                return GetUriForLocalUsername(username).Uri;
+            return (await GetUriForRemoteUsernameAsync(username)).Uri;
         }
 
         // TODO: move to IActivityPubClientService
@@ -74,15 +62,13 @@ namespace Elysium.Hosting.Services
         //    return new($"{localizedUsername.Value}@{_host}");
         //}
 
-        public Result<LocalUri> GetUriForLocalUsername(string username)
+        public LocalUri GetUriForLocalUsername(string username)
         {
-            var localizedUsername = GetLocalizedUsernameFromUsername(username);
-            if (!localizedUsername.IsSuccessful)
-                return new(localizedUsername.Error);
+            _ = GetLocalizedUsernameFromUsername(username); // validation
             return GetUriForLocalizedUsername(username);
         }
 
-        public Result<LocalUri> GetUriForLocalizedUsername(string localizedUsername)
+        public LocalUri GetUriForLocalizedUsername(string localizedUsername)
         {
             return new LocalUri
             {
@@ -94,7 +80,7 @@ namespace Elysium.Hosting.Services
                 }.Uri
             };
         }
-        public Task<Result<RemoteUri>> GetUriForRemoteUsernameAsync(string username)
+        public Task<RemoteUri> GetUriForRemoteUsernameAsync(string username)
         {
             //if (username.Count(c => c == '@') != 1)
             //    return new(new InvalidOperationException("unable to parse username as a remote user"));
@@ -113,12 +99,10 @@ namespace Elysium.Hosting.Services
 
         }
 
-        public Result<LocalUri> GetLocalUserScopedUri(string username, string next)
+        public LocalUri GetLocalUserScopedUri(string username, string next)
         {
             var userUri = GetUriForLocalUsername(username);
-            if (!userUri.IsSuccessful)
-                return userUri;
-            return GetLocalUserScopedUri(userUri.Value, next);
+            return GetLocalUserScopedUri(userUri, next);
         }
 
         public LocalUri GetLocalUserScopedUri(LocalUri userUri, string next)
@@ -132,18 +116,15 @@ namespace Elysium.Hosting.Services
             return $"{username}@{_host}";
         }
 
-        public Result<string> GetLocalizedUsernameFromUsername(string username)
+        public string GetLocalizedUsernameFromUsername(string username)
         {
             var pattern = $"^([{AuthenticationConstants.ALLOWED_USERNAME_CHARACTERS.Replace("]", @"\]")}]+)@{Regex.Escape(_host)}$";
             var match = Regex.Match(username, pattern);
             if (!match.Success)
-                return new(new InvalidOperationException("unable to parse username as a local user"));
-            return new(match.Groups[1].Value);
+                throw new InvalidOperationException("unable to parse username as a local user");
+            return match.Groups[1].Value;
         }
 
-        public string GetHost()
-        {
-            return _host;
-        }
+        public string Host => _host;
     }
 }

@@ -1,9 +1,11 @@
-﻿using DotNext;
-using Elysium.GrainInterfaces;
+﻿using Elysium.GrainInterfaces;
+using Elysium.GrainInterfaces.Reasons;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Services;
 using Elysium.Hosting.Models;
 using Elysium.Persistence.Services;
+using Haondt.Core.Models;
+using Haondt.Persistence.Services;
 using JsonLD.Core;
 using Newtonsoft.Json.Linq;
 using Orleans.Concurrency;
@@ -20,7 +22,7 @@ namespace Elysium.Grains
         IGrainFactory grainFactory
         ) : Grain, ILocalDocumentGrain
     {
-        IInstanceActorAuthorGrain _instanceActorGrain = grainFactory.GetGrain<IInstanceActorAuthorGrain>(Guid.Empty);
+        private readonly IInstanceActorAuthorGrain _instanceActorGrain = grainFactory.GetGrain<IInstanceActorAuthorGrain>(Guid.Empty);
 
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
@@ -28,10 +30,10 @@ namespace Elysium.Grains
             await base.OnActivateAsync(cancellationToken);
         }
 
-        public async Task<Optional<Exception>> InitializeValueAsync(LocalUri owner, JObject value)
+        public async Task InitializeValueAsync(LocalUri owner, JObject value)
         {
             if (state.State.Owner != null)
-                return new(new InvalidOperationException("state is already initialized"));
+                throw new InvalidOperationException("state is already initialized");
 
             state.State = new DocumentState
             {
@@ -40,14 +42,14 @@ namespace Elysium.Grains
                 UpdatedOnUtc = DateTime.UtcNow
             };
             await state.WriteStateAsync();
-            return new();
         }
 
-        public Task<Result<JObject>> GetValueAsync(Uri requester)
+        // TODO: permissions
+        public Task<Result<JObject, DocumentReason>> GetValueAsync(Uri requester)
         {
             if (state.State.Value == null)
-                return Task.FromResult<Result<JObject>>(new(new InvalidOperationException("State does not yet exist")));
-            return Task.FromResult<Result<JObject>>(new(state.State.Value));
+                throw new InvalidOperationException("State does not yet exist");
+            return Task.FromResult<Result<JObject, DocumentReason>>(new(state.State.Value));
         }
 
         public Task<bool> HasValueAsync(Uri requester)
@@ -55,21 +57,21 @@ namespace Elysium.Grains
             return Task.FromResult(state.State.Value != null);
         }
 
-        public async Task<Result<JArray>> GetExpandedValueAsync(Uri requester)
+        public async Task<Result<JArray, DocumentReason>> GetExpandedValueAsync(Uri requester)
         {
             var state = await GetValueAsync(requester);
             if (!state.IsSuccessful)
-                return new(state.Error);
+                return new(state.Reason);
 
-            return await jsonLdService.ExpandAsync(_instanceActorGrain, state.Value);
+            return new(await jsonLdService.ExpandAsync(_instanceActorGrain, state.Value));
         }
 
-        public Task<Optional<Exception>> SetValueAsync(LocalUri actor, JObject value)
+        public Task<Result<DocumentReason>> SetValueAsync(LocalUri actor, JObject value)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Optional<Exception>> UpdateValueAsync(JObject value)
+        public Task<Result<DocumentReason>> UpdateValueAsync(JObject value)
         {
             throw new NotImplementedException();
         }

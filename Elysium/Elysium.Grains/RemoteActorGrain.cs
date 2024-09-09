@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.ActivityPub.Helpers;
+﻿using Elysium.ActivityPub.Helpers;
 using Elysium.ActivityPub.Models;
 using Elysium.Authentication.Services;
 using Elysium.GrainInterfaces;
@@ -39,7 +38,7 @@ namespace Elysium.Grains
             _actorStateGrain = grainFactory.GetGrain<IRemoteDocumentGrain>(_id);
         }
 
-        private async Task<Result<byte[]>> InternalGetPublicKeyAsync()
+        private async Task<byte[]> InternalGetPublicKeyAsync()
         {
             //var actorState = await _actorStateGrain.GetExpandedValueAsync();
             //if (!actorState.IsSuccessful)
@@ -57,7 +56,7 @@ namespace Elysium.Grains
             throw new NotImplementedException();
         }
 
-        public async Task<Result<byte[]>> GetPublicKeyAsync()
+        public async Task<byte[]> GetPublicKeyAsync()
         {
             //if (_publicKey != null)
             //    return _publicKey;
@@ -75,7 +74,7 @@ namespace Elysium.Grains
             throw new NotImplementedException();
         }
 
-        public async Task<Result<Uri>> GetInboxUriAsync()
+        public async Task<Uri> GetInboxUriAsync()
         {
             // todo: proxy this to instance grain?
             //var actorState = await _actorStateGrain.GetExpandedValueAsync();

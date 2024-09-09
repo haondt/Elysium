@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.ActivityPub.Models;
+﻿using Elysium.ActivityPub.Models;
 using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
@@ -20,22 +19,16 @@ namespace Elysium.Client.Services
         IGrainFactory<StorageKey<UserIdentity>> userIdentityGrainFactory,
         IGrainFactory<LocalUri> grainFactory) : IActivityPubClientService
     {
-        public async Task<Result<(LocalUri ActivityUri, LocalUri ObjectUri)>> PublishActivityAsync(StorageKey<UserIdentity> author, ActivityType type, JArray @object)
+        public async Task<(LocalUri ActivityUri, LocalUri ObjectUri)> PublishActivityAsync(StorageKey<UserIdentity> author, ActivityType type, JArray @object)
         {
             var userIdentityGrain = userIdentityGrainFactory.GetGrain<IStorageKeyGrain<UserIdentity>>(author);
             var userIdentity = await userIdentityGrain.GetAsync();
             if (!userIdentity.IsSuccessful)
-                return new(userIdentity.Error);
+                throw new UnauthorizedAccessException($"Unable to retrieve user identity {author}");
 
-            var localizedUsername = userIdentity.Value.LocalizedUsername;
-            if (string.IsNullOrEmpty(localizedUsername))
-                return new(new InvalidOperationException("User does not have a localized username"));
-
+            var localizedUsername = userIdentity.Value.LocalizedUsername ?? author.Parts[^1].Value;
             var userUri = hostingService.GetUriForLocalizedUsername(localizedUsername);
-            if (!userUri.IsSuccessful)
-                return new(userUri.Error);
-
-            var userGrain = grainFactory.GetGrain<ILocalActorGrain>(userUri.Value);
+            var userGrain = grainFactory.GetGrain<ILocalActorGrain>(userUri);
 
             return await userGrain.PublishActivity(type, @object);
         }

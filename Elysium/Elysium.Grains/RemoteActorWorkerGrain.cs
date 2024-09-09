@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.GrainInterfaces;
+﻿using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Hosting.Models;
 using Newtonsoft.Json;
@@ -16,7 +15,6 @@ namespace Elysium.Grains
     public class RemoteActorWorkerGrain : Grain, IRemoteActorWorkerGrain
     {
         private readonly RemoteUri _id;
-        private readonly Optional<byte[]> _signingKey;
         private readonly IRemoteActorGrain _actorGrain;
         private readonly IDispatchRemoteActivityGrain _dispatchGrain;
 

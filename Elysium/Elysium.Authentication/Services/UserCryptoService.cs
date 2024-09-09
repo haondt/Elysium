@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Microsoft.AspNetCore.DataProtection;
+﻿using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
 using SimpleBase;
 using System.Security.Cryptography;
@@ -55,48 +54,34 @@ namespace Elysium.Authentication.Services
         //}
 
         // https://www.w3.org/TR/controller-document/#multibase-0
-        public Result<byte[]> DecodeMultibaseString(string input)
+        public byte[] DecodeMultibaseString(string input)
         {
-            try
-            {
-                if (input.Length < 1)
-                    return new(new InvalidOperationException("input must be at least 1 char long"));
+            if (input.Length < 1)
+                throw new InvalidOperationException("input must be at least 1 char long");
 
-                if (input[0] == 'u')
+            if (input[0] == 'u')
+            {
+                // base-64-url-no-pad
+                input = input.Substring(1).Replace('-', '+').Replace('_', '/');
+                switch(input.Length % 4)
                 {
-                    // base-64-url-no-pad
-                    input = input.Substring(1).Replace('-', '+').Replace('_', '/');
-                    switch(input.Length % 4)
-                    {
-                        case 2: input += "=="; break;
-                        case 3: input += "="; break;
-                    }
-                    return Convert.FromBase64String(input);
+                    case 2: input += "=="; break;
+                    case 3: input += "="; break;
                 }
+                return Convert.FromBase64String(input);
+            }
 
-                // base-58-btc
-                if (input[0] == 'z')
-                    return Base58.Bitcoin.Decode(input.AsSpan(1));
-            }
-            catch (Exception ex)
-            {
-                return new(ex);
-            }
-            return new(new InvalidOperationException("input in an unrecognized format"));
+            // base-58-btc
+            if (input[0] == 'z')
+                return Base58.Bitcoin.Decode(input.AsSpan(1));
+            throw new InvalidOperationException("input in an unrecognized format");
         }
 
-        public Result<byte[]> DecodePublicKeyFromPemX509(string publicKey)
+        public byte[] DecodePublicKeyFromPemX509(string publicKey)
         {
-            try
-            {
-                using var rsa = RSA.Create();
-                rsa.ImportSubjectPublicKeyInfo(Convert.FromBase64String(publicKey), out _);
-                return rsa.ExportRSAPublicKey();
-            }
-            catch (Exception ex)
-            {
-                return new(ex);
-            }
+            using var rsa = RSA.Create();
+            rsa.ImportSubjectPublicKeyInfo(Convert.FromBase64String(publicKey), out _);
+            return rsa.ExportRSAPublicKey();
         }
 
         //public string EncodeMultibaseString(byte[] bytes)

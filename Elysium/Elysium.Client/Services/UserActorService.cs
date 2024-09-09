@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.Authentication.Services;
+﻿using Elysium.Authentication.Services;
 using Elysium.Core.Models;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Hosting.Models;
@@ -21,7 +20,7 @@ namespace Elysium.Client.Services
         IHostingService hostingService) : IUserActorService
     {
 
-        public async Task<Result<byte[]>> GetSigningKeyAsync(LocalUri id)
+        public async Task<byte[]> GetSigningKeyAsync(LocalUri id)
         {
             //var username = hostingService.GetUsernameFromLocalUri(id);
             //if (!username.IsSuccessful)
@@ -50,7 +49,7 @@ namespace Elysium.Client.Services
             throw new NotImplementedException();
         }
 
-        public Task<Result<JObject>> GenerateIdentityDocumentAsync(LocalUri uri)
+        public Task<JObject> GenerateIdentityDocumentAsync(LocalUri uri)
         {
             throw new NotImplementedException();
             //if (!_typedActorService.IsSuccessful)
@@ -87,7 +86,7 @@ namespace Elysium.Client.Services
         }
 
 
-        public Task<Result<byte[]>> GetPublicKeyAsync(LocalUri uri)
+        public Task<byte[]> GetPublicKeyAsync(LocalUri uri)
         {
             throw new NotImplementedException();
         }

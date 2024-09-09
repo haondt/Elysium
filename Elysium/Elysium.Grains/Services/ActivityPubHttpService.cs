@@ -1,9 +1,10 @@
-﻿using DotNext;
-using Elysium.GrainInterfaces;
+﻿using Elysium.GrainInterfaces;
+using Elysium.GrainInterfaces.Reasons;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Exceptions;
 using Elysium.Hosting.Models;
 using Elysium.Server.Services;
+using Haondt.Core.Models;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -126,19 +127,19 @@ namespace Elysium.Grains.Services
 
             throw new NotImplementedException();
         }
-        private async Task<Result<IHostIntegrityGrain>> ValidateHostAsync(RemoteUri target)
+        private async Task<Optional<IHostIntegrityGrain>> ValidateHostAsync(RemoteUri target)
         {
             var hostIntegrityGrain = uriGrainFactory.GetGrain<IHostIntegrityGrain>(target);
             if (!await hostIntegrityGrain.ShouldSendRequest())
-                return new(new ActivityPubException($"The host {target.Uri} is not in good standing"));
+                return new();
             return new(hostIntegrityGrain);
         }
 
-        public async Task<Result<JObject>> GetAsync(HttpGetData data)
+        public async Task<Result<JToken, ElysiumWebReason>> GetAsync(HttpGetData data)
         {
             var hostIntegrityGrain = await ValidateHostAsync(data.Target);
-            if (!hostIntegrityGrain.IsSuccessful)
-                return new(hostIntegrityGrain.Error);
+            if (!hostIntegrityGrain.HasValue)
+                return new (ElysiumWebReason.FaultyHost);
 
             var date = DateTimeOffset.UtcNow.ToString("r", CultureInfo.InvariantCulture);
             var stringToSign = $"(request-target): get {data.Target.Uri.AbsoluteUri}\nhost: {data.Target.Uri.Host}\ndate: {date}";
@@ -154,36 +155,44 @@ namespace Elysium.Grains.Services
             try
             {
                 response = await httpClient.SendAsync(message);
-                response.EnsureSuccessStatusCode();
-            }
-            catch (Exception ex)
-            {
-                await hostIntegrityGrain.Value.VoteAgainst();
-                return new(ex);
-            }
-
-            await hostIntegrityGrain.Value.VoteFor();
-
-            JObject? model;
-            try
-            {
-                model = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
-                if (model == null)
-                    return new(new ActivityPubException($"Unable to deserialize data from {data.Target}"));
+                if (!response.IsSuccessStatusCode)
+                {
+                    switch(response.StatusCode)
+                    {
+                        case System.Net.HttpStatusCode.NotFound:
+                            return new(ElysiumWebReason.NotFound);
+                    }
+                }
             }
             catch
             {
-                return new(new ActivityPubException($"Unable to deserialize data from {data.Target}"));
+                await hostIntegrityGrain.Value.VoteAgainst();
+                throw;
             }
+            await hostIntegrityGrain.Value.VoteFor();
+            response.EnsureSuccessStatusCode();
+
+
+            JToken? model;
+            try
+            {
+                model = JsonConvert.DeserializeObject<JToken>(await response.Content.ReadAsStringAsync());
+            }
+            catch
+            {
+                throw new ActivityPubException($"Unable to deserialize data from {data.Target}");
+            }
+            if (model == null)
+                throw new ActivityPubException($"Unable to deserialize data from {data.Target}");
 
             return new(model);
         }
 
-        public async Task<Optional<Exception>> PostAsync(HttpPostData data)
+        public async Task<Result<ElysiumWebReason>> PostAsync(HttpPostData data)
         {
             var hostIntegrityGrain = await ValidateHostAsync(data.Target);
-            if (!hostIntegrityGrain.IsSuccessful)
-                return new(hostIntegrityGrain.Error);
+            if (!hostIntegrityGrain.HasValue)
+                return new (ElysiumWebReason.FaultyHost);
 
             var digest = $"SHA-256={SHA256.HashData(Encoding.UTF8.GetBytes(data.JsonLdPayload))}";
             var date = DateTimeOffset.UtcNow.ToString("r", CultureInfo.InvariantCulture);
@@ -200,18 +209,27 @@ namespace Elysium.Grains.Services
             message.Headers.Add("Digest", digest);
             message.Headers.Add("Signature", signatureHeaderValue);
 
+            HttpResponseMessage response;
             try
             {
-                var response = await httpClient.SendAsync(message);
-                response.EnsureSuccessStatusCode();
+                response = await httpClient.SendAsync(message);
+                if (!response.IsSuccessStatusCode)
+                {
+                    switch(response.StatusCode)
+                    {
+                        case System.Net.HttpStatusCode.NotFound:
+                            return new(ElysiumWebReason.NotFound);
+                    }
+                }
             }
-            catch (Exception ex)
+            catch
             {
                 await hostIntegrityGrain.Value.VoteAgainst();
-                return new(ex);
+                throw;
             }
-
             await hostIntegrityGrain.Value.VoteFor();
+            response.EnsureSuccessStatusCode();
+
             return new();
         }
     }

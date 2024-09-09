@@ -1,10 +1,8 @@
-﻿using DotNext;
-
-namespace Elysium.GrainInterfaces.Services
+﻿namespace Elysium.GrainInterfaces.Services
 {
     public interface IHttpMessageAuthor
     {
         Task<string> GetKeyIdAsync();
-        Task<Result<string>> SignAsync(string stringToSign);
+        Task<string> SignAsync(string stringToSign);
     }
 }

@@ -23,17 +23,4 @@ namespace Elysium.GrainInterfaces.Services
         }
     }
 
-    //public class StorageKeyGrainFactory(IGrainFactory grainFactory) : IGrainFactory<StorageKey>
-    //{
-    //    public TGrain GetGrain<TGrain>(StorageKey identity) where TGrain : IGrain<StorageKey>
-    //    {
-
-    //        return grainFactory.GetGrain<TGrain>(StorageKeyConvert.Serialize(identity));
-    //    }
-
-    //    public StorageKey GetIdentity<TGrain>(TGrain grain) where TGrain : IGrain<StorageKey>
-    //    {
-    //        return StorageKeyConvert.Deserialize(grain.GetPrimaryKeyString());
-    //    }
-    //}
 }

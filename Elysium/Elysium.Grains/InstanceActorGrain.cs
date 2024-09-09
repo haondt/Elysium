@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.GrainInterfaces;
+﻿using Elysium.GrainInterfaces;
 using Orleans.Concurrency;
 using System;
 using System.Collections.Generic;
@@ -17,7 +16,7 @@ namespace Elysium.Grains
             throw new NotImplementedException();
         }
 
-        public Task<Result<string>> SignAsync(string stringToSign)
+        public Task<string> SignAsync(string stringToSign)
         {
             throw new NotImplementedException();
         }

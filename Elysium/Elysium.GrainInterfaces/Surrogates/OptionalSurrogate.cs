@@ -1,4 +1,4 @@
-﻿using DotNext;
+﻿using Haondt.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +22,7 @@ namespace Elysium.GrainInterfaces.Surrogates
         public Optional<T> ConvertFromSurrogate(in OptionalSurrogate<T> surrogate)
         {
             if (surrogate.HasValue)
-                return new(surrogate.Value);
+                return new(surrogate.Value!);
             return new();
         }
 

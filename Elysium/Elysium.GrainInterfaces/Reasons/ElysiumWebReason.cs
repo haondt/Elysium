@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.GrainInterfaces
+namespace Elysium.GrainInterfaces.Reasons
 {
-    public enum GuardianReason
+    public enum ElysiumWebReason
     {
         NotFound,
-        Forbidden,
-        Conflict
+        FaultyHost
     }
 }

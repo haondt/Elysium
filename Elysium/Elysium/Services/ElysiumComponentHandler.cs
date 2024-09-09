@@ -9,17 +9,15 @@ namespace Elysium.Services
     {
         public async Task<IComponent> HandleAsync(string componentIdentity)
         {
-            var component = await componentFactory.GetComponent(componentIdentity);
-            if (component.IsSuccessful)
-                return component.Value;
-
-            if (component.Error is UnauthorizedAccessException)
+            try
             {
-                var loginComponent = await componentFactory.GetPlainComponent<LoginModel>();
-                return loginComponent.Value;
+                var component = await componentFactory.GetComponent(componentIdentity);
+                return component;
             }
-
-            return component.Value;
+            catch (UnauthorizedAccessException)
+            {
+                return await componentFactory.GetPlainComponent<LoginModel>();
+            }
         }
     }
 }

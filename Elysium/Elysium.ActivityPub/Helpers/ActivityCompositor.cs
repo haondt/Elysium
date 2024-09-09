@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.ActivityPub.Helpers;
+﻿using Elysium.ActivityPub.Helpers;
 using Elysium.ActivityPub.Helpers.ActivityCompositor;
 using Elysium.ActivityPub.Models;
 using Elysium.Core.Extensions;
@@ -9,7 +8,7 @@ namespace Elysium.ActivityPub.Helpers.ActivityCompositor
 {
     public static class ActivityCompositor
     {
-        public static Result<JArray> Composit(ICompositionDetails details)
+        public static JArray Composit(ICompositionDetails details)
         {
             switch (details)
             {
@@ -36,40 +35,34 @@ namespace Elysium.ActivityPub.Helpers.ActivityCompositor
             return new (new InvalidOperationException($"Unkown object details type {details.GetType()}"));
         }
 
-        public static Result<JArray> Composit(PrePublishActivityDetails details)
+        public static JArray Composit(PrePublishActivityDetails details)
         {
             var activityClone = details.ReferencedActivityWithBtoBcc.DeepClone();
-            var activityMainObjectCloneResult = new Result<JToken>(activityClone)
+            var activityMainObjectCloneResult = activityClone
                 .Single()
                 .As<JObject>();
-            if (!activityMainObjectCloneResult.IsSuccessful)
-                return new(activityMainObjectCloneResult.Error);
 
             // strip bcc, bto from activity
-            if (activityMainObjectCloneResult.Value.ContainsKey(JsonLdTypes.BCC))
-                activityMainObjectCloneResult.Value.Remove(JsonLdTypes.BCC);
-            if (activityMainObjectCloneResult.Value.ContainsKey(JsonLdTypes.BTO))
-                activityMainObjectCloneResult.Value.Remove(JsonLdTypes.BTO);
+            if (activityMainObjectCloneResult.ContainsKey(JsonLdTypes.BCC))
+                activityMainObjectCloneResult.Remove(JsonLdTypes.BCC);
+            if (activityMainObjectCloneResult.ContainsKey(JsonLdTypes.BTO))
+                activityMainObjectCloneResult.Remove(JsonLdTypes.BTO);
 
             var activityObjectClone = details.ObjectWithBtoBcc.DeepClone();
-            var activityObjectMainObjectCloneResult = new Result<JToken>(activityObjectClone)
+            var activityObjectMainObjectCloneResult = activityObjectClone
                 .Single()
                 .As<JObject>();
-            if (!activityObjectMainObjectCloneResult.IsSuccessful)
-                return new(activityObjectMainObjectCloneResult.Error);
 
             // strip bcc, bto from activity object
-            if (activityObjectMainObjectCloneResult.Value.ContainsKey(JsonLdTypes.BCC))
-                activityObjectMainObjectCloneResult.Value.Remove(JsonLdTypes.BCC);
-            if (activityObjectMainObjectCloneResult.Value.ContainsKey(JsonLdTypes.BTO))
-                activityObjectMainObjectCloneResult.Value.Remove(JsonLdTypes.BTO);
+            if (activityObjectMainObjectCloneResult.ContainsKey(JsonLdTypes.BCC))
+                activityObjectMainObjectCloneResult.Remove(JsonLdTypes.BCC);
+            if (activityObjectMainObjectCloneResult.ContainsKey(JsonLdTypes.BTO))
+                activityObjectMainObjectCloneResult.Remove(JsonLdTypes.BTO);
 
             // dereference activity object
-            var setResult = activityMainObjectCloneResult.Set(JsonLdTypes.OBJECT, activityObjectClone);
-            if (setResult.HasValue)
-                return new(setResult.Value);
+            activityMainObjectCloneResult[JsonLdTypes.OBJECT] =  activityObjectClone;
 
-            return new Result<JToken>(activityClone).As<JArray>();
+            return activityClone.As<JArray>();
         }
     }
 }

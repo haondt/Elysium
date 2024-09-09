@@ -1,6 +1,6 @@
-﻿using DotNext;
-using Elysium.Core.Models;
+﻿using Elysium.Core.Models;
 using Elysium.Persistence.Converters;
+using Haondt.Core.Models;
 using Haondt.Identity.StorageKey;
 using Haondt.Persistence.Services;
 using Microsoft.Extensions.Options;
@@ -97,47 +97,45 @@ namespace Elysium.Persistence.Services
             _dataCache = data;
         }
 
-        public Task<Result<bool>> ContainsKey(StorageKey key) =>
+        public Task<bool> ContainsKey(StorageKey key) =>
             TryAcquireSemaphoreAnd(async () =>
             {
-                var x = new Result<bool>();
                 var data = await GetDataAsync();
-                return new Result<bool>(data.Values.ContainsKey(StorageKeyConvert.Serialize(key)));
+                return data.Values.ContainsKey(StorageKeyConvert.Serialize(key));
             });
 
-        public Task<Optional<Exception>> Delete(StorageKey key) =>
+        public Task<Result<StorageResultReason>> Delete(StorageKey key) =>
             TryAcquireSemaphoreAnd(async () =>
             {
                 var data = await GetDataAsync();
                 if (!data.Values.Remove(StorageKeyConvert.Serialize(key)))
-                    return new Optional<Exception>();
+                    return new(StorageResultReason.NotFound);
                 await SetDataAsync(data);
-                return new Optional<Exception>();
+                return new Result<StorageResultReason>();
             });
 
-        public Task<Result<T>> Get<T>(StorageKey<T> key) =>
+        public Task<Result<T, StorageResultReason>> Get<T>(StorageKey<T> key) =>
             TryAcquireSemaphoreAnd(async () =>
             {
                 var data = await GetDataAsync();
                 var stringKey = StorageKeyConvert.Serialize(key);
                 if (!data.Values.TryGetValue(stringKey, out var value))
-                    return new Result<T>(new KeyNotFoundException(StorageKeyConvert.Serialize(key)));
+                    return new(StorageResultReason.NotFound);
                 if (value is not T castedValue)
-                    return new(new InvalidCastException($"Cannot convert {key} to type {typeof(T)}"));
-                return new(castedValue);
+                    throw new InvalidCastException($"Cannot convert {key} to type {typeof(T)}");
+                return new Result<T, StorageResultReason>(castedValue);
             });
 
-        public Task<Optional<Exception>> Set<T>(StorageKey<T> key, T value) =>
+        public Task Set<T>(StorageKey<T> key, T value) =>
             TryAcquireSemaphoreAnd(async () =>
             {
                 var data = await GetDataAsync();
                 data.Values[StorageKeyConvert.Serialize(key)] = value;
                 await SetDataAsync(data);
-                return new Optional<Exception>();
             });
 
 
-        public Task<Result<UserIdentity>> GetUserByNameAsync(string normalizedUsername) =>
+        public Task<Result<UserIdentity, StorageResultReason>> GetUserByNameAsync(string normalizedUsername) =>
             TryAcquireSemaphoreAnd(async () =>
             {
                 var data = await GetDataAsync();
@@ -146,9 +144,9 @@ namespace Elysium.Persistence.Services
                     if (item is not UserIdentity userIdentity)
                         continue;
                     if (userIdentity.NormalizedUsername == normalizedUsername)
-                        return new Result<UserIdentity>(userIdentity);
+                        return new Result<UserIdentity, StorageResultReason>(userIdentity);
                 }
-                return new Result<UserIdentity>(new KeyNotFoundException(normalizedUsername));
+                return new(StorageResultReason.NotFound);
             });
     }
 }

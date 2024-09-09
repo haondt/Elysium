@@ -1,4 +1,5 @@
-﻿using DotNext;
+﻿using Elysium.GrainInterfaces.Reasons;
+using Haondt.Core.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -10,8 +11,8 @@ namespace Elysium.Grains.Services
 {
     public interface IActivityPubHttpService
     {
-        public Task<Optional<Exception>> PostAsync(HttpPostData data);
-        public Task<Result<JObject>> GetAsync(HttpGetData data);
+        public Task<Result<ElysiumWebReason>> PostAsync(HttpPostData data);
+        public Task<Result<JToken, ElysiumWebReason>> GetAsync(HttpGetData data);
 
         //public Task<Result<bool>> VerifySignature(idk bro);
     }

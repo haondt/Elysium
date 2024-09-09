@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.GrainInterfaces;
+﻿using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Services;
 using Elysium.Hosting.Models;
@@ -55,15 +54,23 @@ namespace Elysium.Grains
 
         private async Task SendAsync(DispatchRemoteActivityData data)
         {
-            var result = await httpService.PostAsync(new HttpPostData
+            try
             {
-                JsonLdPayload = data.Payload,
-                Target = data.Target,
-                Author = uriGrainFactory.GetGrain<ILocalActorAuthorGrain>(data.Sender)
-            });
 
-            if (result.HasValue)
-                logger.LogError(result.Value, "Failed to dispatch request");
+                var result = await httpService.PostAsync(new HttpPostData
+                {
+                    JsonLdPayload = data.Payload,
+                    Target = data.Target,
+                    Author = uriGrainFactory.GetGrain<ILocalActorAuthorGrain>(data.Sender)
+                });
+                if (!result.IsSuccessful)
+                    logger.LogError("dispatch failed with reason {reason}", result.Reason);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "dispatch failed with exception");
+            }
+
         }
     }
 }

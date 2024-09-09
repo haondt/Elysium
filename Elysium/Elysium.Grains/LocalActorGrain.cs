@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.Core.Models;
+﻿using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
 using Elysium.Grains.Exceptions;
 using Elysium.Grains.Services;
@@ -74,6 +73,11 @@ namespace Elysium.Grains
             await _state.ReadStateAsync();
             await base.OnActivateAsync(cancellationToken);
         }
+        public Task InitializeAsync(LocalActorState localActorState)
+        {
+            throw new InvalidOperationException(); 
+
+        }
 
         //public async Task<Optional<Exception>> InitializeDocument()
         //{
@@ -110,7 +114,7 @@ namespace Elysium.Grains
         //    throw new NotImplementedException();
         //}
 
-        public Task<Optional<Exception>> IngestActivityAsync(JObject activity)
+        public Task IngestActivityAsync(JObject activity)
         {
             throw new NotImplementedException();
             // see https://www.w3.org/TR/activitypub/#inbox-forwarding
@@ -121,7 +125,7 @@ namespace Elysium.Grains
         // this uri is the uri of the *activity*, not the object.
         // you willl have to query the uri to get the activity object, then get the object object from that.
         // probably a good idea in case the grain or other downstream services makes changes to the object
-        public async Task<Result<(LocalUri ActivityUri, LocalUri ObjectUri)>> PublishActivity(ActivityType type, JArray expandedObject)
+        public async Task<(LocalUri ActivityUri, LocalUri ObjectUri)> PublishActivity(ActivityType type, JArray expandedObject)
         {
             // todo: c/r/u/d the object on disk, create the activity on disk, send the activity to followers.
             // need to think of a way to link the document back to the user for the outbox,
@@ -142,71 +146,51 @@ namespace Elysium.Grains
 
             if (type == ActivityType.Create)
             {
-                var mainObjectResult = new Result<JToken>(expandedObject).Single().As<JObject>();
-                if (!mainObjectResult.IsSuccessful)
-                    return new(mainObjectResult.Error);
+                var mainObjectResult = expandedObject.Single().As<JObject>();
 
                 // only doing this because it is a create operation!!
-                var setObjectAttributedToResult = mainObjectResult.Set(JsonLdTypes.ATTRIBUTED_TO, new JArray { new JObject { { "@Id", _id.Uri.AbsoluteUri } } });
-                if (setObjectAttributedToResult.HasValue)
-                    return new(setObjectAttributedToResult.Value);
+                var setObjectAttributedToResult = mainObjectResult[JsonLdTypes.ATTRIBUTED_TO] = new JArray { new JObject { { "@Id", _id.Uri.AbsoluteUri } } };
 
                 // get recepients
-                Result<List<Uri>> ExtractListIdValues(string name, JObject parent)
+                static List<Uri> ExtractListIdValues(string name, JObject parent)
                 {
                     if (!parent.TryGetValue(name, out var values))
                         return new(new List<Uri>());
                     if (values is not JArray ja)
-                        return new Result<List<Uri>>(new JsonException($"{name} was not in the expected format"));
+                        throw new JsonException($"{name} was not in the expected format");
                     var output = new List<Uri>();
                     foreach (var value in values)
                     {
                         if (value is not JObject jv)
-                            return new Result<List<Uri>>(new JsonException($"one or more values of {name} was not in the expected format"));
+                            throw new JsonException($"one or more values of {name} was not in the expected format");
                         if (jv.Count != 1) 
-                            return new Result<List<Uri>>(new JsonException($"one or more values of {name} did not have exactly 1 key"));
+                            throw new JsonException($"one or more values of {name} did not have exactly 1 key");
                         if (!jv.TryGetValue("@id", out var typeValueToken))
-                            return new Result<List<Uri>>(new JsonException($"one or more values of {name} did not have a @id key"));
+                            throw new JsonException($"one or more values of {name} did not have a @id key");
                         if (typeValueToken is not JValue typeValue || typeValue.Type != JTokenType.String)
-                            return new Result<List<Uri>>(new JsonException($"one or more values of {name} did not have a string key"));
+                            throw new JsonException($"one or more values of {name} did not have a string key");
                         var typeString = typeValue.Value<string>();
                         if (string.IsNullOrEmpty(typeString))
-                            return new Result<List<Uri>>(new JsonException($"one or more values of {name} had an empty string value"));
-                        try
-                        {
-                            output.Add(new Uri(typeString));
-                        }
-                        catch (Exception ex)
-                        {
-                            return new(ex);
-                        }
+                            throw new JsonException($"one or more values of {name} had an empty string value");
+
+                        output.Add(new Uri(typeString));
                     }
 
                     return output;
                 }
 
-                var ccListResult = ExtractListIdValues(JsonLdTypes.CC, mainObjectResult.Value);
-                if (!ccListResult.IsSuccessful)
-                    return new(ccListResult.Error);
-                var bccListResult = ExtractListIdValues(JsonLdTypes.BCC, mainObjectResult.Value);
-                if (!bccListResult.IsSuccessful)
-                    return new(bccListResult.Error);
-                var toListResult = ExtractListIdValues(JsonLdTypes.TO, mainObjectResult.Value);
-                if (!toListResult.IsSuccessful)
-                    return new(toListResult.Error);
-                var btoListResult = ExtractListIdValues(JsonLdTypes.BTO, mainObjectResult.Value);
-                if (!btoListResult.IsSuccessful)
-                    return new(btoListResult.Error);
-                var audienceListResult = ExtractListIdValues(JsonLdTypes.BTO, mainObjectResult.Value);
-                if (!audienceListResult.IsSuccessful)
-                    return new(audienceListResult.Error);
+                var ccList = ExtractListIdValues(JsonLdTypes.CC, mainObjectResult);
+                var bccList = ExtractListIdValues(JsonLdTypes.BCC, mainObjectResult);
+                var toList = ExtractListIdValues(JsonLdTypes.TO, mainObjectResult);
+                var btoList = ExtractListIdValues(JsonLdTypes.BTO, mainObjectResult);
+                var audienceList = ExtractListIdValues(JsonLdTypes.BTO, mainObjectResult);
 
                 var recepients = new HashSet<Uri>();
-                recepients.UnionWith(ccListResult.Value);
-                recepients.UnionWith(bccListResult.Value);
-                recepients.UnionWith(toListResult.Value);
-                recepients.UnionWith(btoListResult.Value);
-                recepients.UnionWith(audienceListResult.Value);
+                recepients.UnionWith(ccList);
+                recepients.UnionWith(bccList);
+                recepients.UnionWith(toList);
+                recepients.UnionWith(btoList);
+                recepients.UnionWith(audienceList);
 
                 // todo: for each recepient, look them up
                 // then retrieve the inbox(es)
@@ -217,9 +201,7 @@ namespace Elysium.Grains
                 // this will be handled by a worker grain? or a dispatcher grain maybe... it will have both local and remote targets
 
 
-                var compactedObjectResult = await _jsonLdService.CompactAsync(_authorGrain, expandedObject);
-                if (!compactedObjectResult.IsSuccessful)
-                    return new(compactedObjectResult.Error);
+                var compactedObject = await _jsonLdService.CompactAsync(_authorGrain, expandedObject);
 
                 // todo: the id generation strategy should be moved to a service
                 var objectId = Guid.NewGuid();
@@ -227,87 +209,66 @@ namespace Elysium.Grains
                 // todo: this should probably depend on the activityobject type, e.g. messages should be at useruri/messages/1234
                 var objectUri = _hostingService.GetLocalUserScopedUri(_id, $"objects/{objectId}");
 
-                var activityResult = ActivityCompositor.Composit(new CreateActivityDetails
+                var activity = ActivityCompositor.Composit(new CreateActivityDetails
                 {
                     Actor = _id.Uri,
-                    Bcc = bccListResult.Value,
-                    Bto = btoListResult.Value,
-                    Cc = ccListResult.Value,
-                    To = toListResult.Value,
+                    Bcc = bccList,
+                    Bto = btoList,
+                    Cc = ccList,
+                    To = toList,
                     Object = objectUri.Uri,
                     AttributedTo = _id.Uri,
                 });
 
-
-                if (!activityResult.IsSuccessful)
-                    return new(activityResult.Error);
-
                 var activityId = Guid.NewGuid();
                 var activityUri = _hostingService.GetLocalUserScopedUri(_id, $"activities/{objectId}");
 
-                var compactedActivityResult = await _jsonLdService.CompactAsync(_authorGrain, activityResult.Value);
-                if (!compactedActivityResult.IsSuccessful)
-                    return new(compactedActivityResult.Error);
+                var compactedActivity = await _jsonLdService.CompactAsync(_authorGrain, activity);
 
                 // create the object
                 var guardianGrain = _grainFactory.GetGrain<IGuardianGrain>(Guid.Empty);
-                var response = await guardianGrain.TryCreateDocumentAsync(_id, objectUri, compactedObjectResult.Value, btoListResult.Value, bccListResult.Value);
+                var response = await guardianGrain.TryCreateDocumentAsync(_id, objectUri, compactedObject, btoList, bccList);
                 if (!response.IsSuccessful)
-                    return new(response.Error);
-                else if (response.Value != GuardianReason.Success) // TODO: mapp the guardian responses to exceptions? http responses?
-                    return new(new InvalidOperationException($"Guardian denied document creation with reason {response.Value}"));
+                    throw new InvalidOperationException($"Guardian denied document creation with reason {response.Reason}");
 
                 // create the activity
-                response = await guardianGrain.TryCreateDocumentAsync(_id, objectUri, compactedActivityResult.Value, btoListResult.Value, bccListResult.Value);
+                response = await guardianGrain.TryCreateDocumentAsync(_id, objectUri, compactedActivity, btoList, bccList);
                 if (!response.IsSuccessful)
-                    return new(response.Error);
-                else if (response.Value != GuardianReason.Success) // TODO: mapp the guardian responses to exceptions? http responses?
-                    return new(new InvalidOperationException($"Guardian denied document creation with reason {response.Value}"));
-
-
+                    throw new InvalidOperationException($"Guardian denied document creation with reason {response.Reason}");
 
                 // TODO: the activity should also be available at a more well known url, if the type is understood. e.g. toots go at users/fred/toot/12345
 
                 // strip bto, bcc and dereference activity
-                var outgoingActivityResult = ActivityCompositor.Composit(new PrePublishActivityDetails
+                var outgoingActivity = ActivityCompositor.Composit(new PrePublishActivityDetails
                 {
-                    ReferencedActivityWithBtoBcc = activityResult.Value,
+                    ReferencedActivityWithBtoBcc = activity,
                     ObjectWithBtoBcc = expandedObject
                 });
-                if (!outgoingActivityResult.IsSuccessful)
-                    return new(outgoingActivityResult.Error);
 
-                var outgoingCompactedActivityResult = await _jsonLdService.CompactAsync(_authorGrain, outgoingActivityResult.Value);
-                if (!outgoingCompactedActivityResult.IsSuccessful)
-                    return new(outgoingCompactedActivityResult.Error);
+                var outgoingCompactedActivity = await _jsonLdService.CompactAsync(_authorGrain, outgoingActivity);
 
                 // dispatch the activity
                 await _workStream.OnNextAsync(new LocalActorWorkData
                 {
-                    Acivity = outgoingCompactedActivityResult.Value,
+                    Acivity = outgoingCompactedActivity,
                     Recipients = recepients.ToList()
                 });
 
-                return new((activityUri, objectUri));
+                return (activityUri, objectUri);
 
             }
             else
             {
-                return new(new NotSupportedException($"ActivityType {type} not yet suported"));
+                throw new NotSupportedException($"ActivityType {type} not yet suported");
             }
         }
 
 
-        public Task<Optional<Exception>> PublishTransientActivity(ActivityType type, JObject @object)
+        public Task PublishTransientActivity(ActivityType type, JObject @object)
         {
             throw new NotImplementedException();
         }
 
-        public Task<string> GetKeyIdAsync() => Task.FromResult(_id.Uri.AbsoluteUri);
 
-        public Task<Result<string>> SignAsync(string stringToSign)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

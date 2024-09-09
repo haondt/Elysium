@@ -16,10 +16,15 @@
 - add a settings object to configure htmx & hyperscript versions. This can be run through the `ScriptDescriptor`
 - instance actor
 - grain streams with something more persistent / fault tolerant
+- break up api projects
+  - Elysium.WebFinger
+  - Elysium.WebFinger.Api
+  - Elysium.Api (for mobile app)
+  - Elysium.ActivityPub.Api
+- add persistent state storage provider for grain
+- rename UserCryptoService
 
 
 ## currently doing
-- add persistent state storage provider for grain
-- get message sending successfully
-- commit
 - rethink usage of `Result<T>` and `Optional<T>`, i think it might be better to do `Result<T, TReason>` and `Result<TReason>`. Maybe like `Result<TReason> : Result<TReason, Reason>`, and drop DotNext entirely.
+- get message sending successfully

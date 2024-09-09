@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.ActivityPub.Models;
+﻿using Elysium.ActivityPub.Models;
 using Elysium.Core.Models;
 using Elysium.Hosting.Models;
 using Haondt.Identity.StorageKey;
@@ -20,7 +19,7 @@ namespace Elysium.Client.Services
 
         // uri = id of the object
         // existing id will be ignored
-        Task<Result<(LocalUri ActivityUri, LocalUri ObjectUri)>> PublishActivityAsync(StorageKey<UserIdentity> author, ActivityType type, JArray @object);
+        Task<(LocalUri ActivityUri, LocalUri ObjectUri)> PublishActivityAsync(StorageKey<UserIdentity> author, ActivityType type, JArray @object);
         //Task<Result<LocalUri>> PublishActivityAsync(StorageKey<UserIdentity> author, ActivityType type, RemoteUri @object);
 
         // object must have an id

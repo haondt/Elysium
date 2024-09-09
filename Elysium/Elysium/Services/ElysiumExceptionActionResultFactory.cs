@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.Components.Components;
+﻿using Elysium.Components.Components;
 using Haondt.Web.Components;
 using Haondt.Web.Core.Components;
 using Haondt.Web.Core.Exceptions;
@@ -12,7 +11,7 @@ namespace Elysium.Services
 {
     public class ElysiumExceptionActionResultFactory(ISingletonComponentFactory componentFactoryFactory, IOptions<ErrorSettings> errorOptions) : IExceptionActionResultFactory
     {
-        public async Task<Result<IActionResult>> CreateAsync(Exception exception, HttpContext context)
+        public async Task<IActionResult> CreateAsync(Exception exception, HttpContext context)
         {
             var result = exception switch
             {
@@ -26,18 +25,13 @@ namespace Elysium.Services
                 result.Details = exception.ToString();
 
             var componentFactory = componentFactoryFactory.CreateComponentFactory();
-
+            
             var errorComponent = await componentFactory.GetPlainComponent(result, configureResponse: m => m.SetStatusCode = result.ErrorCode);
-            if (!errorComponent.IsSuccessful)
-                return new(errorComponent.Error);
-
             var closeModalComponent = await componentFactory.GetPlainComponent<CloseModalModel>();
-            if (!closeModalComponent.IsSuccessful)
-                return new(closeModalComponent.Error);
 
             var appendComponent = await componentFactory.GetComponent(new AppendComponentLayoutModel
             {
-                Components = [errorComponent.Value, closeModalComponent.Value]
+                Components = [errorComponent, closeModalComponent]
             }, configureResponse: m =>
             {
                 m.SetStatusCode = result.ErrorCode;
@@ -45,12 +39,9 @@ namespace Elysium.Services
                     .ReSwap("innerHTML")
                     .ReTarget("#content")
                     .Build();
-            })
-               ;
-            if (!appendComponent.IsSuccessful)
-                return new(appendComponent.Error);
+            });
 
-            return Components.Extensions.ComponentExtensions.CreateView(appendComponent.Value, context.Response.AsResponseData());
+            return Components.Extensions.ComponentExtensions.CreateView(appendComponent, context.Response.AsResponseData());
         }
     }
 }

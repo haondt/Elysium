@@ -1,11 +1,11 @@
-﻿using DotNext;
-using Elysium.ActivityPub;
+﻿using Elysium.ActivityPub;
 using Elysium.ActivityPub.Helpers.ActivityCompositor;
 using Elysium.ActivityPub.Models;
 using Elysium.Authentication.Services;
 using Elysium.Client.Services;
 using Elysium.Components.Components;
 using Elysium.Server.Services;
+using Haondt.Core.Models;
 using Haondt.Web.Core.Components;
 using Haondt.Web.Core.Extensions;
 using Haondt.Web.Core.Http;
@@ -21,42 +21,50 @@ namespace Elysium.Services
     {
         public const string SEND_MESSAGE_EVENT = "SendMessage";
 
-        public async Task<Result<Optional<IComponent>>> HandleAsync(string eventName, IRequestData requestData)
+        public async Task<Optional<IComponent>> HandleAsync(string eventName, IRequestData requestData)
         {
 
             if (SEND_MESSAGE_EVENT.Equals(eventName))
             {
                 if (!sessionService.IsAuthenticated())
-                    return await GetLoginComponentAsync();
+                    return await GetLoginComponentAsOptionalAsync();
 
                 var userKey = await sessionService.GetUserKeyAsync();
-                if (!userKey.IsSuccessful)
-                    return await GetLoginComponentAsync();
+                if (!userKey.HasValue)
+                    return await GetLoginComponentAsOptionalAsync();
 
-                var messageResult = requestData.Form.GetValue<string>("message");
-                if (!messageResult.IsSuccessful)
-                    return await GetMessageErrorComponentAsync(messageResult.Error.Message);
-                var recepientResult = requestData.Form.GetValue<string>("recepient");
-                if (!recepientResult.IsSuccessful)
-                    return await GetMessageErrorComponentAsync(recepientResult.Error.Message);
-                var recepientUri = await hostingService.GetUriForUsernameAsync(recepientResult.Value);
-                if (!recepientUri.IsSuccessful)
-                    return await GetMessageErrorComponentAsync(recepientUri.Error.Message);
+                var messageResult = requestData.Form.TryGetValue<string>("message");
+                if (!messageResult.HasValue)
+                    return await GetMessageErrorComponentAsOptionalAsync("message cannot be empty");
+                var recepientResult = requestData.Form.TryGetValue<string>("recepient");
+                if (!recepientResult.HasValue)
+                    return await GetMessageErrorComponentAsOptionalAsync("recepient cannot be empty");
+                Uri recepientUri;
+                try
+                {
+                    recepientUri = await hostingService.GetUriForUsernameAsync(recepientResult.Value);
+                }
+                catch
+                {
+                    return await GetMessageErrorComponentAsOptionalAsync("unable to parse receiver username");
+                }
 
                 var activityObjectDetails = new MessageDetails
                 {
                     Text = messageResult.Value,
-                    Recepient = recepientUri.Value,
+                    Recepient = recepientUri,
                 };
 
                 var activityObject = ActivityCompositor.Composit(activityObjectDetails);
-                if (!activityObject.IsSuccessful)
-                    return await GetMessageErrorComponentAsync(activityObject.Error.Message);
 
-                var publishResult = await activityPubService.PublishActivityAsync(userKey.Value, ActivityType.Create,  activityObject.Value);
-                if (!publishResult.IsSuccessful)
-                    publishResult.Value.Equals(null);
-                    //return await GetMessageErrorComponentAsync(publishResult.Error.Message);
+                try
+                {
+                    var (activityUri, objectUri) = await activityPubService.PublishActivityAsync(userKey.Value, ActivityType.Create, activityObject);
+                }
+                catch
+                {
+                    return await GetMessageErrorComponentAsOptionalAsync("failed to send activity");
+                }
 
                 return new(await componentFactory.GetPlainComponent(new TemporaryMessageComponentUpdateModel
                 {
@@ -91,15 +99,15 @@ namespace Elysium.Services
                 //return new(updaterComponent);
             }
 
-            return new(Optional.Null<IComponent>());
+            return new();
         }
 
-        private async Task<Result<Optional<IComponent>>> GetLoginComponentAsync()
+        private async Task<Optional<IComponent>> GetLoginComponentAsOptionalAsync()
         {
             return new(await componentFactory.GetPlainComponent<LoginModel>(configureResponse: m => m.SetStatusCode = 401));
         }
 
-        private async Task<Result<Optional<IComponent>>> GetMessageErrorComponentAsync(string errorMessage)
+        private async Task<Optional<IComponent>> GetMessageErrorComponentAsOptionalAsync(string errorMessage)
         {
             return new(await componentFactory.GetPlainComponent(new TemporaryMessageComponentUpdateModel
             {

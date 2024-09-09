@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.Authentication.Services;
+﻿using Elysium.Authentication.Services;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Hosting.Models;
@@ -16,8 +15,7 @@ namespace Elysium.Grains
     public class LocalActorAuthorGrain : Grain, ILocalActorAuthorGrain
     {
         private readonly LocalUri _id;
-        private readonly Result<ITypedActorService> _typedActorService;
-        private readonly Lazy<Task<Result<byte[]>>> _signingKeyLazy;
+        private readonly Lazy<Task<byte[]>> _signingKeyLazy;
         private readonly IUserCryptoService _cryptoService;
 
         public LocalActorAuthorGrain(
@@ -26,24 +24,17 @@ namespace Elysium.Grains
             IGrainFactory<LocalUri> grainFactory)
         {
             _id = grainFactory.GetIdentity(this);
-            _typedActorService = typedActorServiceProvider.GetService(_id.Uri);
-            _signingKeyLazy = new(async () =>
-            {
-                if (!_typedActorService.IsSuccessful)
-                    return new(_typedActorService.Error);
-                return await _typedActorService.Value.GetSigningKeyAsync(_id);
-            });
+            var typedActorService = typedActorServiceProvider.GetService(_id.Uri);
+            _signingKeyLazy = new(typedActorService.GetSigningKeyAsync(_id));
             _cryptoService = cryptoService;
         }
 
         public Task<string> GetKeyIdAsync() => Task.FromResult(_id.Uri.AbsoluteUri);
 
-        public async Task<Result<string>> SignAsync(string stringToSign)
+        public async Task<string> SignAsync(string stringToSign)
         {
             var signingKey = await _signingKeyLazy.Value;
-            if (!signingKey.IsSuccessful)
-                return new Result<string>(signingKey.Error);
-            return _cryptoService.Sign(stringToSign, signingKey.Value);
+            return _cryptoService.Sign(stringToSign, signingKey);
         }
     }
 }

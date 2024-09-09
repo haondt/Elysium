@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.Authentication.Services;
+﻿using Elysium.Authentication.Services;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Services;
@@ -84,12 +83,8 @@ namespace Elysium.Grains
                 if (_hostingService.IsLocalHost(recipient))
                 {
                     var localUri = new LocalUri { Uri = recipient };
-                    var localActorExistsResult = await _registryGrain.ExistsActor(localUri);
-                    if (!localActorExistsResult.IsSuccessful)
-                    {
-                        _logger.LogError(localActorExistsResult.Error, $"Failed to look up local actor {recipient.AbsoluteUri}");
-                        continue;
-                    }
+                    if(!await _registryGrain.HasRegisteredActor(localUri))
+                        throw new ArgumentException($"No actor registered with local uri {recipient}");
 
                     var localActorGrain = _grainFactory.GetGrain<ILocalActorGrain>(localUri);
                     sendTasks.Add(() => localActorGrain.IngestActivityAsync(data.Acivity));

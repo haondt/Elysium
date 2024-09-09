@@ -1,4 +1,4 @@
-using DotNext;
+using Haondt.Core.Models;
 using Haondt.Web.Core.Components;
 
 namespace Elysium.Components.Components

@@ -1,4 +1,4 @@
-﻿using DotNext;
+﻿using Haondt.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +11,9 @@ namespace Elysium.GrainInterfaces.Surrogates
     public struct ResultSurrogate<T>
     {
         [Id(0)]
-        public T? Value;
+        public T? Reason;
         [Id(1)]
-        public Exception? Exception;
+        public bool IsSuccessful;
     }
 
     [RegisterConverter]
@@ -21,18 +21,16 @@ namespace Elysium.GrainInterfaces.Surrogates
     {
         public Result<T> ConvertFromSurrogate(in ResultSurrogate<T> surrogate)
         {
-            if (surrogate.Exception != null)
-                return new(surrogate.Exception);
-            if (surrogate.Value != null)
-                return new(surrogate.Value);
-            throw new OrleansException("Unable to convert surrogate back to result<T>");
+            if (surrogate.IsSuccessful)
+                return new();
+            return new(surrogate.Reason!);
         }
 
         public ResultSurrogate<T> ConvertToSurrogate(in Result<T> value)
         {
             if (value.IsSuccessful)
-                return new() { Value = value.Value };
-            return new() { Exception = value.Error };
+                return new() { IsSuccessful = true, Reason = default };
+            return new() { IsSuccessful = false, Reason = value.Reason };
         }
     }
 }

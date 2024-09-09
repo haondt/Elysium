@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.ActivityPub.Models;
+﻿using Elysium.ActivityPub.Models;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Hosting.Models;
 using Newtonsoft.Json.Linq;
@@ -18,10 +17,10 @@ namespace Elysium.GrainInterfaces
     ///<remarks><see href="https://www.w3.org/TR/activitypub/#actors"/></remarks> 
     public interface ILocalActorGrain : IGrain<LocalUri>
     {
-        //Task<Optional<Exception>> InitializeDocument();
+        Task InitializeAsync(LocalActorState localActorState);
 
 
-        Task<Optional<Exception>> IngestActivityAsync(JObject activity);
+        Task IngestActivityAsync(JObject activity);
         //Task<OrderedCollection> GetPublishedActivities(Optional<Actor> requester);
 
         /// <summary>
@@ -37,7 +36,7 @@ namespace Elysium.GrainInterfaces
         /// <param name="type"></param>
         /// <param name="object"></param>
         /// <returns>the <see cref="Uri"/> of the created activity</returns>
-        Task<Result<(LocalUri ActivityUri, LocalUri ObjectUri)>> PublishActivity(ActivityType type, JArray @object);
+        Task<(LocalUri ActivityUri, LocalUri ObjectUri)> PublishActivity(ActivityType type, JArray @object);
 
         /// <summary>
         /// Ask the grain to publish a transient activity.
@@ -52,7 +51,7 @@ namespace Elysium.GrainInterfaces
         /// <param name="type"></param>
         /// <param name="object"></param>
         /// <returns></returns>
-        Task<Optional<Exception>> PublishTransientActivity(ActivityType type, JObject @object);
+        Task PublishTransientActivity(ActivityType type, JObject @object);
 
 
     }

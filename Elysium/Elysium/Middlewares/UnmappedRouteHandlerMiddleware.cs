@@ -28,6 +28,7 @@ namespace Elysium.Middlewares
             var message = errorOptions.Value.ShowErrorInfo
                 ? $"The request url {context.Request.Path} was not found"
                 : "404 Not Found";
+
             var component = await pageFactory.GetComponent<ErrorModel>(new Dictionary<string, string>
             {
                 { "errorCode", "404" },
@@ -35,10 +36,7 @@ namespace Elysium.Middlewares
                 { "title", "404 Not Found" }
             });
 
-            if (!component.IsSuccessful)
-                return;
-
-            var viewResult = component.Value.CreateView(context.Response.AsResponseData());
+            var viewResult = component.CreateView(context.Response.AsResponseData());
             await viewResult.ExecuteResultAsync(new()
             {
                 HttpContext = context,

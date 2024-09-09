@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.Authentication.Services;
+﻿using Elysium.Authentication.Services;
 using Elysium.Components.Components;
 using Elysium.Services;
 using Haondt.Web.Assets;
@@ -10,6 +9,7 @@ using Haondt.Web.Services;
 using Haondt.Web.Core.Extensions;
 using Haondt.Web.Components;
 using Elysium.Server.Services;
+using Elysium.Authentication.Components;
 
 namespace Elysium.Extensions
 {
@@ -54,19 +54,13 @@ namespace Elysium.Extensions
 
         public static IServiceCollection AddElysiumComponents(this IServiceCollection services)
         {
-            services.AddScoped<IComponentDescriptor>(sp => new ComponentDescriptor<HomeLayoutModel>(async (cf, rd) =>
+            services.AddScoped<IComponentDescriptor>(sp => new NeedsAuthenticationComponentDescriptor<HomeLayoutModel>(async (cf) =>
             {
-                var session = sp.GetRequiredService<ISessionService>();
-                if (!session.IsAuthenticated())
-                    return new Result<HomeLayoutModel>(new UnauthorizedAccessException());
-
                 var feed = await cf.GetComponent(new FeedModel());
-                if (!feed.IsSuccessful)
-                    return new Result<HomeLayoutModel>(feed.Error);
-                return new(new HomeLayoutModel
+                return new HomeLayoutModel
                 {
-                    Feed = feed.Value
-                });
+                    Feed = feed
+                };
             })
             {
                 ViewPath = "~/Components/HomeLayout.cshtml",
@@ -77,19 +71,17 @@ namespace Elysium.Extensions
             });
             services.AddScoped<IComponentDescriptor>(_ => new ComponentDescriptor<ErrorModel>((componentFactory, requestData) =>
             {
-                var errorCodeResult = requestData.Query.GetValue<int>("errorCode");
-                var messageResult = requestData.Query.GetValue<string>("message");
-                if (!errorCodeResult.IsSuccessful || !messageResult.IsSuccessful)
-                    return new(new InvalidOperationException("Not enough information to construct ErrorModel"));
-                var titleResult = requestData.Query.GetValue<string>("title");
-                var detailsResult = requestData.Query.GetValue<string>("details");
-                return new(new ErrorModel
+                var errorCode = requestData.Query.GetValue<int>("errorCode");
+                var message = requestData.Query.GetValue<string>("message");
+                var title = requestData.Query.TryGetValue<string>("title");
+                var details = requestData.Query.TryGetValue<string>("details");
+                return new ErrorModel
                 {
-                    ErrorCode = errorCodeResult.Value,
-                    Message = messageResult.Value,
-                    Title = titleResult,
-                    Details = detailsResult,
-                });
+                    ErrorCode = errorCode,
+                    Message = message,
+                    Title = title,
+                    Details = details,
+                };
             })
             {
                 ViewPath = "~/Components/Error.cshtml",
@@ -101,12 +93,12 @@ namespace Elysium.Extensions
             services.AddScoped<IComponentDescriptor>(sp => new ComponentDescriptor<LoginModel>(() =>
             {
                 var hostingService = sp.GetRequiredService<IHostingService>();
-                var host = hostingService.GetHost();
+                var host = hostingService.Host;
 
-                return new Result<LoginModel>(new LoginModel
+                return new LoginModel
                 {
                     Host = host
-                });
+                };
             })
             {
                 ViewPath = "~/Components/Login.cshtml",
@@ -123,12 +115,12 @@ namespace Elysium.Extensions
             services.AddScoped<IComponentDescriptor>(sp => new ComponentDescriptor<RegisterModalModel>(() =>
             {
                 var hostingService = sp.GetRequiredService<IHostingService>();
-                var host = hostingService.GetHost();
+                var host = hostingService.Host;
 
-                return new Result<RegisterModalModel>(new RegisterModalModel
+                return new RegisterModalModel
                 {
                     Host = host
-                });
+                };
             })
             {
                 ViewPath = "~/Components/RegisterModal.cshtml",
@@ -139,40 +131,9 @@ namespace Elysium.Extensions
 
 
             // temporary message model
-            services.AddScoped<IComponentDescriptor>(sp => new ComponentDescriptor<TemporaryMessageComponentLayoutModel>(async (cf, rd) =>
+            services.AddScoped<IComponentDescriptor>(sp => new NeedsAuthenticationComponentDescriptor<TemporaryMessageComponentLayoutModel>(() => new TemporaryMessageComponentLayoutModel
             {
-                var session = sp.GetRequiredService<ISessionService>();
-                if (!session.IsAuthenticated())
-                    return new Result<TemporaryMessageComponentLayoutModel>(new UnauthorizedAccessException());
-
-                //var loaderComponent = await cf.GetPlainComponent(new LoaderModel
-                //{
-                //    Target = $"/_component/{ComponentDescriptor<TemporaryMessageUpdateModel>.TypeIdentity}"
-                //});
-                //if (!loaderComponent.IsSuccessful)
-                //    return new(loaderComponent.Error);
-
-                //var appendComponent = await cf.GetPlainComponent(new AppendComponentLayoutModel
-                //{
-                //    Components = [loaderComponent.Value, .Value]
-                //}, configureResponse: m =>
-                //{
-                //    m.ConfigureHeadersAction = new HxHeaderBuilder()
-                //        .ReSwap("innerHTML")
-                //        .ReTarget("#content")
-                //        .PushUrl("/home")
-                //        .Build();
-                //});
-
-
-
-                //var feed = await cf.GetComponent(new FeedModel());
-                //if (!feed.IsSuccessful)
-                //    return new Result<FeedModel>(feed.Error);
-                return new(new TemporaryMessageComponentLayoutModel
-                {
-                    Messages = []
-                });
+                Messages = []
             })
             {
                 ViewPath = "~/Components/TemporaryMessageComponentLayout.cshtml",
@@ -182,11 +143,10 @@ namespace Elysium.Extensions
                     .PushUrl("/messages")
                     .Build())
             });
-            services.AddScoped<IComponentDescriptor>(_ => new ComponentDescriptor<TemporaryMessageComponentUpdateModel>()
+            services.AddScoped<IComponentDescriptor>(_ => new NeedsAuthenticationComponentDescriptor<TemporaryMessageComponentUpdateModel>()
             {
                 ViewPath = "~/Components/TemporaryMessageComponentUpdate.cshtml",
             });
-
             // end temporary message model
 
             return services;

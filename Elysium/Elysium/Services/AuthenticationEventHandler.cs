@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DotNext;
 using Haondt.Identity.StorageKey;
 using Haondt.Web;
 using Haondt.Web.Core.Components;
@@ -21,85 +20,78 @@ using Microsoft.Extensions.Primitives;
 using System.Diagnostics.CodeAnalysis;
 using System.Collections;
 using Elysium.Server.Services;
+using Haondt.Core.Models;
+using Elysium.Client.Services;
 
 namespace Elysium.Authentication.Services
 {
     public class AuthenticationEventHandler(
-        UserManager<UserIdentity> userManager,
         SignInManager<UserIdentity> signInManager,
         IComponentFactory componentFactory,
-        IHostingService hostingService,
-        IUserCryptoService cryptoService) : IEventHandler
+        IElysiumService elysiumService,
+        IHostingService hostingService) : IEventHandler
     {
         public const string REGISTER_USER_EVENT = "RegisterUser";
         public const string LOGIN_USER_EVENT = "LoginUser";
-        public async Task<Result<Optional<IComponent>>> HandleAsync(string eventName, IRequestData requestData)
+        public async Task<Optional<IComponent>> HandleAsync(string eventName, IRequestData requestData)
         {
             if (REGISTER_USER_EVENT.Equals(eventName))
             {
-                var passwordResult = requestData.Form.GetValue<string>("password");
-                var localizedUsernameResult = requestData.Form.GetValue<string>("localizedUsername");
-                if (!localizedUsernameResult.IsSuccessful || !passwordResult.IsSuccessful)
+                var passwordResult = requestData.Form.TryGetValue<string>("password");
+                var localizedUsernameResult = requestData.Form.TryGetValue<string>("localizedUsername");
+                if (!localizedUsernameResult.HasValue || !passwordResult.HasValue)
                 {
-                    var model = new RegisterModalModel { Host = hostingService.GetHost() };
-                    if (localizedUsernameResult.IsSuccessful)
+                    var model = new RegisterModalModel { Host = hostingService.Host };
+                    if (localizedUsernameResult.HasValue)
                         model.ExistingLocalizedUsername = localizedUsernameResult.Value;
                     else
                     {
                         model.DangerUsername = true;
                         model.Errors.Add("Username is required.");
                     }
-                    if (!passwordResult.IsSuccessful)
+                    if (!passwordResult.HasValue)
                     {
                         model.DangerPassword = true;
                         model.Errors.Add("Password is required.");
                     }
-                    return await GetRegisterComponentAsync(model);
+                    return new(await GetRegisterComponentAsync(model));
                 }
 
-                var (publicKey, encryptedPrivateKey) = cryptoService.GenerateKeyPair();
-                var username = hostingService.GetUsernameFromLocalizedUsername(localizedUsernameResult.Value);
-                var user = new UserIdentity
-                {
-                    Id = UserIdentity.GetStorageKey(username),
-                    LocalizedUsername = localizedUsernameResult.Value,
-                    PublicKey = publicKey,
-                    EncryptedPrivateKey = encryptedPrivateKey
-                };
-                var result = await userManager.CreateAsync(user, passwordResult.Value);
-
-                if (!result.Succeeded)
-                    return await GetRegisterComponentAsync(new RegisterModalModel
+                var registrationResult = await elysiumService.RegisterUserAsync(
+                    localizedUsernameResult.Value,
+                    passwordResult.Value);
+                if(!registrationResult.IsSuccessful)
+                    return new(await GetRegisterComponentAsync(new RegisterModalModel
                     {
                         ExistingLocalizedUsername = localizedUsernameResult.Value,
-                        Host = hostingService.GetHost(),
-                        Errors = result.Errors.Select(e => $"{e.Description}").ToList()
-                    });
+                        Host = hostingService.Host,
+                        Errors = registrationResult.Reason
+                    }));
 
-                await signInManager.SignInAsync(user, isPersistent: true);
-                return await GetHomeLoaderComponentAsync();
+                await signInManager.SignInAsync(registrationResult.Value, isPersistent: true);
+                return new(await GetHomeLoaderComponentAsync());
             }
 
             if (LOGIN_USER_EVENT.Equals(eventName))
             {
-                var passwordResult = requestData.Form.GetValue<string>("password");
-                var localizedUsernameResult = requestData.Form.GetValue<string>("localizedUsername");
-                if (!localizedUsernameResult.IsSuccessful || !passwordResult.IsSuccessful)
+                var passwordResult = requestData.Form.TryGetValue<string>("password");
+                var localizedUsernameResult = requestData.Form.TryGetValue<string>("localizedUsername");
+                if (!localizedUsernameResult.HasValue || !passwordResult.HasValue)
                 {
-                    var model = new LoginModel { Host = hostingService.GetHost() };
-                    if (localizedUsernameResult.IsSuccessful)
+                    var model = new LoginModel { Host = hostingService.Host };
+                    if (localizedUsernameResult.HasValue)
                         model.ExistingLocalizedUsername = localizedUsernameResult.Value;
                     else
                     {
                         model.DangerUsername = true;
                         model.Errors.Add("Username is required.");
                     }
-                    if (!passwordResult.IsSuccessful)
+                    if (!passwordResult.HasValue)
                     {
                         model.DangerPassword = true;
                         model.Errors.Add("Password is required.");
                     }
-                    return await GetLoginComponentAsync(model);
+                    return new(await GetLoginComponentAsync(model));
                 }
 
                 var result = await signInManager.PasswordSignInAsync(
@@ -108,35 +100,29 @@ namespace Elysium.Authentication.Services
                     isPersistent: true, lockoutOnFailure: false);
 
                 if (!result.Succeeded)
-                    return await GetLoginComponentAsync(new LoginModel
+                    return new(await GetLoginComponentAsync(new LoginModel
                     { 
-                        Host = hostingService.GetHost(),
+                        Host = hostingService.Host,
                         ExistingLocalizedUsername = localizedUsernameResult.Value,
                         Errors = ["Incorrect username or password."]
-                    });
+                    }));
 
-                return await GetHomeLoaderComponentAsync();
+                return new(await GetHomeLoaderComponentAsync());
             }
 
-            return new(Optional.Null<IComponent>());
+            return new();
         }
 
-        public  async Task<Result<Optional<IComponent>>> GetHomeLoaderComponentAsync()
+        public  async Task<IComponent> GetHomeLoaderComponentAsync()
         {
             var closeModalComponent = await componentFactory.GetPlainComponent<CloseModalModel>();
-            if (!closeModalComponent.IsSuccessful)
-                return new(closeModalComponent.Error);
-
             var loaderComponent = await componentFactory.GetPlainComponent(new LoaderModel
             {
                 Target = $"/_component/{ComponentDescriptor<HomeLayoutModel>.TypeIdentity}"
             });
-            if (!loaderComponent.IsSuccessful)
-                return new(loaderComponent.Error);
-
             var appendComponent = await componentFactory.GetPlainComponent(new AppendComponentLayoutModel
             {
-                Components = [loaderComponent.Value, closeModalComponent.Value]
+                Components = [loaderComponent, closeModalComponent]
             }, configureResponse: m =>
             {
                 m.ConfigureHeadersAction = new HxHeaderBuilder()
@@ -146,24 +132,21 @@ namespace Elysium.Authentication.Services
                     .Build();
             });
 
-            return new(appendComponent);
+            return appendComponent;
         }
 
-        public  async Task<Result<Optional<IComponent>>> GetLoginComponentAsync(LoginModel model, int? statusCode = 401)
+        public  async Task<IComponent> GetLoginComponentAsync(LoginModel model, int? statusCode = 401)
         {
-            var loginComponent = statusCode.HasValue
-                ? await componentFactory.GetPlainComponent(model, configureResponse: m => m.SetStatusCode = statusCode.Value)
-                : await componentFactory.GetPlainComponent(model);
-            return new(loginComponent);
+            if (statusCode.HasValue)
+                return await componentFactory.GetPlainComponent(model, configureResponse: m => m.SetStatusCode = statusCode.Value);
+            return await componentFactory.GetPlainComponent(model);
         }
-        public  async Task<Result<Optional<IComponent>>> GetRegisterComponentAsync(RegisterModalModel model, int? statusCode = 400)
+
+        public  async Task<IComponent> GetRegisterComponentAsync(RegisterModalModel model, int? statusCode = 400)
         {
-            var registerComponent = statusCode.HasValue
-                ? await componentFactory.GetPlainComponent(model, configureResponse: m => m.SetStatusCode = statusCode.Value)
-                : await componentFactory.GetPlainComponent(model);
-            return new (registerComponent);
+            if (statusCode.HasValue)
+                return await componentFactory.GetPlainComponent(model, configureResponse: m => m.SetStatusCode = statusCode.Value);
+            return await componentFactory.GetPlainComponent(model);
         }
-
-
     }
 }

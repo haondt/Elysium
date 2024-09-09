@@ -13,7 +13,7 @@ namespace Elysium.Controllers
         public async Task<IActionResult> Login()
         {
             var result = await pageFactory.GetComponent<LoginModel>();
-            return result.Value.CreateView(this);
+            return result.CreateView(this);
         } 
     }
 }

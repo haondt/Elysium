@@ -10,14 +10,15 @@ namespace Elysium.WebFinger.Controllers
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] WebFingerQuery query)
         {
-            var jrd = await webFingerService.GetAsync(query.Resource);
-            if (!jrd.IsSuccessful)
-                return NotFound();
+            //var jrd = await webFingerService.GetAsync(query.Resource);
+            //if (!jrd.IsSuccessful)
+            //    return NotFound();
 
-            if (query.Rel != null)
-                jrd.Value.Links = jrd.Value.Links.Where(l => query.Rel.Contains(l.Rel)).ToList();
+            //if (query.Rel != null)
+            //    jrd.Value.Links = jrd.Value.Links.Where(l => query.Rel.Contains(l.Rel)).ToList();
 
-            return Ok(jrd.Value);
+            //return Ok(jrd.Value);
+            throw new NotImplementedException();
         }
     }
 }

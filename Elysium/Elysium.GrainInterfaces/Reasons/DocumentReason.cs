@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.GrainInterfaces
+namespace Elysium.GrainInterfaces.Reasons
 {
-    [GenerateSerializer]
-    public class RegisteredActorState
+    public enum DocumentReason
     {
+        NotAllowed
     }
 }

@@ -1,5 +1,5 @@
-﻿using DotNext;
-using Elysium.Core.Models;
+﻿using Elysium.Core.Models;
+using Haondt.Core.Models;
 using Haondt.Identity.StorageKey;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ namespace Elysium.Authentication.Services
     public interface ISessionService
     {
         public bool IsAuthenticated();
-        public Task<Result<StorageKey<UserIdentity>>> GetUserKeyAsync();
+        public Task<Optional<StorageKey<UserIdentity>>> GetUserKeyAsync();
         public void ClearCache();
     }
 }

@@ -1,5 +1,5 @@
-﻿using DotNext;
-using Elysium.Core.Models;
+﻿using Elysium.Core.Models;
+using Haondt.Core.Models;
 using Haondt.Identity.StorageKey;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -17,7 +17,7 @@ namespace Elysium.Authentication.Services
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<UserIdentity> _userManager;
-        private Lazy<Task<Result<StorageKey<UserIdentity>>>> _storageKeyLazy;
+        private Lazy<Task<Optional<StorageKey<UserIdentity>>>> _storageKeyLazy;
 
         public SessionService(IHttpContextAccessor httpContextAccessor, UserManager<UserIdentity> userManager)
         {
@@ -32,20 +32,20 @@ namespace Elysium.Authentication.Services
             _storageKeyLazy = new(async () =>
             {
                 if (_httpContextAccessor.HttpContext is null)
-                    return new(new UnauthorizedAccessException());
+                    return new();
 
                 var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
                 if (userId is null)
-                    return new(new UnauthorizedAccessException());
+                    return new();
 
                 var user = await _userManager.FindByIdAsync(userId.Value);
                 if (user is null)
-                    return new(new UnauthorizedAccessException());
+                    return new();
                 return new(user.Id);
             });
         }
 
-        public Task<Result<StorageKey<UserIdentity>>> GetUserKeyAsync() => _storageKeyLazy.Value;
+        public Task<Optional<StorageKey<UserIdentity>>> GetUserKeyAsync() => _storageKeyLazy.Value;
 
         public bool IsAuthenticated()
         {

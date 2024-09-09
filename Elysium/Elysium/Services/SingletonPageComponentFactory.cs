@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Haondt.Web.Components;
+﻿using Haondt.Web.Components;
 using Haondt.Web.Core.Components;
 using Haondt.Web.Services;
 
@@ -14,22 +13,22 @@ namespace Elysium.Services
             return func(componentFactory);
         }
 
-        public Task<Result<IComponent<PageModel>>> GetComponent(string targetComponentName)
+        public Task<IComponent<PageModel>> GetComponent(string targetComponentName)
             => ExecuteWithScopeAsync(f => f.GetComponent(targetComponentName));
 
-        public Task<Result<IComponent<PageModel>>> GetComponent<T>() where T : IComponentModel
+        public Task<IComponent<PageModel>> GetComponent<T>() where T : IComponentModel
             => ExecuteWithScopeAsync(f => f.GetComponent<T>());
 
-        public Task<Result<IComponent<PageModel>>> GetComponent(string targetComponentName, Dictionary<string, string> queryParams)
+        public Task<IComponent<PageModel>> GetComponent(string targetComponentName, Dictionary<string, string> queryParams)
             => ExecuteWithScopeAsync(f => f.GetComponent(targetComponentName, queryParams));
 
-        public Task<Result<IComponent<PageModel>>> GetComponent(string targetComponentName, List<(string Key, string Value)> queryParams)
+        public Task<IComponent<PageModel>> GetComponent(string targetComponentName, List<(string Key, string Value)> queryParams)
             => ExecuteWithScopeAsync(f => f.GetComponent(targetComponentName, queryParams));
 
-        public Task<Result<IComponent<PageModel>>> GetComponent<T>(Dictionary<string, string> queryParams) where T : IComponentModel
+        public Task<IComponent<PageModel>> GetComponent<T>(Dictionary<string, string> queryParams) where T : IComponentModel
             => ExecuteWithScopeAsync(f => f.GetComponent<T>(queryParams));
 
-        public Task<Result<IComponent<PageModel>>> GetComponent<T>(List<(string Key, string Value)> queryParams) where T : IComponentModel
+        public Task<IComponent<PageModel>> GetComponent<T>(List<(string Key, string Value)> queryParams) where T : IComponentModel
             => ExecuteWithScopeAsync(f => f.GetComponent<T>(queryParams));
     }
 }

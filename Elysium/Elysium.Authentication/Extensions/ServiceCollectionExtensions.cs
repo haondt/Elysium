@@ -1,8 +1,10 @@
-﻿using Elysium.Authentication.Constants;
+﻿using Elysium.Authentication.Components;
+using Elysium.Authentication.Constants;
 using Elysium.Authentication.Services;
 using Elysium.Core.Models;
 using Haondt.Identity.StorageKey;
 using Haondt.Persistence.Extensions;
+using Haondt.Web.Core.Components;
 using Haondt.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -29,6 +31,8 @@ namespace Elysium.Authentication.Extensions
                 o.User.AllowedUserNameCharacters = AuthenticationConstants.ALLOWED_USERNAME_CHARACTERS;
             });
             services.AddScoped<ISessionService, SessionService>();
+            services.AddScoped<ComponentFactory>();
+            services.AddScoped<IComponentFactory>(sp => ActivatorUtilities.CreateInstance<VerifiesAuthenticationComponentFactory>(sp, sp.GetRequiredService<ComponentFactory>()));
             services.AddElysiumCryptoServices();
             return services;
         }

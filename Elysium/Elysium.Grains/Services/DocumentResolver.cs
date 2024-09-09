@@ -1,8 +1,9 @@
-﻿using DotNext;
-using Elysium.GrainInterfaces;
+﻿using Elysium.GrainInterfaces;
+using Elysium.GrainInterfaces.Reasons;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Hosting.Models;
 using Elysium.Server.Services;
+using Haondt.Core.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -31,12 +32,12 @@ namespace Elysium.Grains.Services
         //    return localDocumentGrain.GetValueAsync(requester);
         //}
 
-        public Task<Result<JObject>> GetDocumentAsync(IHttpMessageAuthor requester, RemoteUri uri)
+        public Task<Result<JToken, ElysiumWebReason>> GetDocumentAsync(IHttpMessageAuthor requester, RemoteUri uri)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Result<JObject>> GetDocumentAsync(IHttpMessageAuthor requester, LocalUri uri)
+        public Task<Result<JToken, ElysiumWebReason>> GetDocumentAsync(IHttpMessageAuthor requester, LocalUri uri)
         {
             throw new NotImplementedException();
         }

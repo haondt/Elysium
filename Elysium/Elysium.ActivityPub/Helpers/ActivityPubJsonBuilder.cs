@@ -1,5 +1,4 @@
-﻿using DotNext;
-using Elysium.ActivityPub.Extensions;
+﻿using Elysium.ActivityPub.Extensions;
 using Elysium.ActivityPub.Models;
 using Elysium.Core.Extensions;
 using Newtonsoft.Json.Linq;
@@ -13,33 +12,33 @@ namespace Elysium.ActivityPub.Helpers
 {
     public class ActivityPubJsonBuilder
     {
-        private Result<JArray> _state = new([]);
+        private JArray _state = [];
         private static Func<JObject> JObjectFactory = () => new();
         private static Func<JArray> JArrayFactory = () => new();
 
         public ActivityPubJsonBuilder Type(string type)
         {
             _state.SetDefault(0, JObjectFactory, JObjectFactory)
-                .Set("@type", new JArray { type });
+                ["@type"] = new JArray { type };
             return this;
         }
         
         public ActivityPubJsonBuilder Id(Uri id)
         {
             _state.SetDefault(0, JObjectFactory, JObjectFactory)
-                .Set("@id", new JArray { id.AbsoluteUri });
+                ["@id"] = new JArray { id.AbsoluteUri };
             return this;
         }
         private ActivityPubJsonBuilder SetKeyValue(string key, string value)
         {
             _state.SetDefault(0, JObjectFactory, JObjectFactory)
-                .Set(key, new JArray { new JObject { { "@value", value } } });
+                [key] = new JArray { new JObject { { "@value", value } } };
             return this;
         }
         private ActivityPubJsonBuilder SetKeyId(string key, string value)
         {
             _state.SetDefault(0, JObjectFactory, JObjectFactory)
-                .Set(key, new JArray { new JObject { { "@id", value } } });
+                [key] = new JArray { new JObject { { "@id", value } } };
             return this;
         }
 
@@ -49,7 +48,7 @@ namespace Elysium.ActivityPub.Helpers
             foreach (var value in values)
                 jArray.Add(new JObject { { "@id", value } });
             _state.SetDefault(0, JObjectFactory, JObjectFactory)
-                .Set(key, jArray);
+                [key] = jArray;
             return this;
         }
 
@@ -76,19 +75,19 @@ namespace Elysium.ActivityPub.Helpers
         public ActivityPubJsonBuilder Published(DateTime dateTime)
         {
             _state.SetDefault(0, JObjectFactory, JObjectFactory)
-                .Set(JsonLdTypes.PUBLISHED, new JArray
+                [JsonLdTypes.PUBLISHED] = new JArray
                 {
                     new JObject
                     {
                         { "@type", JsonLdTypes.DATETIME },
                         { "@value", dateTime.AsXsdString() }
                     }
-                });
+                };
             return this;
         }
         public ActivityPubJsonBuilder Object(Uri uri) => SetKeyId(JsonLdTypes.OBJECT, uri.AbsoluteUri);
         public ActivityPubJsonBuilder Actor(Uri uri) => SetKeyId(JsonLdTypes.ACTOR, uri.AbsoluteUri);
-        public Result<JArray> Build()
+        public JArray Build()
         {
             return _state;
         }

@@ -1,7 +1,8 @@
-﻿using DotNext;
-using Elysium.Core.Models;
+﻿using Elysium.Core.Models;
 using Elysium.Persistence.Converters;
+using Haondt.Core.Models;
 using Haondt.Identity.StorageKey;
+using Haondt.Persistence.Services;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -87,141 +88,100 @@ namespace Elysium.Persistence.Services
             return tableName;
         }
 
-        public async Task<Result<T>> Get<T>(StorageKey<T> key)
+        public async Task<Result<T, StorageResultReason>> Get<T>(StorageKey<T> key)
         {
-            try
-            {
-                var keyString = StorageKeyConvert.Serialize(key);
-                using var connection = new SqliteConnection(_connectionString);
-                await connection.OpenAsync();
-                var table = await GetOrCreateTableAsync(key.Type, connection);
-                var query = $"SELECT Value FROM [{table}] WHERE Key = @key";
-                using var command = new SqliteCommand(query, connection);
-                command.Parameters.AddWithValue("@key", keyString);
-                var result = await command.ExecuteScalarAsync();
+            var keyString = StorageKeyConvert.Serialize(key);
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
+            var table = await GetOrCreateTableAsync(key.Type, connection);
+            var query = $"SELECT Value FROM [{table}] WHERE Key = @key";
+            using var command = new SqliteCommand(query, connection);
+            command.Parameters.AddWithValue("@key", keyString);
+            var result = await command.ExecuteScalarAsync();
 
-                if (result == null)
-                    return new(new KeyNotFoundException());
-                var resultString = result.ToString();
-                if (resultString == null)
-                    return new(new JsonException("unable to deserialize result"));
-                var value = JsonConvert.DeserializeObject<T>(resultString, _serializerSettings);
-                if (value == null)
-                    return new(new JsonException("unable to deserialize result"));
-                return value;
-            }
-            catch (Exception ex)
-            {
-                return new(ex);
-            }
+            if (result == null)
+                return new(StorageResultReason.NotFound);
+            var resultString = result.ToString() 
+                ?? throw new JsonException("unable to deserialize result");
+            var value = JsonConvert.DeserializeObject<T>(resultString, _serializerSettings) 
+                ?? throw new JsonException("unable to deserialize result");
+            return new(value);
         }
 
-        public async Task<Result<bool>> ContainsKey(StorageKey key)
+        public async Task<bool> ContainsKey(StorageKey key)
         {
-            try
-            {
-                var keyString = StorageKeyConvert.Serialize(key);
-                using var connection = new SqliteConnection(_connectionString);
-                await connection.OpenAsync();
-                var table = await GetOrCreateTableAsync(key.Type, connection);
-                string query = $"SELECT COUNT(1) FROM [{table}] WHERE Key = @key";
-                using var command = new SqliteCommand(query, connection);
-                command.Parameters.AddWithValue("@key", keyString);
-                var count = await command.ExecuteScalarAsync();
-                if (count is not long longCount)
-                    return new(new JsonException("unable to deserialize result"));
-                return longCount > 0;
-            }
-            catch (Exception ex)
-            {
-                return new(ex);
-            }
+            var keyString = StorageKeyConvert.Serialize(key);
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
+            var table = await GetOrCreateTableAsync(key.Type, connection);
+            string query = $"SELECT COUNT(1) FROM [{table}] WHERE Key = @key";
+            using var command = new SqliteCommand(query, connection);
+            command.Parameters.AddWithValue("@key", keyString);
+            var count = await command.ExecuteScalarAsync();
+            if (count is not long longCount)
+                throw new JsonException("unable to deserialize result");
+            return longCount > 0;
         }
 
-        public async Task<Optional<Exception>> Set<T>(StorageKey<T> key, T value)
+        public async Task Set<T>(StorageKey<T> key, T value)
         {
-            try
+            var keyString = StorageKeyConvert.Serialize(key);
+            var valueString = JsonConvert.SerializeObject(value, _serializerSettings);
+
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
+            var table = await GetOrCreateTableAsync(key.Type, connection);
+
+            string query;
+            Action<SqliteCommand>? setAdditionalParameter = null; 
+            if (typeof(T) == typeof(UserIdentity))
             {
-                var keyString = StorageKeyConvert.Serialize(key);
-                var valueString = JsonConvert.SerializeObject(value, _serializerSettings);
+                if (value is not UserIdentity userIdentity)
+                    throw new InvalidOperationException($"storage key {key} has type UserIdentity but the value was not a UserIdentity");
 
-                using var connection = new SqliteConnection(_connectionString);
-                await connection.OpenAsync();
-                var table = await GetOrCreateTableAsync(key.Type, connection);
-
-                string query;
-                Action<SqliteCommand>? setAdditionalParameter = null; 
-                if (typeof(T) == typeof(UserIdentity))
-                {
-                    if (value is not UserIdentity userIdentity)
-                        return new(new InvalidOperationException("storage key type was UserIdentity but the value was not a UserIdentity"));
-
-                    query = $"INSERT OR REPLACE INTO [{table}] (Key, Value, NormalizedUsername) " +
-                        $"VALUES (@key, @value, @normalizedUsername)";
-                    setAdditionalParameter = c => c.Parameters.AddWithValue("@normalizedUsername", userIdentity.NormalizedUsername ?? (object)DBNull.Value);
-                }
-                else
-                   query = $"INSERT OR REPLACE INTO [{table}] (Key, Value) VALUES (@key, @value)";
-
-                using var command = new SqliteCommand(query, connection);
-                command.Parameters.AddWithValue("@key", keyString);
-                command.Parameters.AddWithValue("@value", valueString);
-                setAdditionalParameter?.Invoke(command);
-                await command.ExecuteNonQueryAsync();
-
-                return Optional<Exception>.None;
+                query = $"INSERT OR REPLACE INTO [{table}] (Key, Value, NormalizedUsername) " +
+                    $"VALUES (@key, @value, @normalizedUsername)";
+                setAdditionalParameter = c => c.Parameters.AddWithValue("@normalizedUsername", userIdentity.NormalizedUsername ?? (object)DBNull.Value);
             }
-            catch (Exception ex)
-            {
-                return ex;
-            }
+            else
+               query = $"INSERT OR REPLACE INTO [{table}] (Key, Value) VALUES (@key, @value)";
+
+            using var command = new SqliteCommand(query, connection);
+            command.Parameters.AddWithValue("@key", keyString);
+            command.Parameters.AddWithValue("@value", valueString);
+            setAdditionalParameter?.Invoke(command);
+            await command.ExecuteNonQueryAsync();
         }
 
-        public async Task<Optional<Exception>> Delete(StorageKey key)
+        public async Task<Result<StorageResultReason>> Delete(StorageKey key)
         {
-            try
-            {
-                var keyString = StorageKeyConvert.Serialize(key);
-                using var connection = new SqliteConnection(_connectionString);
-                await connection.OpenAsync();
-                var table = await GetOrCreateTableAsync(key.Type, connection);
-                string query = $"DELETE FROM [{table}] WHERE Key = @key";
-                using var command = new SqliteCommand(query, connection);
-                command.Parameters.AddWithValue("@key", keyString);
-                await command.ExecuteNonQueryAsync();
-
-                return Optional<Exception>.None;
-            }
-            catch (Exception ex)
-            {
-                return ex;
-            }
+            var keyString = StorageKeyConvert.Serialize(key);
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
+            var table = await GetOrCreateTableAsync(key.Type, connection);
+            string query = $"DELETE FROM [{table}] WHERE Key = @key";
+            using var command = new SqliteCommand(query, connection);
+            command.Parameters.AddWithValue("@key", keyString);
+            await command.ExecuteNonQueryAsync();
+            return new();
         }
 
-        public async Task<Result<UserIdentity>> GetUserByNameAsync(string normalizedUsername)
+        public async Task<Result<UserIdentity, StorageResultReason>> GetUserByNameAsync(string normalizedUsername)
         {
-            try
-            {
-                using var connection = new SqliteConnection(_connectionString);
-                await connection.OpenAsync();
-                var table = await GetOrCreateTableAsync(typeof(UserIdentity), connection);
-                var query = $" SELECT Value FROM [{table}] WHERE NormalizedUsername = @normalizedUsername";
-                using var command = new SqliteCommand(query, connection);
-                command.Parameters.AddWithValue("@normalizedUsername", normalizedUsername);
-                using var reader = await command.ExecuteReaderAsync();
-                if (!await reader.ReadAsync())
-                    return new(new KeyNotFoundException($"No user found with normalized username '{normalizedUsername}'"));
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
+            var table = await GetOrCreateTableAsync(typeof(UserIdentity), connection);
+            var query = $" SELECT Value FROM [{table}] WHERE NormalizedUsername = @normalizedUsername";
+            using var command = new SqliteCommand(query, connection);
+            command.Parameters.AddWithValue("@normalizedUsername", normalizedUsername);
+            using var reader = await command.ExecuteReaderAsync();
+            if (!await reader.ReadAsync())
+                return new(StorageResultReason.NotFound);
 
-                var valueString = reader.GetString(0);
-                var resultUserIdentity = JsonConvert.DeserializeObject<UserIdentity>(valueString, _serializerSettings);
-                if (resultUserIdentity == null)
-                    return new(new JsonException("Unable to deserialize result"));
-                return resultUserIdentity;
-            }
-            catch (Exception ex)
-            {
-                return new(ex);
-            }
+            var valueString = reader.GetString(0);
+            var resultUserIdentity = JsonConvert.DeserializeObject<UserIdentity>(valueString, _serializerSettings)
+                ?? throw new JsonException("Unable to deserialize result");
+            return new(resultUserIdentity);
         }
     }
 }

@@ -6,8 +6,4 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="DotNext" Version="5.13.0" />
-  </ItemGroup>
-
 </Project>

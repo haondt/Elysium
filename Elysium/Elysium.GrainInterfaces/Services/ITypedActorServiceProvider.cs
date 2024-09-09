@@ -1,5 +1,4 @@
-﻿using DotNext;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +8,6 @@ namespace Elysium.GrainInterfaces.Services
 {
     public interface ITypedActorServiceProvider
     {
-        Result<ITypedActorService> GetService(Uri id);
+        ITypedActorService GetService(Uri id);
     }
 }
