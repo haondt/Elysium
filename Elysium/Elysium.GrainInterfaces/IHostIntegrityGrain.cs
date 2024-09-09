@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces
 {
-    public interface IHostIntegrityGrain : IGrain<RemoteUri>
+    public interface IHostIntegrityGrain : IGrain<RemoteIri>
     {
         public Task VoteAgainst();
         public Task<bool> ShouldSendRequest();

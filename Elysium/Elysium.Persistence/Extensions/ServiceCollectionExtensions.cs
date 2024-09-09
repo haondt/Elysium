@@ -1,5 +1,6 @@
 ﻿using Elysium.Persistence.Services;
 using Haondt.Core.Extensions;
+using Haondt.Persistence.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,12 +16,15 @@ namespace Elysium.Persistence.Extensions
             {
                 case ElysiumPersistenceDrivers.Memory:
                     services.AddSingleton<IElysiumStorage, ElysiumMemoryStorage>();
+                    services.AddSingleton<IStorage, ElysiumMemoryStorage>();
                     break;
                 case ElysiumPersistenceDrivers.File:
                     services.AddSingleton<IElysiumStorage, ElysiumFileStorage>();
+                    services.AddSingleton<IStorage, ElysiumFileStorage>();
                     break;
                 case ElysiumPersistenceDrivers.Sqlite:
                     services.AddSingleton<IElysiumStorage, ElysiumSqliteStorage>();
+                    services.AddSingleton<IStorage, ElysiumSqliteStorage>();
                     break;
             }
 

@@ -22,15 +22,15 @@ namespace Elysium.Grains
     {
         private readonly ILocalActorAuthorGrain _authorGrain;
         private readonly IInstanceActorAuthorGrain _instanceAuthorGrain;
-        private readonly LocalUri _id;
-        private readonly IGrainFactory<LocalUri> _grainFactory;
+        private readonly LocalIri _id;
+        private readonly IGrainFactory<LocalIri> _grainFactory;
         private readonly IHostingService _hostingService;
         private readonly ILogger<LocalActorWorkerGrain> _logger;
         private readonly ILocalActorRegistryGrain _registryGrain;
         private readonly IActivityPubHttpService _httpService;
         private StreamSubscriptionHandle<LocalActorWorkData>? _subscription;
 
-        public LocalActorWorkerGrain(IGrainFactory<LocalUri> grainFactory,
+        public LocalActorWorkerGrain(IGrainFactory<LocalIri> grainFactory,
             IGrainFactory baseGrainFactory,
             IHostingService hostingService,
             ILogger<LocalActorWorkerGrain> logger,
@@ -48,7 +48,7 @@ namespace Elysium.Grains
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
             var streamProvider = this.GetStreamProvider(GrainConstants.SimpleStreamProvider);
-            var streamId = StreamId.Create(GrainConstants.LocalActorWorkStream, _id.Uri.AbsoluteUri);
+            var streamId = StreamId.Create(GrainConstants.LocalActorWorkStream, _id.Iri.AbsoluteUri);
             var stream = streamProvider.GetStream<LocalActorWorkData>(streamId);
             _subscription = await stream.SubscribeAsync(OnNextAsync);
             await base.OnActivateAsync(cancellationToken);
@@ -75,14 +75,14 @@ namespace Elysium.Grains
         public async Task OnNextAsync(LocalActorWorkData data, StreamSequenceToken? token)
         {
             // create list of inboxes
-            List<LocalUri> localRecipients = [];
-            List<RemoteUri> remoteRecipients = [];
+            List<LocalIri> localRecipients = [];
+            List<RemoteIri> remoteRecipients = [];
             List<Func<Task>> sendTasks = [];
             foreach(var recipient in data.Recipients)
             {
                 if (_hostingService.IsLocalHost(recipient))
                 {
-                    var localUri = new LocalUri { Uri = recipient };
+                    var localUri = new LocalIri { Iri = recipient };
                     if(!await _registryGrain.HasRegisteredActor(localUri))
                         throw new ArgumentException($"No actor registered with local uri {recipient}");
 
@@ -91,7 +91,7 @@ namespace Elysium.Grains
                 }
                 else
                 {
-                    var remoteUri = new RemoteUri { Uri = recipient };
+                    var remoteUri = new RemoteIri { Uri = recipient };
                     sendTasks.Add(async () =>
                     {
                         var actorState = await _httpService.GetAsync(new HttpGetData

@@ -30,7 +30,7 @@ namespace Elysium.Grains
             await base.OnActivateAsync(cancellationToken);
         }
 
-        public async Task InitializeValueAsync(LocalUri owner, JObject value)
+        public async Task InitializeValueAsync(LocalIri owner, JObject value)
         {
             if (state.State.Owner != null)
                 throw new InvalidOperationException("state is already initialized");
@@ -44,7 +44,6 @@ namespace Elysium.Grains
             await state.WriteStateAsync();
         }
 
-        // TODO: permissions
         public Task<Result<JObject, DocumentReason>> GetValueAsync(Uri requester)
         {
             if (state.State.Value == null)
@@ -52,7 +51,7 @@ namespace Elysium.Grains
             return Task.FromResult<Result<JObject, DocumentReason>>(new(state.State.Value));
         }
 
-        public Task<bool> HasValueAsync(Uri requester)
+        public Task<bool> HasValueAsync()
         {
             return Task.FromResult(state.State.Value != null);
         }
@@ -66,7 +65,7 @@ namespace Elysium.Grains
             return new(await jsonLdService.ExpandAsync(_instanceActorGrain, state.Value));
         }
 
-        public Task<Result<DocumentReason>> SetValueAsync(LocalUri actor, JObject value)
+        public Task<Result<DocumentReason>> SetValueAsync(LocalIri actor, JObject value)
         {
             throw new NotImplementedException();
         }

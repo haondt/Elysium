@@ -10,17 +10,17 @@ namespace Elysium.Grains
 {
     public class LocalActorRegistryGrain : Grain, ILocalActorRegistryGrain
     {
-        public Task<bool> HasRegisteredActor(LocalUri uri)
+        public Task<bool> HasRegisteredActor(LocalIri uri)
         {
             throw new NotImplementedException();
         }
 
-        public Task RegisterActor(LocalUri uri, LocalActorState initialState)
+        public Task RegisterActor(LocalIri uri, LocalActorState initialState)
         {
             throw new NotImplementedException();
         }
 
-        public Task UnregisterActor(LocalUri uri)
+        public Task UnregisterActor(LocalIri uri)
         {
             throw new NotImplementedException();
         }

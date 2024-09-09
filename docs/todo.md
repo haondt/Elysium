@@ -23,8 +23,8 @@
   - Elysium.ActivityPub.Api
 - add persistent state storage provider for grain
 - rename UserCryptoService
+- remote StorageKeyGrain... we can just talk to the database. the documents are small and don't need caching
 
 
 ## currently doing
-- rethink usage of `Result<T>` and `Optional<T>`, i think it might be better to do `Result<T, TReason>` and `Result<TReason>`. Maybe like `Result<TReason> : Result<TReason, Reason>`, and drop DotNext entirely.
 - get message sending successfully

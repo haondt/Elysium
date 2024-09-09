@@ -10,8 +10,8 @@ namespace Elysium.GrainInterfaces.Services
 {
     public interface ITypedActorService
     {
-        public Task<byte[]> GetSigningKeyAsync(LocalUri uri);
-        public Task<byte[]> GetPublicKeyAsync(LocalUri uri);
-        public Task<JObject> GenerateIdentityDocumentAsync(LocalUri uri);
+        public Task<byte[]> GetSigningKeyAsync(LocalIri uri);
+        public Task<byte[]> GetPublicKeyAsync(LocalIri uri);
+        public Task<JObject> GenerateIdentityDocumentAsync(LocalIri uri);
     }
 }

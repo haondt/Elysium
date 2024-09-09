@@ -24,7 +24,7 @@ namespace Elysium.Grains.Extensions
             services.AddSingleton<ITypedActorServiceProvider, TypedActorServiceFactory>();
             services.AddSingleton<IJsonLdService, JsonLdService>();
             //services.AddSingleton<IGrainFactory<StorageKey>, StorageKeyGrainFactory>();
-            services.AddSingleton<IDocumentResolver, DocumentResolver>();
+            services.AddSingleton<IDocumentService, DocumentService>();
             services.AddHttpClient<IActivityPubHttpService, ActivityPubHttpService>(client =>
             {
                 client.DefaultRequestHeaders.Add("Accept", "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"");

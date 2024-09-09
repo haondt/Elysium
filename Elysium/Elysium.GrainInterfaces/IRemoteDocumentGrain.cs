@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces
 {
-    public interface IRemoteDocumentGrain : IGrain<RemoteUri>
+    public interface IRemoteDocumentGrain : IGrain<RemoteIri>
     {
         [AlwaysInterleave]
         public Task<Result<JObject, WebReason>> GetValueAsync(IHttpMessageAuthor requester, bool skipCachingFirstLayer);

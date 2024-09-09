@@ -24,7 +24,7 @@ namespace Elysium.Grains
         IJsonLdService jsonLdService) : Grain, IRemoteDocumentGrain
     {
         private readonly RemoteDocumentSettings _settings = options.Value;
-        private RemoteUri _id;
+        private RemoteIri _id;
         private IInstanceActorAuthorGrain _instanceActorGrain = grainFactory.GetGrain<IInstanceActorAuthorGrain>(Guid.Empty);
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {

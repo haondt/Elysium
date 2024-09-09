@@ -11,6 +11,6 @@ namespace Elysium.GrainInterfaces
     [GenerateSerializer]
     public class LocalActorState
     {
-        public required LocalUri Inbox { get; set; }
+        public required LocalIri Inbox { get; set; }
     }
 }

@@ -26,8 +26,8 @@ namespace Elysium.Client.Extensions
         {
             services.AddSingleton<IGrainFactory<StorageKey<UserIdentity>>, StorageKeyGrainFactory<UserIdentity>>();
             //services.AddSingleton<IGrainFactory<StorageKey>, StorageKeyGrainFactory>();
-            services.AddSingleton<IGrainFactory<LocalUri>, LocalUriGrainFactory>();
-            services.AddSingleton<IGrainFactory<RemoteUri>, RemoteUriGrainFactory>();
+            services.AddSingleton<IGrainFactory<LocalIri>, LocalUriGrainFactory>();
+            services.AddSingleton<IGrainFactory<RemoteIri>, RemoteUriGrainFactory>();
             return services;
         }
     }

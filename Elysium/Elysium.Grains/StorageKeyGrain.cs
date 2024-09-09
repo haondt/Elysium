@@ -18,12 +18,13 @@ namespace Elysium.Grains
         IGrainFactory<StorageKey<T>> grainFactory,
         IElysiumStorage storage) : Grain, IStorageKeyGrain<T>
     {
+        private StorageKey<T> _id;
         private Result<T, StorageResultReason> _value;
 
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
-            var storageKey = grainFactory.GetIdentity(this);
-            _value = await storage.Get(storageKey);
+            _id = grainFactory.GetIdentity(this);
+            _value = await storage.Get(_id);
 
             await base.OnActivateAsync(cancellationToken);
         }
@@ -31,6 +32,17 @@ namespace Elysium.Grains
         public Task<Result<T, StorageResultReason>> GetAsync()
         {
             return Task.FromResult(_value);
+        }
+
+        public Task<bool> ExistsAsync()
+        {
+            return Task.FromResult(_value.IsSuccessful);
+        }
+
+        public Task SetAsync(T value)
+        {
+            _value = new(value);
+            return storage.Set(_id, value);
         }
     }
 

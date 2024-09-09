@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 namespace Elysium.Hosting.Models
 {
     [GenerateSerializer, Immutable]
-    public readonly record struct RemoteUri(Uri Uri)
+    public readonly record struct LocalIri(Iri iri)
     {
-        public Uri Uri { get; init; } = Uri;
+        public Iri Iri { get; init; } = iri;
     }
 }
+

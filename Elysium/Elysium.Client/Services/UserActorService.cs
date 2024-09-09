@@ -20,7 +20,7 @@ namespace Elysium.Client.Services
         IHostingService hostingService) : IUserActorService
     {
 
-        public async Task<byte[]> GetSigningKeyAsync(LocalUri id)
+        public async Task<byte[]> GetSigningKeyAsync(LocalIri id)
         {
             //var username = hostingService.GetUsernameFromLocalUri(id);
             //if (!username.IsSuccessful)
@@ -49,7 +49,7 @@ namespace Elysium.Client.Services
             throw new NotImplementedException();
         }
 
-        public Task<JObject> GenerateIdentityDocumentAsync(LocalUri uri)
+        public Task<JObject> GenerateIdentityDocumentAsync(LocalIri uri)
         {
             throw new NotImplementedException();
             //if (!_typedActorService.IsSuccessful)
@@ -86,7 +86,7 @@ namespace Elysium.Client.Services
         }
 
 
-        public Task<byte[]> GetPublicKeyAsync(LocalUri uri)
+        public Task<byte[]> GetPublicKeyAsync(LocalIri uri)
         {
             throw new NotImplementedException();
         }

@@ -10,8 +10,8 @@ namespace Elysium.GrainInterfaces
 {
     public interface ILocalActorRegistryGrain : IGrainWithGuidKey
     {
-        public Task<bool> HasRegisteredActor(LocalUri uri);
-        public Task RegisterActor(LocalUri uri, LocalActorState initialState);
-        public Task UnregisterActor(LocalUri uri);
+        public Task<bool> HasRegisteredActor(LocalIri uri);
+        public Task RegisterActor(LocalIri uri, LocalActorState initialState);
+        public Task UnregisterActor(LocalIri uri);
     }
 }

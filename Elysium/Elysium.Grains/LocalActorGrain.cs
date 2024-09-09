@@ -35,10 +35,11 @@ namespace Elysium.Grains
         private readonly IElysiumStorage _storage;
         private readonly IJsonLdService _jsonLdService;
         private readonly IUserCryptoService _cryptoService;
+        private readonly IDocumentService _documentService;
         private readonly IGrainFactory _grainFactory;
-        private readonly IGrainFactory<RemoteUri> _remoteGrainFactory;
-        private readonly IGrainFactory<LocalUri> _localGrainFactory;
-        private readonly LocalUri _id;
+        private readonly IGrainFactory<RemoteIri> _remoteGrainFactory;
+        private readonly IGrainFactory<LocalIri> _localGrainFactory;
+        private readonly LocalIri _id;
         private readonly ILocalActorAuthorGrain _authorGrain;
         private readonly IAsyncStream<LocalActorWorkData> _workStream;
 
@@ -48,15 +49,17 @@ namespace Elysium.Grains
             IElysiumStorage storage,
             IJsonLdService jsonLdService,
             IUserCryptoService cryptoService,
+            IDocumentService documentService,
             IGrainFactory grainFactory,
-            IGrainFactory<RemoteUri> remoteGrainFactory,
-            IGrainFactory<LocalUri> localGrainFactory)
+            IGrainFactory<RemoteIri> remoteGrainFactory,
+            IGrainFactory<LocalIri> localGrainFactory)
         {
             _state = state;
             _hostingService = hostingService;
             _storage = storage;
             _jsonLdService = jsonLdService;
             _cryptoService = cryptoService;
+            _documentService = documentService;
             _grainFactory = grainFactory;
             _remoteGrainFactory = remoteGrainFactory;
             _localGrainFactory = localGrainFactory;
@@ -64,7 +67,7 @@ namespace Elysium.Grains
             _authorGrain = localGrainFactory.GetGrain<ILocalActorAuthorGrain>(_id);
 
             var streamProvider = this.GetStreamProvider(GrainConstants.SimpleStreamProvider);
-            var streamId = StreamId.Create(GrainConstants.LocalActorWorkStream, _id.Uri.AbsoluteUri);
+            var streamId = StreamId.Create(GrainConstants.LocalActorWorkStream, _id.Iri.AbsoluteUri);
             _workStream = streamProvider.GetStream<LocalActorWorkData>(streamId);
         }
 
@@ -125,7 +128,7 @@ namespace Elysium.Grains
         // this uri is the uri of the *activity*, not the object.
         // you willl have to query the uri to get the activity object, then get the object object from that.
         // probably a good idea in case the grain or other downstream services makes changes to the object
-        public async Task<(LocalUri ActivityUri, LocalUri ObjectUri)> PublishActivity(ActivityType type, JArray expandedObject)
+        public async Task<(LocalIri ActivityUri, LocalIri ObjectUri)> PublishActivity(ActivityType type, JArray expandedObject)
         {
             // todo: c/r/u/d the object on disk, create the activity on disk, send the activity to followers.
             // need to think of a way to link the document back to the user for the outbox,
@@ -149,7 +152,7 @@ namespace Elysium.Grains
                 var mainObjectResult = expandedObject.Single().As<JObject>();
 
                 // only doing this because it is a create operation!!
-                var setObjectAttributedToResult = mainObjectResult[JsonLdTypes.ATTRIBUTED_TO] = new JArray { new JObject { { "@Id", _id.Uri.AbsoluteUri } } };
+                var setObjectAttributedToResult = mainObjectResult[JsonLdTypes.ATTRIBUTED_TO] = new JArray { new JObject { { "@Id", _id.Iri.AbsoluteUri } } };
 
                 // get recepients
                 static List<Uri> ExtractListIdValues(string name, JObject parent)
@@ -211,13 +214,13 @@ namespace Elysium.Grains
 
                 var activity = ActivityCompositor.Composit(new CreateActivityDetails
                 {
-                    Actor = _id.Uri,
+                    Actor = _id.Iri,
                     Bcc = bccList,
                     Bto = btoList,
                     Cc = ccList,
                     To = toList,
-                    Object = objectUri.Uri,
-                    AttributedTo = _id.Uri,
+                    Object = objectUri.Iri,
+                    AttributedTo = _id.Iri,
                 });
 
                 var activityId = Guid.NewGuid();
@@ -226,15 +229,14 @@ namespace Elysium.Grains
                 var compactedActivity = await _jsonLdService.CompactAsync(_authorGrain, activity);
 
                 // create the object
-                var guardianGrain = _grainFactory.GetGrain<IGuardianGrain>(Guid.Empty);
-                var response = await guardianGrain.TryCreateDocumentAsync(_id, objectUri, compactedObject, btoList, bccList);
-                if (!response.IsSuccessful)
-                    throw new InvalidOperationException($"Guardian denied document creation with reason {response.Reason}");
+                var result = await _documentService.CreateDocumentAsync(_id, objectUri, compactedObject, btoList, bccList);
+                if (!result.IsSuccessful)
+                    throw new InvalidOperationException($"Failed to create document due to reason {result.Reason}");
 
                 // create the activity
-                response = await guardianGrain.TryCreateDocumentAsync(_id, objectUri, compactedActivity, btoList, bccList);
-                if (!response.IsSuccessful)
-                    throw new InvalidOperationException($"Guardian denied document creation with reason {response.Reason}");
+                result = await _documentService.CreateDocumentAsync(_id, objectUri, compactedActivity, btoList, bccList);
+                if (!result.IsSuccessful)
+                    throw new InvalidOperationException($"Failed to create document due to reason {result.Reason}");
 
                 // TODO: the activity should also be available at a more well known url, if the type is understood. e.g. toots go at users/fred/toot/12345
 

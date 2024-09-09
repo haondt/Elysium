@@ -14,11 +14,11 @@ namespace Elysium.Grains
     [StatelessWorker]
     public class RemoteActorWorkerGrain : Grain, IRemoteActorWorkerGrain
     {
-        private readonly RemoteUri _id;
+        private readonly RemoteIri _id;
         private readonly IRemoteActorGrain _actorGrain;
         private readonly IDispatchRemoteActivityGrain _dispatchGrain;
 
-        public RemoteActorWorkerGrain(IGrainFactory<RemoteUri> uriGrainFactory, IGrainFactory grainFactory)
+        public RemoteActorWorkerGrain(IGrainFactory<RemoteIri> uriGrainFactory, IGrainFactory grainFactory)
         {
             _id = uriGrainFactory.GetIdentity(this);
             _actorGrain = uriGrainFactory.GetGrain<IRemoteActorGrain>(_id);

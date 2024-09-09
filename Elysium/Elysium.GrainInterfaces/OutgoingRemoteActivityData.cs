@@ -11,6 +11,6 @@ namespace Elysium.GrainInterfaces
     public class OutgoingRemoteActivityData
     {
         public required string Payload { get; set; }
-        public required LocalUri Sender { get; set; }
+        public required LocalIri Sender { get; set; }
     }
 }

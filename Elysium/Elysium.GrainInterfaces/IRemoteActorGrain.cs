@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces
 {
-    public interface IRemoteActorGrain : IGrain<RemoteUri>
+    public interface IRemoteActorGrain : IGrain<RemoteIri>
     {
         Task<byte[]> GetPublicKeyAsync();
         //Task<JArray> GetInboxAsync();

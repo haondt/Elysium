@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.Grains.Services
 {
-    public class JsonLdService(IDocumentResolver documentResolver, IHostingService hostingService) : IJsonLdService
+    public class JsonLdService(IDocumentService documentResolver, IHostingService hostingService) : IJsonLdService
     {
         public async Task<JObject> CompactAsync(IHttpMessageAuthor author, JArray input)
         {

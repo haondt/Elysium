@@ -8,6 +8,8 @@ namespace Elysium.GrainInterfaces.Reasons
 {
     public enum DocumentReason
     {
-        NotAllowed
+        NotFound,
+        Unauthorized,
+        Conflict
     }
 }

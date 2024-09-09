@@ -42,15 +42,15 @@ namespace Elysium.Hosting.Services
         //    return new(remaining);
         //}
 
-        public async Task<Uri> GetUriForUsernameAsync(string username)
+        public async Task<Iri> GetIriForUsernameAsync(string username)
         {
             if (username.Count(c => c == '@') != 1)
                 throw new InvalidOperationException("unable to parse username");
             var host = username.Split('@')[^1];
             var partialUri = new UriBuilder { Host = host, Scheme = Uri.UriSchemeHttps }.Uri;
             if (IsLocalHost(partialUri))
-                return GetUriForLocalUsername(username).Uri;
-            return (await GetUriForRemoteUsernameAsync(username)).Uri;
+                return GetUriForLocalUsername(username).Iri;
+            return (await GetUriForRemoteUsernameAsync(username)).Iri;
         }
 
         // TODO: move to IActivityPubClientService
@@ -62,17 +62,17 @@ namespace Elysium.Hosting.Services
         //    return new($"{localizedUsername.Value}@{_host}");
         //}
 
-        public LocalUri GetUriForLocalUsername(string username)
+        public LocalIri GetUriForLocalUsername(string username)
         {
             _ = GetLocalizedUsernameFromUsername(username); // validation
             return GetUriForLocalizedUsername(username);
         }
 
-        public LocalUri GetUriForLocalizedUsername(string localizedUsername)
+        public LocalIri GetUriForLocalizedUsername(string localizedUsername)
         {
-            return new LocalUri
+            return new LocalIri
             {
-                Uri = new UriBuilder
+                Iri = new UriBuilder
                 {
                     Host = _host,
                     Scheme = Uri.UriSchemeHttps,
@@ -80,7 +80,7 @@ namespace Elysium.Hosting.Services
                 }.Uri
             };
         }
-        public Task<RemoteUri> GetUriForRemoteUsernameAsync(string username)
+        public Task<RemoteIri> GetUriForRemoteUsernameAsync(string username)
         {
             //if (username.Count(c => c == '@') != 1)
             //    return new(new InvalidOperationException("unable to parse username as a remote user"));
@@ -99,21 +99,22 @@ namespace Elysium.Hosting.Services
 
         }
 
-        public LocalUri GetLocalUserScopedUri(string username, string next)
+        public LocalIri GetLocalUserScopedUri(string username, string next)
         {
             var userUri = GetUriForLocalUsername(username);
             return GetLocalUserScopedUri(userUri, next);
         }
 
-        public LocalUri GetLocalUserScopedUri(LocalUri userUri, string next)
+        public LocalIri GetLocalUserScopedUri(LocalIri userUri, string next)
         {
             next = next.TrimStart('/');
-            return new LocalUri { Uri = new(userUri.Uri, next) };
+            new Uri(userUri.Iri, next);
+            return new LocalIri { Iri = new(userUri.Iri, next) };
         }
 
-        public string GetUsernameFromLocalizedUsername(string username)
+        public string GetUsernameFromLocalizedUsername(string localizedUsername)
         {
-            return $"{username}@{_host}";
+            return $"{localizedUsername}@{_host}";
         }
 
         public string GetLocalizedUsernameFromUsername(string username)
@@ -123,6 +124,21 @@ namespace Elysium.Hosting.Services
             if (!match.Success)
                 throw new InvalidOperationException("unable to parse username as a local user");
             return match.Groups[1].Value;
+        }
+
+        public bool IsScopedToLocalUser(LocalIri uri, LocalIri user)
+        {
+            var uriString = uri.Iri.AbsoluteUri;
+            var userString = user.Iri.AbsoluteUri;
+
+            if (uriString.Length < userString.Length)
+                return false;
+            if (uriString == userString)
+                return true;
+            if (!uriString.StartsWith(userString))
+                return false;
+            var uriPath = uriString.Substring(userString.Length);
+            return uriPath.StartsWith('/');
         }
 
         public string Host => _host;

@@ -22,14 +22,14 @@ namespace Elysium.Grains
 {
     public class RemoteActorGrain : Grain, IRemoteActorGrain
     {
-        private readonly IGrainFactory<RemoteUri> _grainFactory;
+        private readonly IGrainFactory<RemoteIri> _grainFactory;
         private readonly IUserCryptoService _cryptoService;
         private readonly IRemoteDocumentGrain _actorStateGrain;
-        private readonly RemoteUri _id;
+        private readonly RemoteIri _id;
         private byte[]? _publicKey;
 
         public RemoteActorGrain(
-            IGrainFactory<RemoteUri> grainFactory,
+            IGrainFactory<RemoteIri> grainFactory,
             IUserCryptoService cryptoService)
         {
             _id = grainFactory.GetIdentity(this);

@@ -20,7 +20,7 @@ namespace Elysium.Grains.Services
 {
     public class ActivityPubHttpService(
         IHostingService hostingService,
-        IGrainFactory<RemoteUri> uriGrainFactory, 
+        IGrainFactory<RemoteIri> uriGrainFactory, 
         IGrainFactory grainFactory, 
         HttpClient httpClient) : IActivityPubHttpService
     {
@@ -127,7 +127,7 @@ namespace Elysium.Grains.Services
 
             throw new NotImplementedException();
         }
-        private async Task<Optional<IHostIntegrityGrain>> ValidateHostAsync(RemoteUri target)
+        private async Task<Optional<IHostIntegrityGrain>> ValidateHostAsync(RemoteIri target)
         {
             var hostIntegrityGrain = uriGrainFactory.GetGrain<IHostIntegrityGrain>(target);
             if (!await hostIntegrityGrain.ShouldSendRequest())

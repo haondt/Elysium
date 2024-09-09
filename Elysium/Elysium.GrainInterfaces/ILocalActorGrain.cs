@@ -15,7 +15,7 @@ namespace Elysium.GrainInterfaces
     /// Grain representation of a local actor
     /// </summary>
     ///<remarks><see href="https://www.w3.org/TR/activitypub/#actors"/></remarks> 
-    public interface ILocalActorGrain : IGrain<LocalUri>
+    public interface ILocalActorGrain : IGrain<LocalIri>
     {
         Task InitializeAsync(LocalActorState localActorState);
 
@@ -36,7 +36,7 @@ namespace Elysium.GrainInterfaces
         /// <param name="type"></param>
         /// <param name="object"></param>
         /// <returns>the <see cref="Uri"/> of the created activity</returns>
-        Task<(LocalUri ActivityUri, LocalUri ObjectUri)> PublishActivity(ActivityType type, JArray @object);
+        Task<(LocalIri ActivityUri, LocalIri ObjectUri)> PublishActivity(ActivityType type, JArray @object);
 
         /// <summary>
         /// Ask the grain to publish a transient activity.

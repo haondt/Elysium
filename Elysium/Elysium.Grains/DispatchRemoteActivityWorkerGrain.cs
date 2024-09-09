@@ -14,7 +14,7 @@ namespace Elysium.Grains
 {
     [ImplicitStreamSubscription(GrainConstants.DispatchRemoteActivityStream)]
     public class DispatchRemoteActivityWorkerGrain(
-        IGrainFactory<LocalUri> uriGrainFactory, 
+        IGrainFactory<LocalIri> uriGrainFactory, 
         IGrainFactory grainFactory, 
         ILogger<DispatchRemoteActivityWorkerGrain> logger,
         IActivityPubHttpService httpService) : Grain, IDispatchRemoteActivityWorkerGrain

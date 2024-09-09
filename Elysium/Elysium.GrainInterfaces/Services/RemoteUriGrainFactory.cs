@@ -9,16 +9,16 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces.Services
 {
-    public class RemoteUriGrainFactory(IGrainFactory grainFactory) : IGrainFactory<RemoteUri>
+    public class RemoteUriGrainFactory(IGrainFactory grainFactory) : IGrainFactory<RemoteIri>
     {
-        public TGrain GetGrain<TGrain>(RemoteUri identity) where TGrain : IGrain<RemoteUri>
+        public TGrain GetGrain<TGrain>(RemoteIri identity) where TGrain : IGrain<RemoteIri>
         {
             return grainFactory.GetGrain<TGrain>(identity.Uri.AbsoluteUri);
         }
 
-        public RemoteUri GetIdentity<TGrain>(TGrain grain) where TGrain : IGrain<RemoteUri>
+        public RemoteIri GetIdentity<TGrain>(TGrain grain) where TGrain : IGrain<RemoteIri>
         {
-            return new RemoteUri { Uri = new Uri(grain.GetPrimaryKeyString()) };
+            return new RemoteIri { Uri = new Uri(grain.GetPrimaryKeyString()) };
         }
     }
 }

@@ -14,22 +14,22 @@ namespace Elysium.Grains
     [StatelessWorker]
     public class LocalActorAuthorGrain : Grain, ILocalActorAuthorGrain
     {
-        private readonly LocalUri _id;
+        private readonly LocalIri _id;
         private readonly Lazy<Task<byte[]>> _signingKeyLazy;
         private readonly IUserCryptoService _cryptoService;
 
         public LocalActorAuthorGrain(
             ITypedActorServiceProvider typedActorServiceProvider,
             IUserCryptoService cryptoService,
-            IGrainFactory<LocalUri> grainFactory)
+            IGrainFactory<LocalIri> grainFactory)
         {
             _id = grainFactory.GetIdentity(this);
-            var typedActorService = typedActorServiceProvider.GetService(_id.Uri);
+            var typedActorService = typedActorServiceProvider.GetService(_id.Iri);
             _signingKeyLazy = new(typedActorService.GetSigningKeyAsync(_id));
             _cryptoService = cryptoService;
         }
 
-        public Task<string> GetKeyIdAsync() => Task.FromResult(_id.Uri.AbsoluteUri);
+        public Task<string> GetKeyIdAsync() => Task.FromResult(_id.Iri.AbsoluteUri);
 
         public async Task<string> SignAsync(string stringToSign)
         {

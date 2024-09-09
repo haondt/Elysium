@@ -12,7 +12,7 @@ namespace Elysium.GrainInterfaces
     public class DispatchRemoteActivityData 
     {
         public required string Payload { get; set; }
-        public required LocalUri Sender { get; set; }
-        public required RemoteUri Target { get; set; }
+        public required LocalIri Sender { get; set; }
+        public required RemoteIri Target { get; set; }
     }
 }

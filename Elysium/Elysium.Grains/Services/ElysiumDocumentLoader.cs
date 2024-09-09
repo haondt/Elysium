@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Elysium.Grains.Services
 {
     public class ElysiumDocumentLoader(
-        IDocumentResolver documentResolver,
+        IDocumentService documentResolver,
         IHttpMessageAuthor author, 
         IHostingService hostingService) : DocumentLoader
     {
@@ -21,12 +21,12 @@ namespace Elysium.Grains.Services
             var uri = new Uri(url);
             if (hostingService.IsLocalHost(uri))
             {
-                var document = (await documentResolver.GetDocumentAsync(author, new LocalUri { Uri = uri })).Value;
+                var document = (await documentResolver.GetDocumentAsync(author, new LocalIri { Iri = uri })).Value;
                 return new RemoteDocument(url, document);
             }
             else
             {
-                var document = (await documentResolver.GetDocumentAsync(author, new RemoteUri { Uri = uri })).Value;
+                var document = (await documentResolver.GetDocumentAsync(author, new RemoteIri { Uri = uri })).Value;
                 return new RemoteDocument(url, document);
             }
         }

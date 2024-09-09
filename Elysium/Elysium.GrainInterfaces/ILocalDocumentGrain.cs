@@ -14,11 +14,11 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces
 {
-    public interface ILocalDocumentGrain : IGrain<LocalUri>
+    public interface ILocalDocumentGrain : IGrain<LocalIri>
     {
-        public Task<bool> HasValueAsync(Uri requester);
-        public Task InitializeValueAsync(LocalUri owner, JObject value);
-        public Task<Result<DocumentReason>> SetValueAsync(LocalUri requester, JObject value);
+        public Task<bool> HasValueAsync();
+        public Task InitializeValueAsync(LocalIri owner, JObject value);
+        public Task<Result<DocumentReason>> SetValueAsync(LocalIri requester, JObject value);
         public Task<Result<DocumentReason>> UpdateValueAsync(JObject value);
         [AlwaysInterleave]
         public Task<Result<JObject, DocumentReason>> GetValueAsync(Uri requester);
