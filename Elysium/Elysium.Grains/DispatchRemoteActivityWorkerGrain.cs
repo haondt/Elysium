@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.Grains
 {
-    [ImplicitStreamSubscription("DispatchRemoteActivityStream")]
+    [ImplicitStreamSubscription(GrainConstants.DispatchRemoteActivityStream)]
     public class DispatchRemoteActivityWorkerGrain(
         IGrainFactory<LocalUri> uriGrainFactory, 
         IGrainFactory grainFactory, 
@@ -27,8 +27,8 @@ namespace Elysium.Grains
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
             _id = this.GetPrimaryKeyLong();
-            var streamProvider = this.GetStreamProvider("SimpleStreamProvider");
-            var streamId = StreamId.Create("DispatchRemoteActivityStream", _id);
+            var streamProvider = this.GetStreamProvider(GrainConstants.SimpleStreamProvider);
+            var streamId = StreamId.Create(GrainConstants.DispatchRemoteActivityStream, _id);
             var stream = streamProvider.GetStream<DispatchRemoteActivityData>(streamId);
             _subscription = await stream.SubscribeAsync(OnNextAsync);
             await base.OnActivateAsync(cancellationToken);

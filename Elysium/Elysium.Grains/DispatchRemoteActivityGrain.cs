@@ -26,10 +26,10 @@ namespace Elysium.Grains
 
         public override Task OnActivateAsync(CancellationToken cancellationToken)
         {
-            var streamProvider = this.GetStreamProvider("SimpleStreamProvider");
+            var streamProvider = this.GetStreamProvider(GrainConstants.SimpleStreamProvider);
             for (int i=0; i< options.Value.MaxWorkers; i++)
             {
-                var streamId = StreamId.Create("DispatchRemoteActivityStream", i);
+                var streamId = StreamId.Create(GrainConstants.DispatchRemoteActivityStream, i);
                 _streams.Add(streamProvider.GetStream<DispatchRemoteActivityData>(streamId));
                 _loads.Add(0);
             }

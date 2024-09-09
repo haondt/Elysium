@@ -10,7 +10,8 @@ namespace Elysium.GrainInterfaces.Surrogates
     [GenerateSerializer]
     public struct JObjectSurrogate
     {
-        public string Json { get; set; }
+        [Id(0)]
+        public string Json;
     }
 
     [RegisterConverter]
@@ -18,7 +19,7 @@ namespace Elysium.GrainInterfaces.Surrogates
     {
         public JObject ConvertFromSurrogate(in JObjectSurrogate surrogate)
         {
-            return JObject.FromObject(surrogate);
+            return JObject.Parse(surrogate.Json);
         }
 
         public JObjectSurrogate ConvertToSurrogate(in JObject value)

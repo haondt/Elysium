@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 namespace Elysium.Grains
 {
 
-    [ImplicitStreamSubscription("LocalActorWorkStream")]
+    [ImplicitStreamSubscription(GrainConstants.LocalActorWorkStream)]
     public class LocalActorWorkerGrain : Grain, ILocalActorWorkerGrain
     {
         private readonly ILocalActorAuthorGrain _authorGrain;
@@ -48,8 +48,8 @@ namespace Elysium.Grains
         }
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
-            var streamProvider = this.GetStreamProvider("SimpleStreamProvider");
-            var streamId = StreamId.Create("LocalActorWorkStream", _id.Uri.AbsoluteUri);
+            var streamProvider = this.GetStreamProvider(GrainConstants.SimpleStreamProvider);
+            var streamId = StreamId.Create(GrainConstants.LocalActorWorkStream, _id.Uri.AbsoluteUri);
             var stream = streamProvider.GetStream<LocalActorWorkData>(streamId);
             _subscription = await stream.SubscribeAsync(OnNextAsync);
             await base.OnActivateAsync(cancellationToken);

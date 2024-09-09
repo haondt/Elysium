@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.Grains
 {
-    public class LocalDocumentGrain([PersistentState(nameof(DocumentState))] IPersistentState<DocumentState> state,
+    public class LocalDocumentGrain([PersistentState(GrainConstants.GrainDocumentStorage)] IPersistentState<DocumentState> state,
         IJsonLdService jsonLdService,
         IGrainFactory grainFactory
         ) : Grain, ILocalDocumentGrain

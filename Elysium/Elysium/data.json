@@ -1,1 +1,15 @@
-{}
+{
+  "$type": "Elysium.Persistence.Services.DataObject, Elysium.Persistence",
+  "Values": {
+    "$type": "System.Collections.Generic.Dictionary`2[[System.String, System.Private.CoreLib],[System.Object, System.Private.CoreLib]], System.Private.CoreLib",
+    "RWx5c2l1bS5Db3JlLk1vZGVscy5Vc2VySWRlbnRpdHksIEVseXNpdW0uQ29yZSwgVmVyc2lvbj0xLjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPW51bGw=:bm9haEBsb2NhbGhvc3QuaG9tZQ==": {
+      "$type": "Elysium.Core.Models.UserIdentity, Elysium.Core",
+      "Id": "RWx5c2l1bS5Db3JlLk1vZGVscy5Vc2VySWRlbnRpdHksIEVseXNpdW0uQ29yZSwgVmVyc2lvbj0xLjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPW51bGw=:bm9haEBsb2NhbGhvc3QuaG9tZQ==",
+      "PasswordHash": "AQAAAAIAAYagAAAAEONTzjIY4486EBIh90JkklKsgrrMQD5oqlPVVOkgVcQiON8iJVGSJEp+ZOFFCteH6A==",
+      "LocalizedUsername": "noah",
+      "EncryptedPrivateKey": "CfDJ8NBBsJMf8f1Jo+py4Z+sJekhO8sAqYL67U92k5o13FSehl3B2ocAF5GO/20vqWPmh6Q8kCXjollCSfeB5h+cqsF5auxgZGqMue/g+C2IGaHVy7byUITwwkOlIa08yDiN5LWYKdomUTFTotD120UG39yFVrADCvb+pHgnShX7ruxoyGqShYKAoNa4bHx8HytXpcsAzDLDOwnTP6QHZviwNOT/H0iFCA6w/B3LziBPgUSGFrzMDbccvsN3d6HNJz2oYws9keISJVCiMOfMT4Ghdss3CE1XUoFzHB45kR+2Mjtt+JD21H64LXMT0Mc7jx+qqHrPh5glqo+QlUARIwQN80VqvSKj59++O36IVI0n0i4iPjoNvDtLstK/It4MuJas/VhKQNbfOD+6fOaKSlccb2Cz2P/Du/K1swYbVtitNLjyWCK8y72EiexPnlvLaFKAwJ+gcmikIn4aeWAXXBhsCBM=",
+      "PublicKey": "MIIBCgKCAQEAmu55NgmTCDsZNMWyGfJnBIdoKp5W5cAKQuB56oFftavJd0mhcqgrq8dji8icMzEt0KyJn9856jD3sEFqSEvqo28OqayGeg44SlgZyrNffbbPAPLcCbIr2GVqLxsZMEjz/un22Jd39fJ0eNozI5yW7XzlOWxodBOfviNlzRVyiOjuTAHxSINUXJBz1oxYC4bwpoXiK2P5KmSBt1LMTPeQqkERjpMW4P4YmKUFQAAg0mIGnXNujnJJL7xH6rv1EZSD1eBeieKAtECJwrjqOPCEXUm8gP8RIsYyAn+c8CVRllSYFyN2oW78ORV08KSg6JQI2rXbPYXvA/3j5VK369k9GQIDAQAB",
+      "NormalizedUsername": "NOAH"
+    }
+  }
+}

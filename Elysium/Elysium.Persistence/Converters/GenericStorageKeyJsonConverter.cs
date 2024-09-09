@@ -4,9 +4,6 @@ using Newtonsoft.Json.Linq;
 
 namespace Elysium.Persistence.Converters
 {
-    /// <summary>
-    /// Converter for <see cref="StorageKey{T}"/>
-    /// </summary>
     public class GenericStorageKeyJsonConverter : JsonConverter
     {
         public override bool CanConvert(Type objectType)

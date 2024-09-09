@@ -1,32 +1,40 @@
-﻿using Elysium.Client.Services;
-using Elysium.Core.Models;
+﻿using Elysium.Core.Models;
 using Elysium.GrainInterfaces.Services;
+using Elysium.Grains;
+using Elysium.Grains.Services;
 using Elysium.Hosting.Models;
+using Elysium.Hosting.Services;
+using Elysium.Server.Services;
 using Haondt.Identity.StorageKey;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Polly;
+using Polly.Extensions.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Client.Extensions
+namespace Elysium.Silo.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddElysiumClientServices(this IServiceCollection services)
+        public static IServiceCollection AddElysiumSiloServices(this IServiceCollection services)
         {
-            services.AddScoped<IActivityPubClientService, ActivityPubClientService>();
-            services.AddElysiumClientGrainFactories();
+            //services.AddSingleton<IHostingService, HostingService>();
+            //services.AddScoped<IActivityPubClientService, ActivityPubClientService>();
+            services.AddElysiumSiloGrainFactories();
             return services;
         }
 
-        public static IServiceCollection AddElysiumClientGrainFactories(this IServiceCollection services)
+        public static IServiceCollection AddElysiumSiloGrainFactories(this IServiceCollection services)
         {
             services.AddSingleton<IGrainFactory<StorageKey<UserIdentity>>, StorageKeyGrainFactory<UserIdentity>>();
             //services.AddSingleton<IGrainFactory<StorageKey>, StorageKeyGrainFactory>();
             services.AddSingleton<IGrainFactory<LocalUri>, LocalUriGrainFactory>();
             services.AddSingleton<IGrainFactory<RemoteUri>, RemoteUriGrainFactory>();
+            services.AddSingleton<IGrainFactory<StorageKey<UserIdentity>>, StorageKeyGrainFactory<UserIdentity>>();
             return services;
         }
     }

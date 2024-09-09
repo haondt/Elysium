@@ -29,7 +29,7 @@ using Orleans.Streams;
 
 namespace Elysium.Grains
 {
-    public abstract class LocalActorGrain : Grain, ILocalActorGrain
+    public class LocalActorGrain : Grain, ILocalActorGrain
     {
         private readonly IPersistentState<LocalActorState> _state;
         private readonly IHostingService _hostingService;
@@ -44,7 +44,7 @@ namespace Elysium.Grains
         private readonly IAsyncStream<LocalActorWorkData> _workStream;
 
         public LocalActorGrain(
-            [PersistentState(nameof(LocalActorState))] IPersistentState<LocalActorState> state,
+            [PersistentState(GrainConstants.GrainStorage)] IPersistentState<LocalActorState> state,
             IHostingService hostingService,
             IElysiumStorage storage,
             IJsonLdService jsonLdService,
@@ -64,8 +64,8 @@ namespace Elysium.Grains
             _id = localGrainFactory.GetIdentity(this);
             _authorGrain = localGrainFactory.GetGrain<ILocalActorAuthorGrain>(_id);
 
-            var streamProvider = this.GetStreamProvider("SimpleStreamProvider");
-            var streamId = StreamId.Create("LocalActorWorkStream", _id.Uri.AbsoluteUri);
+            var streamProvider = this.GetStreamProvider(GrainConstants.SimpleStreamProvider);
+            var streamId = StreamId.Create(GrainConstants.LocalActorWorkStream, _id.Uri.AbsoluteUri);
             _workStream = streamProvider.GetStream<LocalActorWorkData>(streamId);
         }
 
@@ -165,8 +165,8 @@ namespace Elysium.Grains
                             return new Result<List<Uri>>(new JsonException($"one or more values of {name} was not in the expected format"));
                         if (jv.Count != 1) 
                             return new Result<List<Uri>>(new JsonException($"one or more values of {name} did not have exactly 1 key"));
-                        if (!jv.TryGetValue("@type", out var typeValueToken))
-                            return new Result<List<Uri>>(new JsonException($"one or more values of {name} did not have a @type key"));
+                        if (!jv.TryGetValue("@id", out var typeValueToken))
+                            return new Result<List<Uri>>(new JsonException($"one or more values of {name} did not have a @id key"));
                         if (typeValueToken is not JValue typeValue || typeValue.Type != JTokenType.String)
                             return new Result<List<Uri>>(new JsonException($"one or more values of {name} did not have a string key"));
                         var typeString = typeValue.Value<string>();

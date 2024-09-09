@@ -11,13 +11,13 @@ namespace Elysium.GrainInterfaces
 {
     public interface IStorageKeyGrain<T> : IGrain<StorageKey<T>>
     {
-        public Task<Result<T>> GetIdentityAsync();
+        public Task<Result<T>> GetAsync();
     }
 
     //public interface IUserIdentityStorageKeyGrain : IStorageKeyGrain<UserIdentity> { }
-    public interface IUserIdentityStorageKeyGrain : IGrain<StorageKey>
-    {
-        public Task<Result<T>> GetIdentityAsync<T>();
+    //public interface IUserIdentityStorageKeyGrain : IGrain<StorageKey>
+    //{
+    //    public Task<Result<T>> GetIdentityAsync<T>();
 
-    }
+    //}
 }

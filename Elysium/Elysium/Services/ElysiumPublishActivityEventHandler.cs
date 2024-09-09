@@ -55,7 +55,8 @@ namespace Elysium.Services
 
                 var publishResult = await activityPubService.PublishActivityAsync(userKey.Value, ActivityType.Create,  activityObject.Value);
                 if (!publishResult.IsSuccessful)
-                    return await GetMessageErrorComponentAsync(publishResult.Error.Message);
+                    publishResult.Value.Equals(null);
+                    //return await GetMessageErrorComponentAsync(publishResult.Error.Message);
 
                 return new(await componentFactory.GetPlainComponent(new TemporaryMessageComponentUpdateModel
                 {

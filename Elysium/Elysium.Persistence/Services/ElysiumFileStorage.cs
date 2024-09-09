@@ -22,6 +22,7 @@ namespace Elysium.Persistence.Services
         private DataObject? _dataCache;
         private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
 
+        // TODO: fix this Ioptions, use same style as sqlite settings
         public ElysiumFileStorage(IOptions<HaondtFileStorageSettings> options)
         {
             _dataFile = options.Value.DataFile;
@@ -99,6 +100,7 @@ namespace Elysium.Persistence.Services
         public Task<Result<bool>> ContainsKey(StorageKey key) =>
             TryAcquireSemaphoreAnd(async () =>
             {
+                var x = new Result<bool>();
                 var data = await GetDataAsync();
                 return new Result<bool>(data.Values.ContainsKey(StorageKeyConvert.Serialize(key)));
             });

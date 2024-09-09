@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Elysium.Silo": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

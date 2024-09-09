@@ -29,8 +29,15 @@ namespace Elysium.Authentication.Extensions
                 o.User.AllowedUserNameCharacters = AuthenticationConstants.ALLOWED_USERNAME_CHARACTERS;
             });
             services.AddScoped<ISessionService, SessionService>();
-            services.AddScoped<ICryptoService, CryptoService>();
-            services.AddScoped<IUserCryptoService, UserCryptoService>();
+            services.AddElysiumCryptoServices();
+            return services;
+        }
+
+        public static IServiceCollection AddElysiumCryptoServices(this IServiceCollection services)
+        {
+            services.AddDataProtection(p => p.ApplicationDiscriminator = "Elysium");
+            services.AddSingleton<ICryptoService, CryptoService>();
+            services.AddSingleton<IUserCryptoService, UserCryptoService>();
             return services;
         }
     }

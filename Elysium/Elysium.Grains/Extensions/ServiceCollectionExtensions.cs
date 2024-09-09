@@ -21,12 +21,10 @@ namespace Elysium.Grains.Extensions
         {
             services.Configure<HostIntegritySettings>(configuration.GetSection(nameof(HostIntegritySettings)));
             services.Configure<RemoteDocumentSettings>(configuration.GetSection(nameof(RemoteDocumentSettings)));
-            services.AddScoped<ITypedActorServiceProvider, TypedActorServiceFactory>();
-            services.AddSingleton<IGrainFactory<LocalUri>, LocalUriGrainFactory>();
-            services.AddSingleton<IGrainFactory<RemoteUri>, RemoteUriGrainFactory>();
-            //services.AddSingleton<IGrainFactory<StorageKey<UserIdentity>>, StorageKeyGrainFactory<UserIdentity>>();
-            services.AddSingleton<IGrainFactory<StorageKey>, StorageKeyGrainFactory>();
-            services.AddScoped<IDocumentResolver, DocumentResolver>();
+            services.AddSingleton<ITypedActorServiceProvider, TypedActorServiceFactory>();
+            services.AddSingleton<IJsonLdService, JsonLdService>();
+            //services.AddSingleton<IGrainFactory<StorageKey>, StorageKeyGrainFactory>();
+            services.AddSingleton<IDocumentResolver, DocumentResolver>();
             services.AddHttpClient<IActivityPubHttpService, ActivityPubHttpService>(client =>
             {
                 client.DefaultRequestHeaders.Add("Accept", "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"");

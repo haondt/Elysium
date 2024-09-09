@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.Grains
 {
-    public class RemoteDocumentGrain([PersistentState(nameof(DocumentState))] IPersistentState<DocumentState> state,
+    public class RemoteDocumentGrain([PersistentState(GrainConstants.GrainDocumentStorage)] IPersistentState<DocumentState> state,
         IGrainFactory grainFactory,
         IActivityPubHttpService httpService,
         IOptions<RemoteDocumentSettings> options,
