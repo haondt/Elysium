@@ -1,8 +1,8 @@
-﻿using Elysium.GrainInterfaces;
+﻿using Elysium.Core.Models;
+using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Reasons;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Exceptions;
-using Elysium.Hosting.Models;
 using Elysium.Server.Services;
 using Haondt.Core.Models;
 using Microsoft.Extensions.Options;
@@ -142,12 +142,12 @@ namespace Elysium.Grains.Services
                 return new (ElysiumWebReason.FaultyHost);
 
             var date = DateTimeOffset.UtcNow.ToString("r", CultureInfo.InvariantCulture);
-            var stringToSign = $"(request-target): get {data.Target.Uri.AbsoluteUri}\nhost: {data.Target.Uri.Host}\ndate: {date}";
+            var stringToSign = $"(request-target): get {data.Target.Iri.ToString()}\nhost: {data.Target.Iri.Host}\ndate: {date}";
             var signature = await data.Author.SignAsync(stringToSign);
             var signatureHeaderValue = $"keyId=\"{await data.Author.GetKeyIdAsync()}\",headers=\"(request-target) host date\",signature=\"{signature}\"";
 
-            var message = new HttpRequestMessage(HttpMethod.Get, data.Target.Uri);
-            message.Headers.Add("Host", data.Target.Uri.Host);
+            var message = new HttpRequestMessage(HttpMethod.Get, data.Target.Iri);
+            message.Headers.Add("Host", data.Target.Iri.Host);
             message.Headers.Add("Date", date);
             message.Headers.Add("Signature", signatureHeaderValue);
 
@@ -196,15 +196,15 @@ namespace Elysium.Grains.Services
 
             var digest = $"SHA-256={SHA256.HashData(Encoding.UTF8.GetBytes(data.JsonLdPayload))}";
             var date = DateTimeOffset.UtcNow.ToString("r", CultureInfo.InvariantCulture);
-            var stringToSign = $"(request-target): post {data.Target.Uri.AbsoluteUri}\nhost: {data.Target.Uri.Host}\ndate: {date}\ndigest: {digest}";
+            var stringToSign = $"(request-target): post {data.Target.Iri.ToString()}\nhost: {data.Target.Iri.Host}\ndate: {date}\ndigest: {digest}";
             var signature = await data.Author.SignAsync(stringToSign);
             var signatureHeaderValue = $"keyId=\"{await data.Author.GetKeyIdAsync()}\",headers=\"(request-target) host date digest\",signature=\"{signature}\"";
 
-            var message = new HttpRequestMessage(HttpMethod.Post, data.Target.Uri)
+            var message = new HttpRequestMessage(HttpMethod.Post, data.Target.Iri)
             {
                 Content = new StringContent(data.JsonLdPayload, Encoding.UTF8, "application/ld+json"),
             };
-            message.Headers.Add("Host", data.Target.Uri.Host);
+            message.Headers.Add("Host", data.Target.Iri.Host);
             message.Headers.Add("Date", date);
             message.Headers.Add("Digest", digest);
             message.Headers.Add("Signature", signatureHeaderValue);

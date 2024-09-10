@@ -2,7 +2,6 @@
 using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Hosting.Models;
 using Elysium.Server.Services;
 using Haondt.Identity.StorageKey;
 using Newtonsoft.Json.Linq;
@@ -27,7 +26,7 @@ namespace Elysium.Client.Services
                 throw new UnauthorizedAccessException($"Unable to retrieve user identity {author}");
 
             var localizedUsername = userIdentity.Value.LocalizedUsername ?? author.Parts[^1].Value;
-            var userUri = hostingService.GetUriForLocalizedUsername(localizedUsername);
+            var userUri = hostingService.GetIriForLocalizedUsername(localizedUsername);
             var userGrain = grainFactory.GetGrain<ILocalActorGrain>(userUri);
 
             return await userGrain.PublishActivity(type, @object);

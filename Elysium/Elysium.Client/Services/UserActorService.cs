@@ -1,7 +1,6 @@
 ﻿using Elysium.Authentication.Services;
 using Elysium.Core.Models;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Hosting.Models;
 using Elysium.Persistence.Services;
 using Elysium.Server.Services;
 using Haondt.Identity.StorageKey;
@@ -49,7 +48,7 @@ namespace Elysium.Client.Services
             throw new NotImplementedException();
         }
 
-        public Task<JObject> GenerateIdentityDocumentAsync(LocalIri uri)
+        public Task<JObject> GenerateIdentityDocumentAsync(LocalIri iri)
         {
             throw new NotImplementedException();
             //if (!_typedActorService.IsSuccessful)
@@ -86,7 +85,7 @@ namespace Elysium.Client.Services
         }
 
 
-        public Task<byte[]> GetPublicKeyAsync(LocalIri uri)
+        public Task<byte[]> GetPublicKeyAsync(LocalIri iri)
         {
             throw new NotImplementedException();
         }

@@ -1,5 +1,4 @@
 ﻿using Elysium.GrainInterfaces.Services;
-using Elysium.Hosting.Models;
 using Elysium.Server.Services;
 using JsonLD.Core;
 using Microsoft.Extensions.Options;

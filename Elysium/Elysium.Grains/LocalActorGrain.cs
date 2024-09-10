@@ -19,7 +19,6 @@ using Newtonsoft.Json.Linq;
 using Elysium.Authentication.Services;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Server.Services;
-using Elysium.Hosting.Models;
 using Elysium.ActivityPub.Models;
 using Elysium.Core.Extensions;
 using Newtonsoft.Json;
@@ -67,7 +66,7 @@ namespace Elysium.Grains
             _authorGrain = localGrainFactory.GetGrain<ILocalActorAuthorGrain>(_id);
 
             var streamProvider = this.GetStreamProvider(GrainConstants.SimpleStreamProvider);
-            var streamId = StreamId.Create(GrainConstants.LocalActorWorkStream, _id.Iri.AbsoluteUri);
+            var streamId = StreamId.Create(GrainConstants.LocalActorWorkStream, _id.Iri.ToString());
             _workStream = streamProvider.GetStream<LocalActorWorkData>(streamId);
         }
 
@@ -125,8 +124,8 @@ namespace Elysium.Grains
             //throw new NotImplementedException();
         }
 
-        // this uri is the uri of the *activity*, not the object.
-        // you willl have to query the uri to get the activity object, then get the object object from that.
+        // this iri is the iri of the *activity*, not the object.
+        // you willl have to query the iri to get the activity object, then get the object object from that.
         // probably a good idea in case the grain or other downstream services makes changes to the object
         public async Task<(LocalIri ActivityUri, LocalIri ObjectUri)> PublishActivity(ActivityType type, JArray expandedObject)
         {
@@ -152,16 +151,16 @@ namespace Elysium.Grains
                 var mainObjectResult = expandedObject.Single().As<JObject>();
 
                 // only doing this because it is a create operation!!
-                var setObjectAttributedToResult = mainObjectResult[JsonLdTypes.ATTRIBUTED_TO] = new JArray { new JObject { { "@Id", _id.Iri.AbsoluteUri } } };
+                var setObjectAttributedToResult = mainObjectResult[JsonLdTypes.ATTRIBUTED_TO] = new JArray { new JObject { { "@Id", _id.Iri.ToString() } } };
 
                 // get recepients
-                static List<Uri> ExtractListIdValues(string name, JObject parent)
+                static List<Iri> ExtractListIdValues(string name, JObject parent)
                 {
                     if (!parent.TryGetValue(name, out var values))
-                        return new(new List<Uri>());
+                        return new(new List<Iri>());
                     if (values is not JArray ja)
                         throw new JsonException($"{name} was not in the expected format");
-                    var output = new List<Uri>();
+                    var output = new List<Iri>();
                     foreach (var value in values)
                     {
                         if (value is not JObject jv)
@@ -176,7 +175,7 @@ namespace Elysium.Grains
                         if (string.IsNullOrEmpty(typeString))
                             throw new JsonException($"one or more values of {name} had an empty string value");
 
-                        output.Add(new Uri(typeString));
+                        output.Add(Iri.FromUnencodedString(typeString));
                     }
 
                     return output;
@@ -188,7 +187,7 @@ namespace Elysium.Grains
                 var btoList = ExtractListIdValues(JsonLdTypes.BTO, mainObjectResult);
                 var audienceList = ExtractListIdValues(JsonLdTypes.BTO, mainObjectResult);
 
-                var recepients = new HashSet<Uri>();
+                var recepients = new HashSet<Iri>();
                 recepients.UnionWith(ccList);
                 recepients.UnionWith(bccList);
                 recepients.UnionWith(toList);
@@ -234,7 +233,7 @@ namespace Elysium.Grains
                     throw new InvalidOperationException($"Failed to create document due to reason {result.Reason}");
 
                 // create the activity
-                result = await _documentService.CreateDocumentAsync(_id, objectUri, compactedActivity, btoList, bccList);
+                result = await _documentService.CreateDocumentAsync(_id, activityUri, compactedActivity, btoList, bccList);
                 if (!result.IsSuccessful)
                     throw new InvalidOperationException($"Failed to create document due to reason {result.Reason}");
 

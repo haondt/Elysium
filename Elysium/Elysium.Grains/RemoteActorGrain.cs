@@ -1,11 +1,11 @@
 ﻿using Elysium.ActivityPub.Helpers;
 using Elysium.ActivityPub.Models;
 using Elysium.Authentication.Services;
+using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Exceptions;
 using Elysium.Grains.Services;
-using Elysium.Hosting.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Orleans;
 using Orleans.Runtime;
@@ -74,7 +74,7 @@ namespace Elysium.Grains
             throw new NotImplementedException();
         }
 
-        public async Task<Uri> GetInboxUriAsync()
+        public async Task<Iri> GetInboxUriAsync()
         {
             // todo: proxy this to instance grain?
             //var actorState = await _actorStateGrain.GetExpandedValueAsync();

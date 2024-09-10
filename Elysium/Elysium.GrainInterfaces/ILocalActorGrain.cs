@@ -1,6 +1,6 @@
 ﻿using Elysium.ActivityPub.Models;
+using Elysium.Core.Models;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Hosting.Models;
 using Newtonsoft.Json.Linq;
 using Orleans;
 using System;
@@ -35,7 +35,7 @@ namespace Elysium.GrainInterfaces
         /// </summary>
         /// <param name="type"></param>
         /// <param name="object"></param>
-        /// <returns>the <see cref="Uri"/> of the created activity</returns>
+        /// <returns>the <see cref="Iri"/> of the created activity</returns>
         Task<(LocalIri ActivityUri, LocalIri ObjectUri)> PublishActivity(ActivityType type, JArray @object);
 
         /// <summary>

@@ -1,7 +1,7 @@
-﻿using Elysium.GrainInterfaces;
+﻿using Elysium.Core.Models;
+using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Services;
-using Elysium.Hosting.Models;
 using Microsoft.Extensions.Logging;
 using Orleans.Streams;
 using System;

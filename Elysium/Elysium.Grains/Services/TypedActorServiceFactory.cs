@@ -1,4 +1,5 @@
-﻿using Elysium.GrainInterfaces.Services;
+﻿using Elysium.Core.Models;
+using Elysium.GrainInterfaces.Services;
 using Elysium.Server.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -11,9 +12,9 @@ namespace Elysium.Grains.Services
 {
     public class TypedActorServiceFactory(IServiceProvider serviceProvider, IHostingService hostingService) : ITypedActorServiceProvider
     {
-        public ITypedActorService GetService(Uri id)
+        public ITypedActorService GetService(Iri id)
         {
-            // todo: some magic logic that decides this uri == a useridentity, and returns 
+            // todo: some magic logic that decides this iri == a useridentity, and returns 
                 //return new(serviceProvider.GetRequiredService<IUserActorService>());
             throw new NotImplementedException();
         }

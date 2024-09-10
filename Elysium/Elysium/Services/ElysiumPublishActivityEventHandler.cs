@@ -4,6 +4,7 @@ using Elysium.ActivityPub.Models;
 using Elysium.Authentication.Services;
 using Elysium.Client.Services;
 using Elysium.Components.Components;
+using Elysium.Core.Models;
 using Elysium.Server.Services;
 using Haondt.Core.Models;
 using Haondt.Web.Core.Components;
@@ -39,10 +40,10 @@ namespace Elysium.Services
                 var recepientResult = requestData.Form.TryGetValue<string>("recepient");
                 if (!recepientResult.HasValue)
                     return await GetMessageErrorComponentAsOptionalAsync("recepient cannot be empty");
-                Uri recepientUri;
+                Iri recepientUri;
                 try
                 {
-                    recepientUri = await hostingService.GetUriForUsernameAsync(recepientResult.Value);
+                    recepientUri = await hostingService.GetIriForUsernameAsync(recepientResult.Value);
                 }
                 catch
                 {

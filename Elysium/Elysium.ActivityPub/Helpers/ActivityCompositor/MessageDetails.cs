@@ -1,5 +1,6 @@
 ﻿using Elysium.ActivityPub.Helpers.ActivityCompositor;
 using Elysium.ActivityPub.Models;
+using Elysium.Core.Models;
 
 namespace Elysium.ActivityPub.Helpers.ActivityCompositor
 {
@@ -7,6 +8,6 @@ namespace Elysium.ActivityPub.Helpers.ActivityCompositor
     {
         public string Type => JsonLdTypes.NOTE;
         public required string Text { get; set; }
-        public required Uri Recepient { get; set; }
+        public required Iri Recepient { get; set; }
     }
 }

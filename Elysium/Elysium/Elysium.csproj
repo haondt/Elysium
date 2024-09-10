@@ -22,8 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Haondt.Web" Version="1.0.0-alpha-20240909043452" />
-    <PackageReference Include="Haondt.Web.BulmaCSS" Version="1.0.0-alpha-20240909043452" />
+    <PackageReference Include="Haondt.Web" Version="1.0.0-alpha-20240909175453" />
+    <PackageReference Include="Haondt.Web.BulmaCSS" Version="1.0.0-alpha-20240909175453" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
   </ItemGroup>
 

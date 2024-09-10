@@ -1,4 +1,4 @@
-﻿using Elysium.Hosting.Models;
+﻿using Elysium.Core.Models;
 using Newtonsoft.Json.Linq;
 using Orleans;
 using System;

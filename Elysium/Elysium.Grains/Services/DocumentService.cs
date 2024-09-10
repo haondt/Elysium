@@ -1,7 +1,6 @@
 ﻿using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Reasons;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Hosting.Models;
 using Elysium.Server.Services;
 using Haondt.Core.Models;
 using Haondt.Identity.StorageKey;
@@ -12,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Haondt.Persistence.Services;
+using Elysium.Core.Models;
 
 namespace Elysium.Grains.Services
 {
@@ -26,23 +26,23 @@ namespace Elysium.Grains.Services
 
         //}
 
-        //public Task<Result<JObject>> GetDocumentAsync(IHttpMessageAuthor requester, RemoteUri uri)
+        //public Task<Result<JObject>> GetDocumentAsync(IHttpMessageAuthor requester, RemoteUri iri)
         //{
-        //    var remoteDocumentGrain = grainFactory.GetGrain<IRemoteDocumentGrain>(uri.ToString());
+        //    var remoteDocumentGrain = grainFactory.GetGrain<IRemoteDocumentGrain>(iri.ToString());
         //    return remoteDocumentGrain.GetValueAsync(requester);
         //}
 
-        //public Task<Result<JObject>> GetDocumentAsync(Uri requester, LocalUri uri)
+        //public Task<Result<JObject>> GetDocumentAsync(Iri requester, LocalUri iri)
         //{
-        //    var localDocumentGrain = grainFactory.GetGrain<ILocalDocumentGrain>(uri);
+        //    var localDocumentGrain = grainFactory.GetGrain<ILocalDocumentGrain>(iri);
         //    return localDocumentGrain.GetValueAsync(requester);
         //}
         public async Task<Result<DocumentReason>> CreateDocumentAsync(
             LocalIri actor, 
             LocalIri objectUri, 
             JObject compactedObject,
-            List<Uri> bto,
-            List<Uri> bcc)
+            List<Iri> bto,
+            List<Iri> bcc)
         {
             //var documentGrain = localGrainFactory.GetGrain<ILocalDocumentGrain>(objectUri);
             //if (await documentGrain.HasValueAsync())
@@ -69,12 +69,12 @@ namespace Elysium.Grains.Services
             return new();
         }
 
-        public Task<Result<JToken, ElysiumWebReason>> GetDocumentAsync(IHttpMessageAuthor requester, RemoteIri uri)
+        public Task<Result<JToken, ElysiumWebReason>> GetDocumentAsync(IHttpMessageAuthor requester, RemoteIri iri)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Result<JToken, ElysiumWebReason>> GetDocumentAsync(IHttpMessageAuthor requester, LocalIri uri)
+        public Task<Result<JToken, ElysiumWebReason>> GetDocumentAsync(IHttpMessageAuthor requester, LocalIri iri)
         {
             throw new NotImplementedException();
         }

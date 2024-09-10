@@ -1,6 +1,7 @@
 ﻿using Elysium.ActivityPub.Extensions;
 using Elysium.ActivityPub.Models;
 using Elysium.Core.Extensions;
+using Elysium.Core.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -23,10 +24,10 @@ namespace Elysium.ActivityPub.Helpers
             return this;
         }
         
-        public ActivityPubJsonBuilder Id(Uri id)
+        public ActivityPubJsonBuilder Id(Iri id)
         {
             _state.SetDefault(0, JObjectFactory, JObjectFactory)
-                ["@id"] = new JArray { id.AbsoluteUri };
+                ["@id"] = new JArray { id.ToString() };
             return this;
         }
         private ActivityPubJsonBuilder SetKeyValue(string key, string value)
@@ -59,19 +60,19 @@ namespace Elysium.ActivityPub.Helpers
             return this;
         }
 
-        public ActivityPubJsonBuilder Inbox(Uri uri) => SetKeyId(JsonLdTypes.INBOX, uri.AbsoluteUri);
-        public ActivityPubJsonBuilder Outbox(Uri uri) => SetKeyId(JsonLdTypes.OUTBOX, uri.AbsoluteUri);
-        public ActivityPubJsonBuilder Followers(Uri uri) => SetKeyId(JsonLdTypes.FOLLOWERS, uri.AbsoluteUri);
-        public ActivityPubJsonBuilder Following(Uri uri) => SetKeyId(JsonLdTypes.FOLLOWING, uri.AbsoluteUri);
+        public ActivityPubJsonBuilder Inbox(Iri iri) => SetKeyId(JsonLdTypes.INBOX, iri.ToString());
+        public ActivityPubJsonBuilder Outbox(Iri iri) => SetKeyId(JsonLdTypes.OUTBOX, iri.ToString());
+        public ActivityPubJsonBuilder Followers(Iri iri) => SetKeyId(JsonLdTypes.FOLLOWERS, iri.ToString());
+        public ActivityPubJsonBuilder Following(Iri iri) => SetKeyId(JsonLdTypes.FOLLOWING, iri.ToString());
         public ActivityPubJsonBuilder PreferredUsername(string username) => SetKeyValue(JsonLdTypes.PREFERRED_USERNAME, username);
-        public ActivityPubJsonBuilder AttributedTo(Uri uri) => SetKeyId(JsonLdTypes.ATTRIBUTED_TO, uri.AbsoluteUri);
+        public ActivityPubJsonBuilder AttributedTo(Iri iri) => SetKeyId(JsonLdTypes.ATTRIBUTED_TO, iri.ToString());
         public ActivityPubJsonBuilder Content(string content) => SetKeyValue(JsonLdTypes.CONTENT, content);
-        public ActivityPubJsonBuilder Cc(Uri uri) => SetKeyId(JsonLdTypes.CC, uri.AbsoluteUri);
-        public ActivityPubJsonBuilder To(Uri uri) => SetKeyId(JsonLdTypes.TO, uri.AbsoluteUri);
-        public ActivityPubJsonBuilder To(List<Uri>? uris) => (uris == null || uris.Count == 0) ? ClearKey(JsonLdTypes.TO) : SetKeyIds(JsonLdTypes.TO, uris.Select(uri => uri.AbsoluteUri));
-        public ActivityPubJsonBuilder Cc(List<Uri>? uris) => (uris == null || uris.Count == 0) ? ClearKey(JsonLdTypes.CC) : SetKeyIds(JsonLdTypes.CC, uris.Select(uri => uri.AbsoluteUri));
-        public ActivityPubJsonBuilder Bto(List<Uri>? uris) => (uris == null || uris.Count == 0) ? ClearKey(JsonLdTypes.BTO) : SetKeyIds(JsonLdTypes.BTO, uris.Select(uri => uri.AbsoluteUri));
-        public ActivityPubJsonBuilder Bcc(List<Uri>? uris) => (uris == null || uris.Count == 0) ? ClearKey(JsonLdTypes.BCC) : SetKeyIds(JsonLdTypes.BCC, uris.Select(uri => uri.AbsoluteUri));
+        public ActivityPubJsonBuilder Cc(Iri iri) => SetKeyId(JsonLdTypes.CC, iri.ToString());
+        public ActivityPubJsonBuilder To(Iri iri) => SetKeyId(JsonLdTypes.TO, iri.ToString());
+        public ActivityPubJsonBuilder To(List<Iri>? uris) => (uris == null || uris.Count == 0) ? ClearKey(JsonLdTypes.TO) : SetKeyIds(JsonLdTypes.TO, uris.Select(iri => iri.ToString()));
+        public ActivityPubJsonBuilder Cc(List<Iri>? uris) => (uris == null || uris.Count == 0) ? ClearKey(JsonLdTypes.CC) : SetKeyIds(JsonLdTypes.CC, uris.Select(iri => iri.ToString()));
+        public ActivityPubJsonBuilder Bto(List<Iri>? uris) => (uris == null || uris.Count == 0) ? ClearKey(JsonLdTypes.BTO) : SetKeyIds(JsonLdTypes.BTO, uris.Select(iri => iri.ToString()));
+        public ActivityPubJsonBuilder Bcc(List<Iri>? uris) => (uris == null || uris.Count == 0) ? ClearKey(JsonLdTypes.BCC) : SetKeyIds(JsonLdTypes.BCC, uris.Select(iri => iri.ToString()));
         public ActivityPubJsonBuilder Published(DateTime dateTime)
         {
             _state.SetDefault(0, JObjectFactory, JObjectFactory)
@@ -85,8 +86,8 @@ namespace Elysium.ActivityPub.Helpers
                 };
             return this;
         }
-        public ActivityPubJsonBuilder Object(Uri uri) => SetKeyId(JsonLdTypes.OBJECT, uri.AbsoluteUri);
-        public ActivityPubJsonBuilder Actor(Uri uri) => SetKeyId(JsonLdTypes.ACTOR, uri.AbsoluteUri);
+        public ActivityPubJsonBuilder Object(Iri iri) => SetKeyId(JsonLdTypes.OBJECT, iri.ToString());
+        public ActivityPubJsonBuilder Actor(Iri iri) => SetKeyId(JsonLdTypes.ACTOR, iri.ToString());
         public JArray Build()
         {
             return _state;

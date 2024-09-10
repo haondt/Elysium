@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Elysium.Hosting.Models
+namespace Elysium.Core.Models
 {
     public partial class Iri
     {

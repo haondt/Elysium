@@ -37,7 +37,7 @@ namespace Elysium.Client.Services
             if (!result.Succeeded)
                 return new(result.Errors.Select(e => $"{e.Description}").ToList());
 
-            var userUri = hostingService.GetUriForLocalizedUsername(localizedUsername);
+            var userUri = hostingService.GetIriForLocalizedUsername(localizedUsername);
             throw new NotImplementedException();
             await _registryGrain.RegisterActor(userUri, new LocalActorState
             {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Hosting.Models
+namespace Elysium.Core.Models
 {
     [GenerateSerializer, Immutable]
     public readonly record struct LocalIri(Iri iri)

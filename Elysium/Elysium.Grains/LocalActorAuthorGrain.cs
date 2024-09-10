@@ -1,7 +1,7 @@
 ﻿using Elysium.Authentication.Services;
+using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Hosting.Models;
 using Orleans.Concurrency;
 using System;
 using System.Collections.Generic;
@@ -29,7 +29,7 @@ namespace Elysium.Grains
             _cryptoService = cryptoService;
         }
 
-        public Task<string> GetKeyIdAsync() => Task.FromResult(_id.Iri.AbsoluteUri);
+        public Task<string> GetKeyIdAsync() => Task.FromResult(_id.Iri.ToString());
 
         public async Task<string> SignAsync(string stringToSign)
         {

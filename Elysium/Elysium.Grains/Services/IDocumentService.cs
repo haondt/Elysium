@@ -1,6 +1,6 @@
-﻿using Elysium.GrainInterfaces.Reasons;
+﻿using Elysium.Core.Models;
+using Elysium.GrainInterfaces.Reasons;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Hosting.Models;
 using Haondt.Core.Models;
 using Newtonsoft.Json.Linq;
 using System;
@@ -13,8 +13,8 @@ namespace Elysium.Grains.Services
 {
     public interface IDocumentService
     {
-        Task<Result<JToken, ElysiumWebReason>> GetDocumentAsync(IHttpMessageAuthor requester, RemoteIri uri);
-        Task<Result<JToken, ElysiumWebReason>> GetDocumentAsync(IHttpMessageAuthor requester, LocalIri uri);
+        Task<Result<JToken, ElysiumWebReason>> GetDocumentAsync(IHttpMessageAuthor requester, RemoteIri iri);
+        Task<Result<JToken, ElysiumWebReason>> GetDocumentAsync(IHttpMessageAuthor requester, LocalIri iri);
 
         /// <summary>
         /// 
@@ -29,7 +29,7 @@ namespace Elysium.Grains.Services
             LocalIri actor, 
             LocalIri objectUri, 
             JObject compactedObject,
-            List<Uri> bto,
-            List<Uri> bcc);
+            List<Iri> bto,
+            List<Iri> bcc);
     }
 }

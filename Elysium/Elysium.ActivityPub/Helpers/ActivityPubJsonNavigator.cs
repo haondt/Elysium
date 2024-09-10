@@ -1,6 +1,7 @@
 ﻿using Elysium.ActivityPub.Models;
 using Elysium.Core.Exceptions;
 using Elysium.Core.Extensions;
+using Elysium.Core.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace Elysium.ActivityPub.Helpers
 {
     public class ActivityPubJsonNavigator
     {
-        public Uri GetInbox(JArray expanded)
+        public Iri GetInbox(JArray expanded)
         {
             var uriString = expanded
                 .Single()
@@ -21,7 +22,7 @@ namespace Elysium.ActivityPub.Helpers
                 .Get<JValue>("@id")
                 .AsString();
 
-            return new Uri(uriString);
+            return Iri.FromUnencodedString(uriString);
         }
 
 

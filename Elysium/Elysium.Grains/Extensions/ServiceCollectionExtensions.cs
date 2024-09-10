@@ -1,7 +1,6 @@
 ﻿using Elysium.Core.Models;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Services;
-using Elysium.Hosting.Models;
 using Haondt.Identity.StorageKey;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

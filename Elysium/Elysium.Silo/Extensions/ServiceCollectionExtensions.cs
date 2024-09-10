@@ -2,7 +2,6 @@
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains;
 using Elysium.Grains.Services;
-using Elysium.Hosting.Models;
 using Elysium.Hosting.Services;
 using Elysium.Server.Services;
 using Haondt.Identity.StorageKey;

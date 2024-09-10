@@ -1,8 +1,8 @@
-﻿using Elysium.GrainInterfaces;
+﻿using Elysium.Core.Models;
+using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Exceptions;
 using Elysium.Grains.Services;
-using Elysium.Hosting.Models;
 using Haondt.Core.Models;
 using Haondt.Web.Core.Reasons;
 using JsonLD.Core;

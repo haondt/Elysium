@@ -1,5 +1,5 @@
-﻿using Elysium.GrainInterfaces;
-using Elysium.Hosting.Models;
+﻿using Elysium.Core.Models;
+using Elysium.GrainInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,17 +10,17 @@ namespace Elysium.Grains
 {
     public class LocalActorRegistryGrain : Grain, ILocalActorRegistryGrain
     {
-        public Task<bool> HasRegisteredActor(LocalIri uri)
+        public Task<bool> HasRegisteredActor(LocalIri iri)
         {
             throw new NotImplementedException();
         }
 
-        public Task RegisterActor(LocalIri uri, LocalActorState initialState)
+        public Task RegisterActor(LocalIri iri, LocalActorState initialState)
         {
             throw new NotImplementedException();
         }
 
-        public Task UnregisterActor(LocalIri uri)
+        public Task UnregisterActor(LocalIri iri)
         {
             throw new NotImplementedException();
         }

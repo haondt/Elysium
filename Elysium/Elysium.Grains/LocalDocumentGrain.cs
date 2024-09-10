@@ -1,8 +1,8 @@
-﻿using Elysium.GrainInterfaces;
+﻿using Elysium.Core.Models;
+using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Reasons;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Services;
-using Elysium.Hosting.Models;
 using Elysium.Persistence.Services;
 using Haondt.Core.Models;
 using Haondt.Persistence.Services;
@@ -44,7 +44,7 @@ namespace Elysium.Grains
             await state.WriteStateAsync();
         }
 
-        public Task<Result<JObject, DocumentReason>> GetValueAsync(Uri requester)
+        public Task<Result<JObject, DocumentReason>> GetValueAsync(Iri requester)
         {
             if (state.State.Value == null)
                 throw new InvalidOperationException("State does not yet exist");
@@ -56,7 +56,7 @@ namespace Elysium.Grains
             return Task.FromResult(state.State.Value != null);
         }
 
-        public async Task<Result<JArray, DocumentReason>> GetExpandedValueAsync(Uri requester)
+        public async Task<Result<JArray, DocumentReason>> GetExpandedValueAsync(Iri requester)
         {
             var state = await GetValueAsync(requester);
             if (!state.IsSuccessful)

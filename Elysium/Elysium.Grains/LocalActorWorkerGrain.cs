@@ -1,8 +1,8 @@
 ﻿using Elysium.Authentication.Services;
+using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Services;
-using Elysium.Hosting.Models;
 using Elysium.Server.Services;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -48,7 +48,7 @@ namespace Elysium.Grains
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
             var streamProvider = this.GetStreamProvider(GrainConstants.SimpleStreamProvider);
-            var streamId = StreamId.Create(GrainConstants.LocalActorWorkStream, _id.Iri.AbsoluteUri);
+            var streamId = StreamId.Create(GrainConstants.LocalActorWorkStream, _id.Iri.ToString());
             var stream = streamProvider.GetStream<LocalActorWorkData>(streamId);
             _subscription = await stream.SubscribeAsync(OnNextAsync);
             await base.OnActivateAsync(cancellationToken);
@@ -84,14 +84,14 @@ namespace Elysium.Grains
                 {
                     var localUri = new LocalIri { Iri = recipient };
                     if(!await _registryGrain.HasRegisteredActor(localUri))
-                        throw new ArgumentException($"No actor registered with local uri {recipient}");
+                        throw new ArgumentException($"No actor registered with local iri {recipient}");
 
                     var localActorGrain = _grainFactory.GetGrain<ILocalActorGrain>(localUri);
                     sendTasks.Add(() => localActorGrain.IngestActivityAsync(data.Acivity));
                 }
                 else
                 {
-                    var remoteUri = new RemoteIri { Uri = recipient };
+                    var remoteUri = new RemoteIri { Iri = recipient };
                     sendTasks.Add(async () =>
                     {
                         var actorState = await _httpService.GetAsync(new HttpGetData

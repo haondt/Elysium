@@ -1,5 +1,5 @@
-﻿using Elysium.GrainInterfaces;
-using Elysium.Hosting.Models;
+﻿using Elysium.Core.Models;
+using Elysium.GrainInterfaces;
 using Orleans;
 using System;
 using System.Collections.Generic;
@@ -13,12 +13,12 @@ namespace Elysium.GrainInterfaces.Services
     {
         public TGrain GetGrain<TGrain>(RemoteIri identity) where TGrain : IGrain<RemoteIri>
         {
-            return grainFactory.GetGrain<TGrain>(identity.Uri.AbsoluteUri);
+            return grainFactory.GetGrain<TGrain>(identity.Iri.ToString());
         }
 
         public RemoteIri GetIdentity<TGrain>(TGrain grain) where TGrain : IGrain<RemoteIri>
         {
-            return new RemoteIri { Uri = new Uri(grain.GetPrimaryKeyString()) };
+            return new RemoteIri { Iri = Iri.FromUnencodedString(grain.GetPrimaryKeyString()) };
         }
     }
 }

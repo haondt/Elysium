@@ -1,5 +1,5 @@
-﻿using Elysium.GrainInterfaces.Services;
-using Elysium.Hosting.Models;
+﻿using Elysium.Core.Models;
+using Elysium.GrainInterfaces.Services;
 using Haondt.Core.Models;
 using Haondt.Web.Core.Reasons;
 using Newtonsoft.Json.Linq;

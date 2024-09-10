@@ -1,6 +1,6 @@
-﻿using Elysium.GrainInterfaces.Reasons;
+﻿using Elysium.Core.Models;
+using Elysium.GrainInterfaces.Reasons;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Hosting.Models;
 using Haondt.Core.Models;
 using Haondt.Persistence.Services;
 using Newtonsoft.Json.Linq;
@@ -21,7 +21,7 @@ namespace Elysium.GrainInterfaces
         public Task<Result<DocumentReason>> SetValueAsync(LocalIri requester, JObject value);
         public Task<Result<DocumentReason>> UpdateValueAsync(JObject value);
         [AlwaysInterleave]
-        public Task<Result<JObject, DocumentReason>> GetValueAsync(Uri requester);
-        public Task<Result<JArray, DocumentReason>> GetExpandedValueAsync(Uri requester);
+        public Task<Result<JObject, DocumentReason>> GetValueAsync(Iri requester);
+        public Task<Result<JArray, DocumentReason>> GetExpandedValueAsync(Iri requester);
     }
 }

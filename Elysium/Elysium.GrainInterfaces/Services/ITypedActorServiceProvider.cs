@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Elysium.Core.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,6 @@ namespace Elysium.GrainInterfaces.Services
 {
     public interface ITypedActorServiceProvider
     {
-        ITypedActorService GetService(Uri id);
+        ITypedActorService GetService(Iri id);
     }
 }

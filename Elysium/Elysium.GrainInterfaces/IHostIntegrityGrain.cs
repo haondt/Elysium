@@ -1,4 +1,4 @@
-﻿using Elysium.Hosting.Models;
+﻿using Elysium.Core.Models;
 using Orleans;
 using System;
 using System.Collections.Generic;

@@ -1,6 +1,6 @@
-﻿using Elysium.GrainInterfaces;
+﻿using Elysium.Core.Models;
+using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Hosting.Models;
 using Newtonsoft.Json;
 using Orleans.Concurrency;
 using System;
@@ -42,7 +42,7 @@ namespace Elysium.Grains
             throw new NotImplementedException();
         }
 
-        public Task<string> GetKeyIdAsync() => Task.FromResult(_id.Uri.AbsoluteUri);
+        public Task<string> GetKeyIdAsync() => Task.FromResult(_id.Iri.ToString());
 
     }
 }

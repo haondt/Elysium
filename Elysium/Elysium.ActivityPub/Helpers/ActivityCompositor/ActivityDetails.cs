@@ -1,14 +1,16 @@
-﻿namespace Elysium.ActivityPub.Helpers.ActivityCompositor
+﻿using Elysium.Core.Models;
+
+namespace Elysium.ActivityPub.Helpers.ActivityCompositor
 {
     public abstract class ActivityDetails : ICompositionDetails
     {
         public abstract string Type { get; }
-        public required Uri Actor { get; set; }
-        public List<Uri>? Cc { get; set; }
-        public List<Uri>? To { get; set; }
-        public List<Uri>? Bto { get; set; }
-        public List<Uri>? Bcc { get; set; }
-        public required Uri AttributedTo { get; set; }
-        public required Uri Object { get; set; }
+        public required Iri Actor { get; set; }
+        public List<Iri>? Cc { get; set; }
+        public List<Iri>? To { get; set; }
+        public List<Iri>? Bto { get; set; }
+        public List<Iri>? Bcc { get; set; }
+        public required Iri AttributedTo { get; set; }
+        public required Iri Object { get; set; }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Elysium.Authentication.Constants;
 using Elysium.Core.Models;
-using Elysium.Hosting.Models;
 using Elysium.Persistence.Services;
 using Elysium.Server.Services;
 using Haondt.Identity.StorageKey;
@@ -20,18 +19,18 @@ namespace Elysium.Hosting.Services
 
         public HostingService(IOptions<HostingSettings> options)
         {
-            _host = new UriBuilder { Host = options.Value.Host }.Uri.Host;
+            _host = new IriBuilder { Host = options.Value.Host }.Iri.Host;
         }
 
-        public bool IsLocalHost(Uri uri)
+        public bool IsLocalHost(Iri iri)
         {
-            return uri.Host == _host;
+            return iri.Host == _host;
         }
 
         // TODO: move to IActivityPubClientService
-        //public Task<Result<string>> GetLocalizedUsernameFromLocalUriAsync(LocalUri uri)
+        //public Task<Result<string>> GetLocalizedUsernameFromLocalUriAsync(LocalUri iri)
         //{
-        //    var path = uri.Uri.AbsolutePath;
+        //    var path = iri.Iri.AbsolutePath;
         //    if (!path.StartsWith("/users/", StringComparison.OrdinalIgnoreCase))
         //        return new(new InvalidOperationException("invalid path"));
         //    var remaining = path.Substring("/users/".Length).Trim();
@@ -47,37 +46,37 @@ namespace Elysium.Hosting.Services
             if (username.Count(c => c == '@') != 1)
                 throw new InvalidOperationException("unable to parse username");
             var host = username.Split('@')[^1];
-            var partialUri = new UriBuilder { Host = host, Scheme = Uri.UriSchemeHttps }.Uri;
+            var partialUri = new IriBuilder { Host = host, Scheme = Uri.UriSchemeHttps }.Iri;
             if (IsLocalHost(partialUri))
-                return GetUriForLocalUsername(username).Iri;
+                return GetIriForLocalUsername(username).Iri;
             return (await GetUriForRemoteUsernameAsync(username)).Iri;
         }
 
         // TODO: move to IActivityPubClientService
-        //public Result<string> GetUsernameFromLocalUri(LocalUri uri)
+        //public Result<string> GetUsernameFromLocalUri(LocalUri iri)
         //{
-        //    var localizedUsername = GetLocalizedUsernameFromLocalUri(uri);
+        //    var localizedUsername = GetLocalizedUsernameFromLocalUri(iri);
         //    if (!localizedUsername.IsSuccessful)
         //        return localizedUsername;
         //    return new($"{localizedUsername.Value}@{_host}");
         //}
 
-        public LocalIri GetUriForLocalUsername(string username)
+        public LocalIri GetIriForLocalUsername(string username)
         {
             _ = GetLocalizedUsernameFromUsername(username); // validation
-            return GetUriForLocalizedUsername(username);
+            return GetIriForLocalizedUsername(username);
         }
 
-        public LocalIri GetUriForLocalizedUsername(string localizedUsername)
+        public LocalIri GetIriForLocalizedUsername(string localizedUsername)
         {
             return new LocalIri
             {
-                Iri = new UriBuilder
+                Iri = new IriBuilder
                 {
                     Host = _host,
                     Scheme = Uri.UriSchemeHttps,
                     Path = $"/users/{localizedUsername}"
-                }.Uri
+                }.Iri
             };
         }
         public Task<RemoteIri> GetUriForRemoteUsernameAsync(string username)
@@ -90,7 +89,7 @@ namespace Elysium.Hosting.Services
             //    return new(new InvalidOperationException("unable to parse username as a remote user"));
             //try
             //{
-            //    return new RemoteUri {  Uri = new Uri($"https://{}")}
+            //    return new RemoteUri {  Iri = new Iri($"https://{}")}
             //}
 
             // TODO: this needs to use webfinger, maybe should be moved to IActivityPubClientService
@@ -101,15 +100,14 @@ namespace Elysium.Hosting.Services
 
         public LocalIri GetLocalUserScopedUri(string username, string next)
         {
-            var userUri = GetUriForLocalUsername(username);
+            var userUri = GetIriForLocalUsername(username);
             return GetLocalUserScopedUri(userUri, next);
         }
 
         public LocalIri GetLocalUserScopedUri(LocalIri userUri, string next)
         {
             next = next.TrimStart('/');
-            new Uri(userUri.Iri, next);
-            return new LocalIri { Iri = new(userUri.Iri, next) };
+            return new LocalIri { Iri = userUri.Iri.Concatenate(next) };
         }
 
         public string GetUsernameFromLocalizedUsername(string localizedUsername)
@@ -126,10 +124,10 @@ namespace Elysium.Hosting.Services
             return match.Groups[1].Value;
         }
 
-        public bool IsScopedToLocalUser(LocalIri uri, LocalIri user)
+        public bool IsScopedToLocalUser(LocalIri iri, LocalIri user)
         {
-            var uriString = uri.Iri.AbsoluteUri;
-            var userString = user.Iri.AbsoluteUri;
+            var uriString = iri.Iri.ToString();
+            var userString = user.Iri.ToString();
 
             if (uriString.Length < userString.Length)
                 return false;
