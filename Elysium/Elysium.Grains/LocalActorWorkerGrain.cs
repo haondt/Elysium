@@ -74,6 +74,23 @@ namespace Elysium.Grains
         /// <returns></returns>
         public async Task OnNextAsync(LocalActorWorkData data, StreamSequenceToken? token)
         {
+            var swallowExceptions = true;
+            if (swallowExceptions)
+                try
+                {
+                    await OnNextAsyncInternal(data, token);
+                }
+                catch
+                {
+                    // todo: log exception
+                }
+            else
+                await OnNextAsyncInternal(data, token);
+
+        }
+
+        public async Task OnNextAsyncInternal(LocalActorWorkData data, StreamSequenceToken? token)
+        { 
             // create list of inboxes
             List<LocalIri> localRecipients = [];
             List<RemoteIri> remoteRecipients = [];

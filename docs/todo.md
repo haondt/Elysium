@@ -24,6 +24,10 @@
 - add persistent state storage provider for grain
 - rename UserCryptoService
 - remote StorageKeyGrain... we can just talk to the database. the documents are small and don't need caching
+  - although... consider the storagekeygrain provides an interface for the client to interact with a seperate silo db
+  - maybe keep it and replace the user store with a grain backing
+  - maybe also add option to disable cachine on storagekeygrains? or a really short ttl, maybe both as appsettings per grain type
+- build something into the typedactorservice to resolve the data for the LocalActorState (inbox, user scoping url, actor uri, etc)
 
 
 ## currently doing

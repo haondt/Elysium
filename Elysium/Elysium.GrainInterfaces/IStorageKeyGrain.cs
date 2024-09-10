@@ -15,6 +15,7 @@ namespace Elysium.GrainInterfaces
         public Task<Result<T, StorageResultReason>> GetAsync();
         public Task<bool> ExistsAsync();
         public Task SetAsync(T value);
+        Task ClearAsync();
     }
 
     //public interface IUserIdentityStorageKeyGrain : IStorageKeyGrain<UserIdentity> { }

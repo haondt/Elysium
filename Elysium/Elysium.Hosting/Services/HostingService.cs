@@ -41,16 +41,6 @@ namespace Elysium.Hosting.Services
         //    return new(remaining);
         //}
 
-        public async Task<Iri> GetIriForUsernameAsync(string username)
-        {
-            if (username.Count(c => c == '@') != 1)
-                throw new InvalidOperationException("unable to parse username");
-            var host = username.Split('@')[^1];
-            var partialUri = new IriBuilder { Host = host, Scheme = Uri.UriSchemeHttps }.Iri;
-            if (IsLocalHost(partialUri))
-                return GetIriForLocalUsername(username).Iri;
-            return (await GetUriForRemoteUsernameAsync(username)).Iri;
-        }
 
         // TODO: move to IActivityPubClientService
         //public Result<string> GetUsernameFromLocalUri(LocalUri iri)
@@ -61,11 +51,6 @@ namespace Elysium.Hosting.Services
         //    return new($"{localizedUsername.Value}@{_host}");
         //}
 
-        public LocalIri GetIriForLocalUsername(string username)
-        {
-            _ = GetLocalizedUsernameFromUsername(username); // validation
-            return GetIriForLocalizedUsername(username);
-        }
 
         public LocalIri GetIriForLocalizedUsername(string localizedUsername)
         {
@@ -79,30 +64,8 @@ namespace Elysium.Hosting.Services
                 }.Iri
             };
         }
-        public Task<RemoteIri> GetUriForRemoteUsernameAsync(string username)
-        {
-            //if (username.Count(c => c == '@') != 1)
-            //    return new(new InvalidOperationException("unable to parse username as a remote user"));
-            //var pattern = $"^([^@])@(.*)$";
-            //var match = Regex.Match(username, pattern);
-            //if (!match.Success)
-            //    return new(new InvalidOperationException("unable to parse username as a remote user"));
-            //try
-            //{
-            //    return new RemoteUri {  Iri = new Iri($"https://{}")}
-            //}
 
-            // TODO: this needs to use webfinger, maybe should be moved to IActivityPubClientService
 
-            throw new NotImplementedException();
-
-        }
-
-        public LocalIri GetLocalUserScopedUri(string username, string next)
-        {
-            var userUri = GetIriForLocalUsername(username);
-            return GetLocalUserScopedUri(userUri, next);
-        }
 
         public LocalIri GetLocalUserScopedUri(LocalIri userUri, string next)
         {
@@ -115,14 +78,6 @@ namespace Elysium.Hosting.Services
             return $"{localizedUsername}@{_host}";
         }
 
-        public string GetLocalizedUsernameFromUsername(string username)
-        {
-            var pattern = $"^([{AuthenticationConstants.ALLOWED_USERNAME_CHARACTERS.Replace("]", @"\]")}]+)@{Regex.Escape(_host)}$";
-            var match = Regex.Match(username, pattern);
-            if (!match.Success)
-                throw new InvalidOperationException("unable to parse username as a local user");
-            return match.Groups[1].Value;
-        }
 
         public bool IsScopedToLocalUser(LocalIri iri, LocalIri user)
         {

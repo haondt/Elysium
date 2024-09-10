@@ -1,6 +1,7 @@
 ﻿using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
+using Elysium.Persistence.Exceptions;
 using Elysium.Persistence.Services;
 using Haondt.Core.Models;
 using Haondt.Identity.StorageKey;
@@ -14,17 +15,25 @@ using System.Threading.Tasks;
 namespace Elysium.Grains
 {
 
-    public class StorageKeyGrain<T>(
-        IGrainFactory<StorageKey<T>> grainFactory,
-        IElysiumStorage storage) : Grain, IStorageKeyGrain<T>
+    public class StorageKeyGrain<T> : Grain, IStorageKeyGrain<T>
     {
-        private StorageKey<T> _id;
+        private readonly StorageKey<T> _id;
         private Result<T, StorageResultReason> _value;
+        private readonly IStorageKeyGrainFactory<T> _grainFactory;
+        private readonly IElysiumStorage _storage;
+
+        public StorageKeyGrain(
+            IStorageKeyGrainFactory<T> grainFactory,
+            IElysiumStorage storage)
+        {
+            _id = grainFactory.GetIdentity(this);
+            _grainFactory = grainFactory;
+            _storage = storage;
+        }
 
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
-            _id = grainFactory.GetIdentity(this);
-            _value = await storage.Get(_id);
+            _value = await _storage.Get(_id);
 
             await base.OnActivateAsync(cancellationToken);
         }
@@ -42,7 +51,21 @@ namespace Elysium.Grains
         public Task SetAsync(T value)
         {
             _value = new(value);
-            return storage.Set(_id, value);
+            return _storage.Set(_id, value);
+        }
+
+        public async Task ClearAsync()
+        {
+            if (!_value.IsSuccessful && _value.Reason == StorageResultReason.NotFound)
+                return;
+            var result = await _storage.Delete(_id);
+            if (!result.IsSuccessful)
+                if (result.Reason != StorageResultReason.NotFound)
+                {
+                    _value = await _storage.Get(_id);
+                    throw new StorageException($"Failed to delete stored document with id {_id}");
+                }
+            _value = await _storage.Get(_id);
         }
     }
 

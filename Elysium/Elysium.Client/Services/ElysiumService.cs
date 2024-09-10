@@ -38,12 +38,51 @@ namespace Elysium.Client.Services
                 return new(result.Errors.Select(e => $"{e.Description}").ToList());
 
             var userUri = hostingService.GetIriForLocalizedUsername(localizedUsername);
-            throw new NotImplementedException();
             await _registryGrain.RegisterActor(userUri, new LocalActorState
             {
                 Inbox = new () // TODO!
             });
             return new(user);
+        }
+
+        public async Task<Result<Iri, string>> GetIriForFediverseUsernameAsync(string fediverseUsername)
+        {
+            if (fediverseUsername.Count(c => c == '@') != 1)
+                throw new InvalidOperationException("unable to parse username");
+            var parts = fediverseUsername.Split('@');
+            var partialUri = new IriBuilder { Host = parts[1], Scheme = Uri.UriSchemeHttps }.Iri;
+            if (hostingService.IsLocalHost(partialUri))
+            {
+                var user = await userManager.FindByNameAsync(parts[0]);
+                if (user == null)
+                    return new($"Unable to find user {fediverseUsername}");
+                var localizedUsername = user.LocalizedUsername ?? user.Id.Parts[^1].Value;
+                return new(hostingService.GetIriForLocalizedUsername(localizedUsername).Iri);
+            }
+            return new((await GetUriForRemoteUsernameAsync(fediverseUsername)).Iri);
+
+
+        }
+        public Task<RemoteIri> GetUriForRemoteUsernameAsync(string username)
+        {
+            //if (username.Count(c => c == '@') != 1)
+            //    return new(new InvalidOperationException("unable to parse username as a remote user"));
+            //var pattern = $"^([^@])@(.*)$";
+            //var match = Regex.Match(username, pattern);
+            //if (!match.Success)
+            //    return new(new InvalidOperationException("unable to parse username as a remote user"));
+            //try
+            //{
+            //    return new RemoteUri {  Iri = new Iri($"https://{}")}
+            //}
+
+            // TODO: this needs to use webfinger, maybe should be moved to IActivityPubClientService
+            //var pattern = $"^([{AuthenticationConstants.ALLOWED_USERNAME_CHARACTERS.Replace("]", @"\]")}]+)@{Regex.Escape(_host)}$";
+            //var match = Regex.Match(username, pattern);
+            //if (!match.Success)
+            //    throw new InvalidOperationException("unable to parse username as a local user");
+            //return match.Groups[1].Value;
+            throw new NotImplementedException();
         }
     }
 }

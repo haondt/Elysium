@@ -10,7 +10,6 @@ namespace Elysium.Server.Services
     public interface IHostingService
     {
         bool IsLocalHost(Iri iri);
-        LocalIri GetIriForLocalUsername(string username);
         LocalIri GetIriForLocalizedUsername(string localizedUsername);
         //Task<Result<string>> GetUsernameFromLocalUriAsync(LocalUri iri);
         string GetUsernameFromLocalizedUsername(string username);
@@ -24,11 +23,7 @@ namespace Elysium.Server.Services
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
         public bool IsScopedToLocalUser(LocalIri iri, LocalIri user);
-        string GetLocalizedUsernameFromUsername(string localizedUsername);
-        public LocalIri GetLocalUserScopedUri(string username, string next);
         public LocalIri GetLocalUserScopedUri(LocalIri userUri, string next);
-        public Task<RemoteIri> GetUriForRemoteUsernameAsync(string username);
-        public Task<Iri> GetIriForUsernameAsync(string username);
         public string Host { get; }
     }
 }

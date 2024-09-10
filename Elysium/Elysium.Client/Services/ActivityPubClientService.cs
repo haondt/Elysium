@@ -15,12 +15,12 @@ namespace Elysium.Client.Services
 {
     public class ActivityPubClientService(
         IHostingService hostingService,
-        IGrainFactory<StorageKey<UserIdentity>> userIdentityGrainFactory,
+        IStorageKeyGrainFactory<UserIdentity> userIdentityGrainFactory,
         IGrainFactory<LocalIri> grainFactory) : IActivityPubClientService
     {
         public async Task<(LocalIri ActivityUri, LocalIri ObjectUri)> PublishActivityAsync(StorageKey<UserIdentity> author, ActivityType type, JArray @object)
         {
-            var userIdentityGrain = userIdentityGrainFactory.GetGrain<IStorageKeyGrain<UserIdentity>>(author);
+            var userIdentityGrain = userIdentityGrainFactory.GetGrain(author);
             var userIdentity = await userIdentityGrain.GetAsync();
             if (!userIdentity.IsSuccessful)
                 throw new UnauthorizedAccessException($"Unable to retrieve user identity {author}");

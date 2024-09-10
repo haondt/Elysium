@@ -22,7 +22,6 @@ namespace Elysium.Grains.Extensions
             services.Configure<RemoteDocumentSettings>(configuration.GetSection(nameof(RemoteDocumentSettings)));
             services.AddSingleton<ITypedActorServiceProvider, TypedActorServiceFactory>();
             services.AddSingleton<IJsonLdService, JsonLdService>();
-            //services.AddSingleton<IGrainFactory<StorageKey>, StorageKeyGrainFactory>();
             services.AddSingleton<IDocumentService, DocumentService>();
             services.AddHttpClient<IActivityPubHttpService, ActivityPubHttpService>(client =>
             {

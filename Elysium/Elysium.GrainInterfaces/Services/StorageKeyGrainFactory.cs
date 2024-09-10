@@ -10,14 +10,15 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces.Services
 {
-    public class StorageKeyGrainFactory<T>(IGrainFactory grainFactory) : IGrainFactory<StorageKey<T>>
+    public class StorageKeyGrainFactory<T>(IGrainFactory grainFactory) : IStorageKeyGrainFactory<T>
     {
-        public TGrain GetGrain<TGrain>(StorageKey<T> identity) where TGrain : IGrain<StorageKey<T>>
+
+        public IStorageKeyGrain<T> GetGrain(StorageKey<T> identity)
         {
-            return grainFactory.GetGrain<TGrain>(StorageKeyConvert.Serialize(identity));
+            return grainFactory.GetGrain<IStorageKeyGrain<T>>(StorageKeyConvert.Serialize(identity));
         }
 
-        public StorageKey<T> GetIdentity<TGrain>(TGrain grain) where TGrain : IGrain<StorageKey<T>>
+        public StorageKey<T> GetIdentity(IStorageKeyGrain<T> grain)
         {
             return StorageKeyConvert.Deserialize<T>(grain.GetPrimaryKeyString());
         }

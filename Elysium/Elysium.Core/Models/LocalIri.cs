@@ -9,6 +9,7 @@ namespace Elysium.Core.Models
     [GenerateSerializer, Immutable]
     public readonly record struct LocalIri(Iri iri)
     {
+        [Id(0)]
         public Iri Iri { get; init; } = iri;
     }
 }

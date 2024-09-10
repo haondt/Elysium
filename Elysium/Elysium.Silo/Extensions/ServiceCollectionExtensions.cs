@@ -29,11 +29,9 @@ namespace Elysium.Silo.Extensions
 
         public static IServiceCollection AddElysiumSiloGrainFactories(this IServiceCollection services)
         {
-            services.AddSingleton<IGrainFactory<StorageKey<UserIdentity>>, StorageKeyGrainFactory<UserIdentity>>();
-            //services.AddSingleton<IGrainFactory<StorageKey>, StorageKeyGrainFactory>();
+            services.AddSingleton(typeof(IStorageKeyGrainFactory<>), typeof(StorageKeyGrainFactory<>));
             services.AddSingleton<IGrainFactory<LocalIri>, LocalUriGrainFactory>();
             services.AddSingleton<IGrainFactory<RemoteIri>, RemoteUriGrainFactory>();
-            services.AddSingleton<IGrainFactory<StorageKey<UserIdentity>>, StorageKeyGrainFactory<UserIdentity>>();
             return services;
         }
     }

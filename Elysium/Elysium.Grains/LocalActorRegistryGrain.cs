@@ -1,5 +1,9 @@
 ﻿using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
+using Elysium.GrainInterfaces.Services;
+using Haondt.Identity.StorageKey;
+using Haondt.Persistence.Services;
+using Orleans.Concurrency;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,21 +12,31 @@ using System.Threading.Tasks;
 
 namespace Elysium.Grains
 {
-    public class LocalActorRegistryGrain : Grain, ILocalActorRegistryGrain
+    [StatelessWorker]
+    public class LocalActorRegistryGrain(IStorageKeyGrainFactory<LocalActorState> grainFactory) : Grain, ILocalActorRegistryGrain
     {
+        private IStorageKeyGrain<LocalActorState> GetGrain(LocalIri iri)
+        {
+            return grainFactory.GetGrain(LocalActorState.CreateStorageKey(iri));
+        }
         public Task<bool> HasRegisteredActor(LocalIri iri)
         {
-            throw new NotImplementedException();
+            var grain = GetGrain(iri);
+            return grain.ExistsAsync();
         }
 
-        public Task RegisterActor(LocalIri iri, LocalActorState initialState)
+        public async Task RegisterActor(LocalIri iri, LocalActorState initialState)
         {
-            throw new NotImplementedException();
+            var grain = GetGrain(iri);
+            if (await grain.ExistsAsync())
+                throw new InvalidOperationException($"Actor with iri {iri} already exists");
+            await grain.SetAsync(initialState);
         }
 
         public Task UnregisterActor(LocalIri iri)
         {
-            throw new NotImplementedException();
+            var grain = GetGrain(iri);
+            return grain.ClearAsync();
         }
     }
 }

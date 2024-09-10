@@ -18,6 +18,7 @@ namespace Elysium.Services
         IActivityPubClientService activityPubService,
         IHostingService hostingService,
         ISessionService sessionService,
+        IElysiumService elysiumService,
         IComponentFactory componentFactory) : IEventHandler
     {
         public const string SEND_MESSAGE_EVENT = "SendMessage";
@@ -40,20 +41,14 @@ namespace Elysium.Services
                 var recepientResult = requestData.Form.TryGetValue<string>("recepient");
                 if (!recepientResult.HasValue)
                     return await GetMessageErrorComponentAsOptionalAsync("recepient cannot be empty");
-                Iri recepientUri;
-                try
-                {
-                    recepientUri = await hostingService.GetIriForUsernameAsync(recepientResult.Value);
-                }
-                catch
-                {
+                var recepientIri = await elysiumService.GetIriForFediverseUsernameAsync(recepientResult.Value);
+                if (!recepientIri.IsSuccessful)
                     return await GetMessageErrorComponentAsOptionalAsync("unable to parse receiver username");
-                }
 
                 var activityObjectDetails = new MessageDetails
                 {
                     Text = messageResult.Value,
-                    Recepient = recepientUri,
+                    Recepient = recepientIri.Value,
                 };
 
                 var activityObject = ActivityCompositor.Composit(activityObjectDetails);
