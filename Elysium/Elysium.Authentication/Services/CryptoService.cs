@@ -53,6 +53,11 @@ namespace Elysium.Authentication.Services
             using var rsa = RSA.Create();
             return rsa.SignData(data, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         }
+        
+        public byte[] GenerateRandomBytes(int num)
+        {
+            return RandomNumberGenerator.GetBytes(num);
+        }
 
         public bool VerifySignature(byte[] data, byte[] signature, byte[] publicKey)
         {

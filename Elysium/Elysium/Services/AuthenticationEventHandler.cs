@@ -19,9 +19,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using System.Diagnostics.CodeAnalysis;
 using System.Collections;
-using Elysium.Server.Services;
 using Haondt.Core.Models;
 using Elysium.Client.Services;
+using Elysium.Hosting.Services;
 
 namespace Elysium.Authentication.Services
 {

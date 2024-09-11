@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Elysium.ActivityPub.Helpers.ActivityCompositor
 {
-    public static class ActivityCompositor
+    public static class Compositor
     {
         public static JArray Composit(ICompositionDetails details)
         {
@@ -16,11 +16,13 @@ namespace Elysium.ActivityPub.Helpers.ActivityCompositor
                     return new ActivityPubJsonBuilder()
                         .Type(messageDetails.Type)
                         .To(messageDetails.Recepient)
+                        .AttributedTo(messageDetails.AttributedTo)
                         .Published(DateTime.UtcNow)
                         .Content(messageDetails.Text)
                         .Build();
                 case CreateActivityDetails activityDetails:
                     return new ActivityPubJsonBuilder()
+                        .Id(activityDetails.Id)
                         .Type(activityDetails.Type)
                         .Actor(activityDetails.Actor)
                         .Cc(activityDetails.Cc)
@@ -64,5 +66,6 @@ namespace Elysium.ActivityPub.Helpers.ActivityCompositor
 
             return activityClone.As<JArray>();
         }
+
     }
 }

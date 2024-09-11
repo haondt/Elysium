@@ -4,6 +4,7 @@ namespace Elysium.ActivityPub.Helpers.ActivityCompositor
 {
     public abstract class ActivityDetails : ICompositionDetails
     {
+        public required Iri Id { get; set; }
         public abstract string Type { get; }
         public required Iri Actor { get; set; }
         public List<Iri>? Cc { get; set; }

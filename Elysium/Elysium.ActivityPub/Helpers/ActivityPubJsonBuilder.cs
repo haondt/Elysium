@@ -27,7 +27,7 @@ namespace Elysium.ActivityPub.Helpers
         public ActivityPubJsonBuilder Id(Iri id)
         {
             _state.SetDefault(0, JObjectFactory, JObjectFactory)
-                ["@id"] = new JArray { id.ToString() };
+                ["@id"] = id.ToString();
             return this;
         }
         private ActivityPubJsonBuilder SetKeyValue(string key, string value)
@@ -88,6 +88,18 @@ namespace Elysium.ActivityPub.Helpers
         }
         public ActivityPubJsonBuilder Object(Iri iri) => SetKeyId(JsonLdTypes.OBJECT, iri.ToString());
         public ActivityPubJsonBuilder Actor(Iri iri) => SetKeyId(JsonLdTypes.ACTOR, iri.ToString());
+        public ActivityPubJsonBuilder PublicKeyPem(Iri publicKeyId, Iri publicKeyOwner, string publicKeyPem)
+        {
+            _state.SetDefault(0, JObjectFactory, JObjectFactory)
+                [JsonLdTypes.PUBLIC_KEY] = new JArray { new JObject
+                {
+                    { "@id", publicKeyId.ToString() },
+                    { JsonLdTypes.PUBLIC_KEY_OWNER, new JArray { new JObject { { "@id", publicKeyOwner.ToString() } } } },
+                    { JsonLdTypes.PUBLIC_KEY_PEM, new JArray { new JObject { { "@value", publicKeyPem } } } }
+                } };
+            return this;
+        }
+
         public JArray Build()
         {
             return _state;

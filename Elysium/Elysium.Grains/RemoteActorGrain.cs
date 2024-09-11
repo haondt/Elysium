@@ -24,7 +24,6 @@ namespace Elysium.Grains
     {
         private readonly IGrainFactory<RemoteIri> _grainFactory;
         private readonly IUserCryptoService _cryptoService;
-        private readonly IRemoteDocumentGrain _actorStateGrain;
         private readonly RemoteIri _id;
         private byte[]? _publicKey;
 
@@ -35,7 +34,6 @@ namespace Elysium.Grains
             _id = grainFactory.GetIdentity(this);
             _grainFactory = grainFactory;
             _cryptoService = cryptoService;
-            _actorStateGrain = grainFactory.GetGrain<IRemoteDocumentGrain>(_id);
         }
 
         private async Task<byte[]> InternalGetPublicKeyAsync()

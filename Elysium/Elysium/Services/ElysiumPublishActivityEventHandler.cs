@@ -5,7 +5,7 @@ using Elysium.Authentication.Services;
 using Elysium.Client.Services;
 using Elysium.Components.Components;
 using Elysium.Core.Models;
-using Elysium.Server.Services;
+using Elysium.Hosting.Services;
 using Haondt.Core.Models;
 using Haondt.Web.Core.Components;
 using Haondt.Web.Core.Extensions;
@@ -49,9 +49,10 @@ namespace Elysium.Services
                 {
                     Text = messageResult.Value,
                     Recepient = recepientIri.Value,
+                    AttributedTo = (await activityPubService.GetLocalIriFromUserIdentityAsync(userKey.Value)).Iri
                 };
 
-                var activityObject = ActivityCompositor.Composit(activityObjectDetails);
+                var activityObject = Compositor.Composit(activityObjectDetails);
 
                 try
                 {

@@ -20,8 +20,9 @@ namespace Elysium.Grains.Extensions
         {
             services.Configure<HostIntegritySettings>(configuration.GetSection(nameof(HostIntegritySettings)));
             services.Configure<RemoteDocumentSettings>(configuration.GetSection(nameof(RemoteDocumentSettings)));
-            services.AddSingleton<ITypedActorServiceProvider, TypedActorServiceFactory>();
             services.AddSingleton<IJsonLdService, JsonLdService>();
+            //services.AddSingleton<IStoredDocumentFacade, StoredDocumentFacade>();
+            services.AddSingleton<IStoredDocumentFacadeFactory, StoredDocumentFacadeFactory>();
             services.AddSingleton<IDocumentService, DocumentService>();
             services.AddHttpClient<IActivityPubHttpService, ActivityPubHttpService>(client =>
             {
@@ -29,6 +30,7 @@ namespace Elysium.Grains.Extensions
             }).AddPolicyHandler(HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrTransientHttpStatusCode()
+                // todo: appsettings that shii
                 .WaitAndRetryAsync(3, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt))));
             return services;
         }

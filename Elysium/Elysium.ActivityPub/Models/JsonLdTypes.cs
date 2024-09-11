@@ -38,11 +38,15 @@ namespace Elysium.ActivityPub.Models
 
         // crypto
         public const string PUBLIC_KEY = "https://w3id.org/security#publicKey";
+        public const string PUBLIC_KEY_OWNER = "https://w3id.org/security#owner";
         public const string PUBLIC_KEY_PEM = "https://w3id.org/security#publicKeyPem";
         public const string ASSERTION_METHOD = "https://w3id.org/security#assertionMethod";
         public const string PUBLIC_KEY_MULTIBASE = "https://w3id.org/security#publicKeyMultibase";
 
         // activity types
         public const string CREATE_ACTIVITY = "https://www.w3.org/ns/activitystreams#Create";
+
+        // actor types
+        public const string PERSON = "https://www.w3.org/ns/activitystreams#Person";
     }
 }

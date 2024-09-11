@@ -18,15 +18,26 @@ using Elysium.Persistence.Services;
 using Newtonsoft.Json.Linq;
 using Elysium.Authentication.Services;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Server.Services;
 using Elysium.ActivityPub.Models;
 using Elysium.Core.Extensions;
 using Newtonsoft.Json;
 using Elysium.ActivityPub.Helpers.ActivityCompositor;
 using Orleans.Streams;
+using Elysium.Hosting.Services;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace Elysium.Grains
 {
+    // for when we get to the actors url body
+    // need to add the public key
+    // for multibase need the right contexts
+    // 
+    // "https://www.w3.org/ns/activitystreams",
+    //  "https://www.w3.org/ns/did/v1",
+    //   "https://w3id.org/security/multikey/v1"
+    // see https://web.archive.org/web/20221218063101/https://web-payments.org/vocabs/security#publicKey
+    // and https://swicg.github.io/activitypub-http-signature/#how-to-obtain-a-signature-s-public-key
+    // and https://www.w3.org/TR/controller-document/#dfn-publickeymultibase
     public class LocalActorGrain : Grain, ILocalActorGrain
     {
         private readonly IPersistentState<LocalActorState> _state;
@@ -37,18 +48,22 @@ namespace Elysium.Grains
         private readonly IDocumentService _documentService;
         private readonly IGrainFactory _grainFactory;
         private readonly IGrainFactory<RemoteIri> _remoteGrainFactory;
+        private readonly IIriService _iriService;
         private readonly IGrainFactory<LocalIri> _localGrainFactory;
         private readonly LocalIri _id;
         private readonly ILocalActorAuthorGrain _authorGrain;
         private readonly IAsyncStream<LocalActorWorkData> _workStream;
 
+        private byte[]? _signingKey;
+
         public LocalActorGrain(
-            [PersistentState(GrainConstants.GrainStorage)] IPersistentState<LocalActorState> state,
+            [PersistentState(nameof(LocalActorState), GrainConstants.GrainStorage)] IPersistentState<LocalActorState> state,
             IHostingService hostingService,
             IElysiumStorage storage,
             IJsonLdService jsonLdService,
             IUserCryptoService cryptoService,
             IDocumentService documentService,
+            IIriService iriService,
             IGrainFactory grainFactory,
             IGrainFactory<RemoteIri> remoteGrainFactory,
             IGrainFactory<LocalIri> localGrainFactory)
@@ -61,6 +76,7 @@ namespace Elysium.Grains
             _documentService = documentService;
             _grainFactory = grainFactory;
             _remoteGrainFactory = remoteGrainFactory;
+            _iriService = iriService;
             _localGrainFactory = localGrainFactory;
             _id = localGrainFactory.GetIdentity(this);
             _authorGrain = localGrainFactory.GetGrain<ILocalActorAuthorGrain>(_id);
@@ -73,30 +89,54 @@ namespace Elysium.Grains
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
             await _state.ReadStateAsync();
+            if (_state.State.IsInitialized)
+                _signingKey = _cryptoService.DecryptPrivateKey(_state.State.EncryptedSigningKey);
             await base.OnActivateAsync(cancellationToken);
         }
-        public Task InitializeAsync(LocalActorState localActorState)
-        {
-            throw new InvalidOperationException(); 
 
+        public async Task InitializeAsync(ActorRegistrationDetails registrationDetails)
+        {
+            if (_state.State.IsInitialized)
+                throw new InvalidOperationException($"actor {_id} is already initialized");
+
+            _state.State = new LocalActorState
+            {
+                EncryptedSigningKey = registrationDetails.EncryptedSigningKey,
+                Id = _id,
+                IsInitialized = true,
+                PublicKey = registrationDetails.PublicKey,
+                Type = registrationDetails.Type,
+            };
+            await _state.WriteStateAsync();
+            _signingKey = _cryptoService.DecryptPrivateKey(registrationDetails.EncryptedSigningKey);
+        }
+
+        public Task ClearAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> IsInitializedAsync()
+        {
+            return Task.FromResult(_state.State.IsInitialized);
         }
 
         //public async Task<Optional<Exception>> InitializeDocument()
         //{
         //    throw new NotImplementedException();
-            //if (!_typedActorService.IsSuccessful)
-            //    return new(_typedActorService.Error);
+        //if (!_typedActorService.IsSuccessful)
+        //    return new(_typedActorService.Error);
 
-            //var documentGrain = _grainFactory.GetGrain<ILocalDocumentGrain>(_id);
-            //if (await documentGrain.HasValueAsync())
-            //    return new(new InvalidOperationException("document is already initialized"));
+        //var documentGrain = _grainFactory.GetGrain<ILocalDocumentGrain>(_id);
+        //if (await documentGrain.HasValueAsync())
+        //    return new(new InvalidOperationException("document is already initialized"));
 
-            //var document = await _typedActorService.Value.GenerateDocumentAsync();
-            //if (!document.IsSuccessful)
-            //    return new(document.Error);
+        //var document = await _typedActorService.Value.GenerateDocumentAsync();
+        //if (!document.IsSuccessful)
+        //    return new(document.Error);
 
-            //await documentGrain.SetValueAsync(document.Value);
-            //return new();
+        //await documentGrain.SetValueAsync(document.Value);
+        //return new();
         //}
 
         //public async Task<Optional<Exception>> PublishActivityAsync(Activity activity)
@@ -116,7 +156,8 @@ namespace Elysium.Grains
         //    throw new NotImplementedException();
         //}
 
-        public Task IngestActivityAsync(JObject activity)
+
+        public Task IngestActivityAsync(JToken activity)
         {
             throw new NotImplementedException();
             // see https://www.w3.org/TR/activitypub/#inbox-forwarding
@@ -150,9 +191,6 @@ namespace Elysium.Grains
             {
                 var mainObjectResult = expandedObject.Single().As<JObject>();
 
-                // only doing this because it is a create operation!!
-                var setObjectAttributedToResult = mainObjectResult[JsonLdTypes.ATTRIBUTED_TO] = new JArray { new JObject { { "@Id", _id.Iri.ToString() } } };
-
                 // get recepients
                 static List<Iri> ExtractListIdValues(string name, JObject parent)
                 {
@@ -165,7 +203,7 @@ namespace Elysium.Grains
                     {
                         if (value is not JObject jv)
                             throw new JsonException($"one or more values of {name} was not in the expected format");
-                        if (jv.Count != 1) 
+                        if (jv.Count != 1)
                             throw new JsonException($"one or more values of {name} did not have exactly 1 key");
                         if (!jv.TryGetValue("@id", out var typeValueToken))
                             throw new JsonException($"one or more values of {name} did not have a @id key");
@@ -194,53 +232,54 @@ namespace Elysium.Grains
                 recepients.UnionWith(btoList);
                 recepients.UnionWith(audienceList);
 
-                // todo: for each recepient, look them up
-                // then retrieve the inbox(es)
-                // if the inbox is a collection, recursively resolve it
-                // but limit the recursion depth
-                // also remove me from the final list of inboxes
-                // https://www.w3.org/TR/activitypub/#delivery
-                // this will be handled by a worker grain? or a dispatcher grain maybe... it will have both local and remote targets
 
 
-                var compactedObject = await _jsonLdService.CompactAsync(_authorGrain, expandedObject);
 
                 // todo: the id generation strategy should be moved to a service
-                var objectId = Guid.NewGuid();
-                // todo: these url schemes should all be moved to one place
-                // todo: this should probably depend on the activityobject type, e.g. messages should be at useruri/messages/1234
-                var objectUri = _hostingService.GetLocalUserScopedUri(_id, $"objects/{objectId}");
-
-                var activity = ActivityCompositor.Composit(new CreateActivityDetails
+                LocalIri objectIri = await _documentService.ReserveDocumentIriAsync(_id, () =>
                 {
+                    var objectId = _cryptoService.GenerateDocumentId();
+                    // todo: this should maybe? depend on the activityobject type, e.g. messages should be at useruri/messages/1234
+                    return _iriService.GetAnonymousObjectIri(objectId);
+                }, 5); // todo: put this in an appsetting
+
+                var activityIri = await _documentService.ReserveDocumentIriAsync(_id, () =>
+                {
+                    var activityId = _cryptoService.GenerateDocumentId();
+                    return _iriService.GetActorScopedActivityIri(_id, activityId);
+                }, 5); // todo: put this in an appsetting
+
+                var activity = Compositor.Composit(new CreateActivityDetails
+                {
+                    Id = activityIri.Iri,
                     Actor = _id.Iri,
                     Bcc = bccList,
                     Bto = btoList,
                     Cc = ccList,
                     To = toList,
-                    Object = objectUri.Iri,
+                    Object = objectIri.Iri,
                     AttributedTo = _id.Iri,
                 });
 
-                var activityId = Guid.NewGuid();
-                var activityUri = _hostingService.GetLocalUserScopedUri(_id, $"activities/{objectId}");
 
+                mainObjectResult["@id"] = objectIri.ToString();
+                var compactedObject = await _jsonLdService.CompactAsync(_authorGrain, expandedObject);
                 var compactedActivity = await _jsonLdService.CompactAsync(_authorGrain, activity);
 
                 // create the object
-                var result = await _documentService.CreateDocumentAsync(_id, objectUri, compactedObject, btoList, bccList);
+                var result = await _documentService.CreateDocumentAsync(_id, objectIri, compactedObject, btoList, bccList);
                 if (!result.IsSuccessful)
                     throw new InvalidOperationException($"Failed to create document due to reason {result.Reason}");
 
                 // create the activity
-                result = await _documentService.CreateDocumentAsync(_id, activityUri, compactedActivity, btoList, bccList);
+                result = await _documentService.CreateDocumentAsync(_id, activityIri, compactedActivity, btoList, bccList);
                 if (!result.IsSuccessful)
                     throw new InvalidOperationException($"Failed to create document due to reason {result.Reason}");
 
                 // TODO: the activity should also be available at a more well known url, if the type is understood. e.g. toots go at users/fred/toot/12345
 
                 // strip bto, bcc and dereference activity
-                var outgoingActivity = ActivityCompositor.Composit(new PrePublishActivityDetails
+                var outgoingActivity = Compositor.Composit(new PrePublishActivityDetails
                 {
                     ReferencedActivityWithBtoBcc = activity,
                     ObjectWithBtoBcc = expandedObject
@@ -249,13 +288,14 @@ namespace Elysium.Grains
                 var outgoingCompactedActivity = await _jsonLdService.CompactAsync(_authorGrain, outgoingActivity);
 
                 // dispatch the activity
+                // todo: we can optimize this, since when communicating local -> local there's no point in compacting the activity
                 await _workStream.OnNextAsync(new LocalActorWorkData
                 {
-                    Acivity = outgoingCompactedActivity,
+                    Activity = outgoingCompactedActivity,
                     Recipients = recepients.ToList()
                 });
 
-                return (activityUri, objectUri);
+                return (activityIri, objectIri);
 
             }
             else
@@ -270,6 +310,19 @@ namespace Elysium.Grains
             throw new NotImplementedException();
         }
 
+        public Task<LocalActorState> GetStateAsync()
+        {
+            if (!_state.State.IsInitialized)
+                throw new InvalidOperationException($"actor {_id} is not initialized");
+            return Task.FromResult(_state.State);
+        }
+
+        public Task<byte[]> GetSigningKeyAsync()
+        {
+            if (!_state.State.IsInitialized)
+                throw new InvalidOperationException($"actor {_id} is not initialized");
+            return Task.FromResult(_signingKey!);
+        }
 
     }
 }

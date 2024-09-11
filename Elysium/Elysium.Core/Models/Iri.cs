@@ -94,6 +94,16 @@ namespace Elysium.Core.Models
             return $"{Scheme}://{Host}/{Path}";
         }
 
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Scheme, Host, Path);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is not null && obj is Iri iri && iri.Host == Host && iri.Scheme == Scheme && iri.Path == Path;   
+        }
+
         [GeneratedRegex(@"/{2,}")]
         private static partial Regex PathSepRegex();
         [GeneratedRegex(@"^[a-zA-Z0-9-_]+$")]

@@ -17,6 +17,7 @@ namespace Elysium.Client.Extensions
         {
             services.AddScoped<IActivityPubClientService, ActivityPubClientService>();
             services.AddScoped<IElysiumService, ElysiumService>();
+            services.AddScoped<ILocalActorRegistrar, LocalActorRegistrar>();
             services.AddElysiumClientGrainFactories();
             return services;
         }
@@ -24,8 +25,8 @@ namespace Elysium.Client.Extensions
         public static IServiceCollection AddElysiumClientGrainFactories(this IServiceCollection services)
         {
             services.AddSingleton(typeof(IStorageKeyGrainFactory<>), typeof(StorageKeyGrainFactory<>));
-            services.AddSingleton<IGrainFactory<LocalIri>, LocalUriGrainFactory>();
-            services.AddSingleton<IGrainFactory<RemoteIri>, RemoteUriGrainFactory>();
+            services.AddSingleton<IGrainFactory<LocalIri>, LocalIriGrainFactory>();
+            services.AddSingleton<IGrainFactory<RemoteIri>, RemoteIriGrainFactory>();
             return services;
         }
     }

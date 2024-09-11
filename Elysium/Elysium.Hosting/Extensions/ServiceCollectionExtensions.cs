@@ -16,6 +16,7 @@ namespace Elysium.Hosting.Extensions
         {
             services.Configure<HostingSettings>(configuration.GetSection(nameof(HostingSettings)));
             services.AddSingleton<IHostingService, HostingService>();
+            services.AddSingleton<IIriService, IriService>();
             return services;
         }
     }

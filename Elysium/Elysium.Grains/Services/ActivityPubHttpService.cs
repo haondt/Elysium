@@ -3,7 +3,7 @@ using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Reasons;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Exceptions;
-using Elysium.Server.Services;
+using Elysium.Hosting.Services;
 using Haondt.Core.Models;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -19,9 +19,7 @@ using System.Threading.Tasks;
 namespace Elysium.Grains.Services
 {
     public class ActivityPubHttpService(
-        IHostingService hostingService,
         IGrainFactory<RemoteIri> uriGrainFactory, 
-        IGrainFactory grainFactory, 
         HttpClient httpClient) : IActivityPubHttpService
     {
 

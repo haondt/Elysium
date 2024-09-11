@@ -11,6 +11,6 @@ namespace Elysium.Grains.Services
     public interface IJsonLdService
     {
         Task<JArray> ExpandAsync(IHttpMessageAuthor author, JToken input);
-        Task<JObject> CompactAsync(IHttpMessageAuthor author, JArray input);
+        Task<JObject> CompactAsync(IHttpMessageAuthor author, JToken input);
     }
 }

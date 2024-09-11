@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces.Services
 {
-    public class LocalUriGrainFactory(IGrainFactory grainFactory) : IGrainFactory<LocalIri>
+    public class LocalIriGrainFactory(IGrainFactory grainFactory) : IGrainFactory<LocalIri>
     {
         public TGrain GetGrain<TGrain>(LocalIri identity) where TGrain : IGrain<LocalIri>
         {

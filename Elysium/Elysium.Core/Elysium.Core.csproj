@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Haondt.Identity" Version="1.0.0-alpha-20240909175453" />
+    <PackageReference Include="Haondt.Identity" Version="1.0.0-alpha-20240910182219" />
     <PackageReference Include="Microsoft.Orleans.Sdk" Version="8.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>

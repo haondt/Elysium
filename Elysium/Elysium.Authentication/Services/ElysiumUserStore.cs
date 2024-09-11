@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.Authentication.Services
 {
+    // todo: use storagekeygrain instead of storage
     public class ElysiumUserStore(IElysiumStorage storage) : ElysiumStorageKeyIdModelStore<UserIdentity>(storage), IUserStore<UserIdentity>, IUserPasswordStore<UserIdentity>
     {
         public async Task<UserIdentity?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)

@@ -2,7 +2,7 @@
 using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Server.Services;
+using Elysium.Hosting.Services;
 using Haondt.Identity.StorageKey;
 using Newtonsoft.Json.Linq;
 using System;
@@ -14,22 +14,27 @@ using System.Threading.Tasks;
 namespace Elysium.Client.Services
 {
     public class ActivityPubClientService(
-        IHostingService hostingService,
+        IIriService iriService,
         IStorageKeyGrainFactory<UserIdentity> userIdentityGrainFactory,
         IGrainFactory<LocalIri> grainFactory) : IActivityPubClientService
     {
-        public async Task<(LocalIri ActivityUri, LocalIri ObjectUri)> PublishActivityAsync(StorageKey<UserIdentity> author, ActivityType type, JArray @object)
+        public async Task<LocalIri> GetLocalIriFromUserIdentityAsync(StorageKey<UserIdentity> identity)
         {
-            var userIdentityGrain = userIdentityGrainFactory.GetGrain(author);
+            var userIdentityGrain = userIdentityGrainFactory.GetGrain(identity);
             var userIdentity = await userIdentityGrain.GetAsync();
             if (!userIdentity.IsSuccessful)
-                throw new UnauthorizedAccessException($"Unable to retrieve user identity {author}");
+                throw new UnauthorizedAccessException($"Unable to retrieve user identity {identity}");
 
-            var localizedUsername = userIdentity.Value.LocalizedUsername ?? author.Parts[^1].Value;
-            var userUri = hostingService.GetIriForLocalizedUsername(localizedUsername);
+            var localizedUsername = userIdentity.Value.LocalizedUsername ?? identity.Parts[^1].Value;
+            return iriService.GetIriForLocalizedActorname(localizedUsername);
+        }
+
+        public async Task<(LocalIri ActivityUri, LocalIri ObjectUri)> PublishActivityAsync(StorageKey<UserIdentity> author, ActivityType type, JArray expandedObject)
+        {
+            var userUri = await GetLocalIriFromUserIdentityAsync(author);
             var userGrain = grainFactory.GetGrain<ILocalActorGrain>(userUri);
 
-            return await userGrain.PublishActivity(type, @object);
+            return await userGrain.PublishActivity(type, expandedObject);
         }
     }
 }

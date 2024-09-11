@@ -28,7 +28,18 @@
   - maybe keep it and replace the user store with a grain backing
   - maybe also add option to disable cachine on storagekeygrains? or a really short ttl, maybe both as appsettings per grain type
 - build something into the typedactorservice to resolve the data for the LocalActorState (inbox, user scoping url, actor uri, etc)
+- delete local and remote document grains in favor of documnetservice + storagekey grains
+- delete typed actor services
+- various `todo`s sprinkled through the codebase
+- go through grains and see what can be AlwaysInterleave, StatelessWorker and Reentrant
+- unit tests
+- linked data signatures https://docs.joinmastodon.org/admin/config/#authorized_fetch
+- the new publickey spec with multikey, currently just implementing the old one at https://w3c-ccg.github.io/security-vocab/#publicKey
+- etag support for IStorage
+-  configureawait false in haondt lib
 
 
 ## currently doing
 - get message sending successfully
+- add unstable warning in sign up ui
+- websockets?

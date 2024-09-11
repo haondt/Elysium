@@ -3,6 +3,7 @@ using Elysium.Core.Models;
 using Elysium.GrainInterfaces.Services;
 using Newtonsoft.Json.Linq;
 using Orleans;
+using Orleans.Concurrency;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,10 +18,10 @@ namespace Elysium.GrainInterfaces
     ///<remarks><see href="https://www.w3.org/TR/activitypub/#actors"/></remarks> 
     public interface ILocalActorGrain : IGrain<LocalIri>
     {
-        Task InitializeAsync(LocalActorState localActorState);
+        Task ClearAsync();
 
 
-        Task IngestActivityAsync(JObject activity);
+        Task IngestActivityAsync(JToken activity);
         //Task<OrderedCollection> GetPublishedActivities(Optional<Actor> requester);
 
         /// <summary>
@@ -53,6 +54,12 @@ namespace Elysium.GrainInterfaces
         /// <returns></returns>
         Task PublishTransientActivity(ActivityType type, JObject @object);
 
-
+        [AlwaysInterleave]
+        Task<bool> IsInitializedAsync();
+        [AlwaysInterleave]
+        Task<LocalActorState> GetStateAsync();
+        Task InitializeAsync(ActorRegistrationDetails registrationDetails);
+        [AlwaysInterleave]
+        Task<byte[]> GetSigningKeyAsync();
     }
 }

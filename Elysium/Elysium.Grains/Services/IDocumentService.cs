@@ -21,15 +21,17 @@ namespace Elysium.Grains.Services
         /// </summary>
         /// <param name="actor"></param>
         /// <param name="objectUri"></param>
-        /// <param name="compactedObject"></param>
+        /// <param name="document">should NOT contain bto/bcc items</param>
         /// <param name="bto">may be an empty list</param>
         /// <param name="bcc">may be an empty list</param>
         /// <returns></returns>
         Task<Result<DocumentReason>> CreateDocumentAsync(
             LocalIri actor, 
             LocalIri objectUri, 
-            JObject compactedObject,
+            JToken document,
             List<Iri> bto,
             List<Iri> bcc);
+        Task<Result<DocumentReason>> ReserveDocumentIriAsync(LocalIri actor, LocalIri documentIri);
+        Task<LocalIri> ReserveDocumentIriAsync(LocalIri actor, Func<LocalIri> iriFactory, int maxAttempts);
     }
 }

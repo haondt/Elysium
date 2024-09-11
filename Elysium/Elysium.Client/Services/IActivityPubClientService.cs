@@ -13,6 +13,8 @@ namespace Elysium.Client.Services
 
     public interface IActivityPubClientService
     {
+        Task<LocalIri> GetLocalIriFromUserIdentityAsync(StorageKey<UserIdentity> identity);
+
         // Todo: method that parses @foo@baz.bar and turns it into https://baz.bar/x/y/z/foo
         //Task<Result<>>
 

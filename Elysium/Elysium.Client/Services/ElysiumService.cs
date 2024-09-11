@@ -1,7 +1,9 @@
-﻿using Elysium.Authentication.Services;
+﻿using Elysium.ActivityPub.Models;
+using Elysium.Authentication.Services;
 using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
-using Elysium.Server.Services;
+using Elysium.GrainInterfaces.Services;
+using Elysium.Hosting.Services;
 using Haondt.Core.Models;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -13,18 +15,19 @@ using System.Threading.Tasks;
 namespace Elysium.Client.Services
 {
     public class ElysiumService(
+        IIriService iriService,
         IHostingService hostingService,
         IUserCryptoService cryptoService,
         IGrainFactory grainFactory,
+        ILocalActorRegistrar registrar,
         UserManager<UserIdentity> userManager
         ) : IElysiumService
     {
-        private readonly ILocalActorRegistryGrain _registryGrain = grainFactory.GetGrain<ILocalActorRegistryGrain>(Guid.Empty);
 
         public async Task<Result<UserIdentity, List<string>>> RegisterUserAsync(string localizedUsername, string password)
         {
             var (publicKey, encryptedPrivateKey) = cryptoService.GenerateKeyPair();
-            var username = hostingService.GetUsernameFromLocalizedUsername(localizedUsername);
+            var username = iriService.GetActornameFromLocalizedActorname(localizedUsername);
             var user = new UserIdentity
             {
                 Id = UserIdentity.GetStorageKey(username),
@@ -37,11 +40,24 @@ namespace Elysium.Client.Services
             if (!result.Succeeded)
                 return new(result.Errors.Select(e => $"{e.Description}").ToList());
 
-            var userUri = hostingService.GetIriForLocalizedUsername(localizedUsername);
-            await _registryGrain.RegisterActor(userUri, new LocalActorState
+            var userIri = iriService.GetIriForLocalizedActorname(localizedUsername);
+            try
             {
-                Inbox = new () // TODO!
-            });
+                await registrar.RegisterActor(userIri, new ActorRegistrationDetails
+                {
+                    EncryptedSigningKey = encryptedPrivateKey,
+                    PublicKey = publicKey,
+                    Type = JsonLdTypes.PERSON
+                });
+            }
+            catch
+            {
+                // todo: should probably log this? or notify something? this would be real bad
+                // todo: maybe implement some sort of saga pattern here to make recovery more viable
+                // todo: saga pattern
+                throw;
+            }
+
             return new(user);
         }
 
@@ -51,18 +67,17 @@ namespace Elysium.Client.Services
                 throw new InvalidOperationException("unable to parse username");
             var parts = fediverseUsername.Split('@');
             var partialUri = new IriBuilder { Host = parts[1], Scheme = Uri.UriSchemeHttps }.Iri;
-            if (hostingService.IsLocalHost(partialUri))
+            if (partialUri.Host == hostingService.Host)
             {
                 var user = await userManager.FindByNameAsync(parts[0]);
                 if (user == null)
                     return new($"Unable to find user {fediverseUsername}");
                 var localizedUsername = user.LocalizedUsername ?? user.Id.Parts[^1].Value;
-                return new(hostingService.GetIriForLocalizedUsername(localizedUsername).Iri);
+                return new(iriService.GetIriForLocalizedActorname(localizedUsername).Iri);
             }
             return new((await GetUriForRemoteUsernameAsync(fediverseUsername)).Iri);
-
-
         }
+
         public Task<RemoteIri> GetUriForRemoteUsernameAsync(string username)
         {
             //if (username.Count(c => c == '@') != 1)

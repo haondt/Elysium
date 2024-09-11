@@ -8,8 +8,8 @@ using Haondt.Web.Core.Services;
 using Haondt.Web.Services;
 using Haondt.Web.Core.Extensions;
 using Haondt.Web.Components;
-using Elysium.Server.Services;
 using Elysium.Authentication.Components;
+using Elysium.Hosting.Services;
 
 namespace Elysium.Extensions
 {

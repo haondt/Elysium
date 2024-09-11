@@ -11,30 +11,36 @@ using System.Threading.Tasks;
 
 namespace Elysium.Grains
 {
-    [StatelessWorker]
+    [StatelessWorker, Reentrant]
     public class LocalActorAuthorGrain : Grain, ILocalActorAuthorGrain
     {
         private readonly LocalIri _id;
-        private readonly Lazy<Task<byte[]>> _signingKeyLazy;
+        private readonly ILocalActorGrain _mom;
         private readonly IUserCryptoService _cryptoService;
+        private byte[]? _signingKey;
 
         public LocalActorAuthorGrain(
-            ITypedActorServiceProvider typedActorServiceProvider,
             IUserCryptoService cryptoService,
             IGrainFactory<LocalIri> grainFactory)
         {
             _id = grainFactory.GetIdentity(this);
-            var typedActorService = typedActorServiceProvider.GetService(_id.Iri);
-            _signingKeyLazy = new(typedActorService.GetSigningKeyAsync(_id));
+            _mom = grainFactory.GetGrain<ILocalActorGrain>(_id);
             _cryptoService = cryptoService;
         }
 
+        public override async Task OnActivateAsync(CancellationToken cancellationToken)
+        {
+            _signingKey = await _mom.GetSigningKeyAsync();
+            await base.OnActivateAsync(cancellationToken);
+        }
+
+        public Task<LocalIri> GetIriAsync() => Task.FromResult(_id);
+
         public Task<string> GetKeyIdAsync() => Task.FromResult(_id.Iri.ToString());
 
-        public async Task<string> SignAsync(string stringToSign)
+        public Task<string> SignAsync(string stringToSign)
         {
-            var signingKey = await _signingKeyLazy.Value;
-            return _cryptoService.Sign(stringToSign, signingKey);
+            return Task.FromResult(_cryptoService.Sign(stringToSign, _signingKey!));
         }
     }
 }

@@ -4,9 +4,12 @@ using Elysium.Grains;
 using Elysium.Grains.Services;
 using Elysium.Hosting.Services;
 using Elysium.Server.Services;
+using Elysium.Silo.Services;
 using Haondt.Identity.StorageKey;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Orleans.Runtime.Hosting;
+using Orleans.Storage;
 using Polly;
 using Polly.Extensions.Http;
 using System;
@@ -30,8 +33,22 @@ namespace Elysium.Silo.Extensions
         public static IServiceCollection AddElysiumSiloGrainFactories(this IServiceCollection services)
         {
             services.AddSingleton(typeof(IStorageKeyGrainFactory<>), typeof(StorageKeyGrainFactory<>));
-            services.AddSingleton<IGrainFactory<LocalIri>, LocalUriGrainFactory>();
-            services.AddSingleton<IGrainFactory<RemoteIri>, RemoteUriGrainFactory>();
+            services.AddSingleton<IGrainFactory<LocalIri>, LocalIriGrainFactory>();
+            services.AddSingleton<IGrainFactory<RemoteIri>, RemoteIriGrainFactory>();
+            services.AddSingleton<IGrainFactory<Iri>, IriGrainFactory>();
+            return services;
+        }
+
+        // see https://learn.microsoft.com/en-us/dotnet/orleans/tutorials-and-samples/custom-grain-storage?pivots=orleans-7-0
+        public static IServiceCollection AddElysiumStorageGrainStorage(this IServiceCollection services, string providerName)
+        {
+            //services.AddTransient<
+            //IPostConfigureOptions<FileGrainStorageOptions>,
+            //DefaultStorageProviderSerializerOptionsConfigurator<FileGrainStorageOptions>>();
+            //services.AddSingletonNamedService(providerName, (p, n) =>
+            //    (ILifecycleParticipant<ISiloLifecycle>)p.GetRequiredServiceByName<IGrainStorage>(n));
+            services.AddGrainStorage(providerName, (sp, name) =>
+                ActivatorUtilities.CreateInstance<ElysiumStorageGrainStorage>(sp));
             return services;
         }
     }

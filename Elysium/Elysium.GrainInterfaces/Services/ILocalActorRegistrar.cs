@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.GrainInterfaces
+namespace Elysium.GrainInterfaces.Services
 {
-    public interface ILocalActorRegistryGrain : IGrainWithGuidKey
+    public interface ILocalActorRegistrar : IGrainWithGuidKey
     {
         /// <summary>
         /// Registers a local actor so that they may receive activities
@@ -16,7 +16,7 @@ namespace Elysium.GrainInterfaces
         /// <param name="iri"></param>
         /// <returns></returns>
         public Task<bool> HasRegisteredActor(LocalIri iri);
-        public Task RegisterActor(LocalIri iri, LocalActorState initialState);
+        public Task RegisterActor(LocalIri iri, ActorRegistrationDetails registrationDetails);
         public Task UnregisterActor(LocalIri iri);
     }
 }

@@ -13,5 +13,6 @@ namespace Elysium.Authentication.Services
         byte[] AesDecrypt(byte[] data, byte[] encryptionKey, byte[] iv);
         byte[] Sign(byte[] data, byte[] privateKey);
         bool VerifySignature(byte[] data, byte[] signature, byte[] publicKey);
+        byte[] GenerateRandomBytes(int num);
     }
 }

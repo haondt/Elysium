@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using SimpleBase;
 using System.Security.Cryptography;
 using System.Text;
@@ -46,6 +47,14 @@ namespace Elysium.Authentication.Services
                 return false;
             }
         }
+
+        // generate a random 64 bit object id, encoded as a url-safe base64 string
+        public string GenerateDocumentId()
+        {
+            var bytes = cryptoService.GenerateRandomBytes(8);
+            return Base64UrlEncoder.Encode(bytes);
+        }
+
         //public string EncodePublicKeyAsPemX509(byte[] publicKey)
         //{
         //    using var rsa = RSA.Create();
@@ -83,6 +92,14 @@ namespace Elysium.Authentication.Services
             rsa.ImportSubjectPublicKeyInfo(Convert.FromBase64String(publicKey), out _);
             return rsa.ExportRSAPublicKey();
         }
+
+        public string EncodePublicKeyToPemX509(string publicKey)
+        {
+            using var rsa = RSA.Create();
+            rsa.ImportRSAPublicKey(Convert.FromBase64String(publicKey), out _);
+            return rsa.ExportSubjectPublicKeyInfoPem();
+        }
+
 
         //public string EncodeMultibaseString(byte[] bytes)
         //{

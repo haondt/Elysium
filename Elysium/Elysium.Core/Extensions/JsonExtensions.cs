@@ -2,6 +2,7 @@
 using Elysium.Core.Extensions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Elysium.Core.Extensions
 {
@@ -18,10 +19,21 @@ namespace Elysium.Core.Extensions
         {
             return jtoken is T;
         }
+        public static bool Is<T>(this JToken jtoken, [NotNullWhen(true)] out T? TValue) where T : JToken
+        {
+            if (jtoken is T casted)
+            {
+                TValue = casted;
+                return true;
+            }
+
+            TValue = default;
+            return false;
+        }
 
         public static T As<T>(this JToken jtoken) where T : JToken
         {
-            if (jtoken is not T tValue) throw new InvalidCastException($"Cannot cast object of type {jtoken.GetType()} to {nameof(T)}");
+            if (jtoken is not T tValue) throw new InvalidCastException($"Cannot cast object of type {jtoken.GetType()} to {typeof(T)}");
             return tValue;
         }
 

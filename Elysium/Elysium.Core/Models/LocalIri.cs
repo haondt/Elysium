@@ -11,6 +11,11 @@ namespace Elysium.Core.Models
     {
         [Id(0)]
         public Iri Iri { get; init; } = iri;
+
+        public override string ToString()
+        {
+            return Iri.ToString();
+        }
     }
 }
 

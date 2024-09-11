@@ -7,9 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Haondt.Identity" Version="1.0.0-alpha-20240909175453" />
-    <PackageReference Include="Haondt.Persistence" Version="1.0.0-alpha-20240909175453" />
-    <PackageReference Include="Haondt.Web" Version="1.0.0-alpha-20240909175453" />
+    <PackageReference Include="Haondt.Identity" Version="1.0.0-alpha-20240910182219" />
+    <PackageReference Include="Haondt.Persistence" Version="1.0.0-alpha-20240910182219" />
+    <PackageReference Include="Haondt.Web" Version="1.0.0-alpha-20240910182219" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.0.2" />
     <PackageReference Include="SimpleBase" Version="4.0.0" />
   </ItemGroup>
 

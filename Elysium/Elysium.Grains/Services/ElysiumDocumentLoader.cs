@@ -1,6 +1,6 @@
 ﻿using Elysium.Core.Models;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Server.Services;
+using Elysium.Hosting.Services;
 using JsonLD.Core;
 using Microsoft.Extensions.Options;
 using System;
@@ -19,7 +19,7 @@ namespace Elysium.Grains.Services
         public override async Task<RemoteDocument> LoadDocumentAsync(string url)
         {
             var iri = Iri.FromUnencodedString(url);
-            if (hostingService.IsLocalHost(iri))
+            if (hostingService.Host == iri.Host)
             {
                 var document = (await documentResolver.GetDocumentAsync(author, new LocalIri { Iri = iri })).Value;
                 return new RemoteDocument(url, document);

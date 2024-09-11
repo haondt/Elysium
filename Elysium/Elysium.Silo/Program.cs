@@ -24,12 +24,11 @@ await Host.CreateDefaultBuilder(args)
         {
             options.ClusterId = "default";
             options.ServiceId = "elysium";
-
         })
-        .AddMemoryGrainStorageAsDefault()
-        .AddMemoryGrainStorage(GrainConstants.SimpleStreamProvider)
-        .AddMemoryGrainStorage(GrainConstants.GrainDocumentStorage)
-        .AddMemoryGrainStorage(GrainConstants.GrainStorage)
+        //.AddMemoryGrainStorageAsDefault()
+        .AddElysiumStorageGrainStorage(GrainConstants.SimpleStreamProvider)
+        .AddElysiumStorageGrainStorage(GrainConstants.GrainDocumentStorage)
+        .AddElysiumStorageGrainStorage(GrainConstants.GrainStorage)
         .AddMemoryStreams(GrainConstants.SimpleStreamProvider))
     .ConfigureServices((context, services) =>
     {

@@ -38,7 +38,8 @@ namespace Elysium.Persistence.Services
 
         private static JsonSerializerSettings ConfigureSerializerSettings(JsonSerializerSettings settings)
         {
-            settings.TypeNameHandling = TypeNameHandling.All;
+            //settings.TypeNameHandling = TypeNameHandling.All;
+            settings.TypeNameHandling = TypeNameHandling.Auto;
             settings.MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Error;
             settings.Formatting = Newtonsoft.Json.Formatting.None;
             settings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
@@ -64,19 +65,22 @@ namespace Elysium.Persistence.Services
         private async Task<string> GetOrCreateTableAsync(Type tableType, SqliteConnection connection)
         {
             var tableName = tableType.AssemblyQualifiedName ?? throw new InvalidOperationException("Type name is null");
+            tableName = SanitizeTableName(tableName);
 
             if (_existingTables.ContainsKey(tableName)) return tableName;
 
             var createTableQuery = tableType == typeof(UserIdentity)
                 ? $@"
-                    CREATE TABLE IF NOT EXISTS [{tableName}] (
+                    CREATE TABLE IF NOT EXISTS {tableName} (
                         Key TEXT PRIMARY KEY,
+                        KeyString TEXT NOT NULL,
                         Value TEXT NOT NULL,
                         NormalizedUsername TEXT
                     )"
                 : $@"
-                    CREATE TABLE IF NOT EXISTS [{tableName}] (
+                    CREATE TABLE IF NOT EXISTS {tableName} (
                         Key TEXT PRIMARY KEY,
+                        KeyString TEXT NOT NULL,
                         Value TEXT NOT NULL
                     )";
 
@@ -94,7 +98,7 @@ namespace Elysium.Persistence.Services
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
             var table = await GetOrCreateTableAsync(key.Type, connection);
-            var query = $"SELECT Value FROM [{table}] WHERE Key = @key";
+            var query = $"SELECT Value FROM {table} WHERE Key = @key";
             using var command = new SqliteCommand(query, connection);
             command.Parameters.AddWithValue("@key", keyString);
             var result = await command.ExecuteScalarAsync();
@@ -114,7 +118,7 @@ namespace Elysium.Persistence.Services
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
             var table = await GetOrCreateTableAsync(key.Type, connection);
-            string query = $"SELECT COUNT(1) FROM [{table}] WHERE Key = @key";
+            string query = $"SELECT COUNT(1) FROM {table} WHERE Key = @key";
             using var command = new SqliteCommand(query, connection);
             command.Parameters.AddWithValue("@key", keyString);
             var count = await command.ExecuteScalarAsync();
@@ -139,15 +143,23 @@ namespace Elysium.Persistence.Services
                 if (value is not UserIdentity userIdentity)
                     throw new InvalidOperationException($"storage key {key} has type UserIdentity but the value was not a UserIdentity");
 
-                query = $"INSERT OR REPLACE INTO [{table}] (Key, Value, NormalizedUsername) " +
-                    $"VALUES (@key, @value, @normalizedUsername)";
+                if (_settings.StoreKeyStrings)
+                    query = $"INSERT OR REPLACE INTO {table} (Key, KeyString, Value, NormalizedUsername) " +
+                        $"VALUES (@key, @keyString, @value, @normalizedUsername)";
+                else
+                    query = $"INSERT OR REPLACE INTO {table} (Key, Value, NormalizedUsername) " +
+                        $"VALUES (@key, @value, @normalizedUsername)";
                 setAdditionalParameter = c => c.Parameters.AddWithValue("@normalizedUsername", userIdentity.NormalizedUsername ?? (object)DBNull.Value);
             }
+            else if (_settings.StoreKeyStrings)
+               query = $"INSERT OR REPLACE INTO {table} (Key, KeyString, Value) VALUES (@key, @keyString, @value)";
             else
-               query = $"INSERT OR REPLACE INTO [{table}] (Key, Value) VALUES (@key, @value)";
+               query = $"INSERT OR REPLACE INTO {table} (Key, Value) VALUES (@key, @value)";
 
             using var command = new SqliteCommand(query, connection);
             command.Parameters.AddWithValue("@key", keyString);
+            if (_settings.StoreKeyStrings)
+                command.Parameters.AddWithValue("@keyString", key.ToString());
             command.Parameters.AddWithValue("@value", valueString);
             setAdditionalParameter?.Invoke(command);
             await command.ExecuteNonQueryAsync();
@@ -159,7 +171,7 @@ namespace Elysium.Persistence.Services
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
             var table = await GetOrCreateTableAsync(key.Type, connection);
-            string query = $"DELETE FROM [{table}] WHERE Key = @key";
+            string query = $"DELETE FROM {table} WHERE Key = @key";
             using var command = new SqliteCommand(query, connection);
             command.Parameters.AddWithValue("@key", keyString);
             await command.ExecuteNonQueryAsync();
@@ -171,7 +183,7 @@ namespace Elysium.Persistence.Services
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
             var table = await GetOrCreateTableAsync(typeof(UserIdentity), connection);
-            var query = $" SELECT Value FROM [{table}] WHERE NormalizedUsername = @normalizedUsername";
+            var query = $" SELECT Value FROM {table} WHERE NormalizedUsername = @normalizedUsername";
             using var command = new SqliteCommand(query, connection);
             command.Parameters.AddWithValue("@normalizedUsername", normalizedUsername);
             using var reader = await command.ExecuteReaderAsync();
@@ -182,6 +194,15 @@ namespace Elysium.Persistence.Services
             var resultUserIdentity = JsonConvert.DeserializeObject<UserIdentity>(valueString, _serializerSettings)
                 ?? throw new JsonException("Unable to deserialize result");
             return new(resultUserIdentity);
+        }
+
+        private string SanitizeTableName(string tableName)
+        {
+            // Escape any double quotes by replacing them with two double quotes
+            var sanitized = tableName.Replace("\"", "\"\"");
+    
+            // Surround the sanitized table name with double quotes
+            return $"\"{sanitized}\"";
         }
     }
 }

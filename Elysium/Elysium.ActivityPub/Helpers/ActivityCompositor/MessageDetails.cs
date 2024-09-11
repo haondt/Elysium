@@ -9,5 +9,6 @@ namespace Elysium.ActivityPub.Helpers.ActivityCompositor
         public string Type => JsonLdTypes.NOTE;
         public required string Text { get; set; }
         public required Iri Recepient { get; set; }
+        public required Iri AttributedTo { get; set; }
     }
 }
