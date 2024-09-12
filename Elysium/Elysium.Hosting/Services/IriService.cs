@@ -34,6 +34,14 @@ namespace Elysium.Hosting.Services
             };
         }
 
+        public string GetLocalizedActornameForLocalIri(LocalIri iri)
+        {
+            if (!IsLocalActorIri(iri))
+                throw new InvalidOperationException($"iri {iri} is not in the right format for a local actor");
+            var partialActorIri = GetIriForLocalizedActorname("");
+            return iri.ToString().Substring(partialActorIri.ToString().Length + 1);
+        }
+
         public string GetActornameFromLocalizedActorname(string localizedUsername)
         {
             return $"{localizedUsername}@{hostingService.Host}";

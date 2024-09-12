@@ -21,8 +21,5 @@ namespace Elysium.Grains.Exceptions
         {
         }
 
-        protected ProbabilityException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

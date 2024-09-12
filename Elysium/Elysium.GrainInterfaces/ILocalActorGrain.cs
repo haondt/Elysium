@@ -21,7 +21,7 @@ namespace Elysium.GrainInterfaces
         Task ClearAsync();
 
 
-        Task IngestActivityAsync(JToken activity);
+        Task IngestActivityAsync(Iri sender, JToken activity);
         //Task<OrderedCollection> GetPublishedActivities(Optional<Actor> requester);
 
         /// <summary>

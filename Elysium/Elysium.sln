@@ -17,17 +17,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Components", "Elysi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Grains", "Elysium.Grains\Elysium.Grains.csproj", "{BC8300F2-312F-46AA-A1D8-2B42367530CF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Silo", "Elysium.Silo\Elysium.Silo.csproj", "{38F4A278-E8CF-496E-9FCF-D840AC12401F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Client", "Elysium.Client\Elysium.Client.csproj", "{B80F08DA-BB63-43AE-B01C-5AF1E25402DC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.WebFinger", "Elysium.WebFinger\Elysium.WebFinger.csproj", "{54D7FA5E-0CF0-48C1-A64E-4DAD307345F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.ActivityPub", "Elysium.ActivityPub\Elysium.ActivityPub.csproj", "{ADEE8ED4-152C-442E-8FE2-2E6321D50F26}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.ActivityPub", "Elysium.ActivityPub\Elysium.ActivityPub.csproj", "{ADEE8ED4-152C-442E-8FE2-2E6321D50F26}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Hosting", "Elysium.Hosting\Elysium.Hosting.csproj", "{1E4E1A6B-6EDE-413A-92AA-70899F647C06}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Hosting", "Elysium.Hosting\Elysium.Hosting.csproj", "{1E4E1A6B-6EDE-413A-92AA-70899F647C06}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D532085B-62CD-472A-92BE-A3EE083D48FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Silo.Api", "Elysium.Silo.Api\Elysium.Silo.Api.csproj", "{D801420F-CCA9-4736-ACAD-060EC3A1F4E4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,10 +63,6 @@ Global
 		{BC8300F2-312F-46AA-A1D8-2B42367530CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC8300F2-312F-46AA-A1D8-2B42367530CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC8300F2-312F-46AA-A1D8-2B42367530CF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{38F4A278-E8CF-496E-9FCF-D840AC12401F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{38F4A278-E8CF-496E-9FCF-D840AC12401F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{38F4A278-E8CF-496E-9FCF-D840AC12401F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{38F4A278-E8CF-496E-9FCF-D840AC12401F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B80F08DA-BB63-43AE-B01C-5AF1E25402DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B80F08DA-BB63-43AE-B01C-5AF1E25402DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B80F08DA-BB63-43AE-B01C-5AF1E25402DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -83,6 +79,10 @@ Global
 		{1E4E1A6B-6EDE-413A-92AA-70899F647C06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E4E1A6B-6EDE-413A-92AA-70899F647C06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E4E1A6B-6EDE-413A-92AA-70899F647C06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D801420F-CCA9-4736-ACAD-060EC3A1F4E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D801420F-CCA9-4736-ACAD-060EC3A1F4E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D801420F-CCA9-4736-ACAD-060EC3A1F4E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D801420F-CCA9-4736-ACAD-060EC3A1F4E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -17,7 +17,7 @@ namespace Elysium.Grains.Services
     {
         public async Task<JObject> CompactAsync(IHttpMessageAuthor author, JToken input)
         {
-            var flattened = (await JsonLdProcessor.FlattenAsync(input, new JObject(), new JsonLdOptions(string.Empty)
+            var flattened = (await JsonLdProcessor.FlattenAsync(input, new JObject(), new JsonLdOptions(null)
             {
                 documentLoader = new ElysiumDocumentLoader(documentResolver, author, hostingService),
             })).As<JObject>();

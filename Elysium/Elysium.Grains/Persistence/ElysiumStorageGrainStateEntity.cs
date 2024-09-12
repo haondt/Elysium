@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Silo.Services
+namespace Elysium.Grains.Persistence
 {
     public class ElysiumStorageGrainStateEntity<T>
     {
@@ -16,7 +16,7 @@ namespace Elysium.Silo.Services
                 $"{KEY_STRING_SEPARATOR}{CosmosIdSanitizer.Sanitize(grainId.Type.ToString()!)}" +
                 $"{CosmosIdSanitizer.SeparatorChar}{CosmosIdSanitizer.Sanitize(grainId.Key.ToString()!)}";
 
-    
+
             return StorageKey<ElysiumStorageGrainStateEntity<T>>.Create($"{keyString}");
         }
 

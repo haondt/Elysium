@@ -9,6 +9,7 @@ using Haondt.Web.Core.Middleware;
 using Elysium.Middlewares;
 using Elysium.Client.Extensions;
 using Orleans.Configuration;
+using Elysium.Client.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,8 @@ builder.Services
 
 builder.Services.AddMvc();
 
+builder.Services.AddSignalR();
+
 builder.Services.AddOrleansClient(client => client
     .UseLocalhostClustering()
     .Configure<ClusterOptions>(options =>
@@ -48,6 +51,7 @@ app.UseStaticFiles();
 app.MapControllers();
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseMiddleware<UnmappedRouteHandlerMiddleware>();
+app.MapHub<ElysiumHub>("/elysiumHub");
 //app.UseAuthentication();
 app.Run();
 

@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <Content Remove="wwwroot\bulma-custom.css" />
+    <Content Remove="wwwroot\hx-signalr.js" />
     <Content Remove="wwwroot\icon.ico" />
     <Content Remove="wwwroot\icon.svg" />
     <Content Remove="wwwroot\logo.svg" />
@@ -16,6 +17,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="wwwroot\bulma-custom.css" />
+    <EmbeddedResource Include="wwwroot\hx-signalr.js" />
     <EmbeddedResource Include="wwwroot\icon.ico" />
     <EmbeddedResource Include="wwwroot\icon.svg" />
     <EmbeddedResource Include="wwwroot\logo.svg" />

@@ -1,23 +1,22 @@
-﻿using Elysium.Silo.Extensions;
-using Elysium.Persistence.Extensions;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Orleans.Configuration;
-using Elysium.GrainInterfaces;
-using Elysium.Hosting.Extensions;
-using Elysium.Grains.Extensions;
 using Elysium.Authentication.Extensions;
+using Elysium.GrainInterfaces;
+using Elysium.Grains.Extensions;
+using Elysium.Silo.Extensions;
+using Orleans.Configuration;
+using Elysium.Hosting.Extensions;
+using Elysium.Persistence.Extensions;
 
-await Host.CreateDefaultBuilder(args)
-    .ConfigureAppConfiguration((context, config) =>
-    {
-        config
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: false, reloadOnChange: true)
-            .AddEnvironmentVariables();
+var builder = WebApplication.CreateBuilder(args);
 
-    })
+// Add services to the container.
+
+builder.Services.AddControllers();
+
+builder.Configuration.AddEnvironmentVariables();
+
+//builder.Services
+
+builder.Host
     .UseOrleans(builder => builder
         .UseLocalhostClustering()
         .Configure<ClusterOptions>(options =>
@@ -25,7 +24,6 @@ await Host.CreateDefaultBuilder(args)
             options.ClusterId = "default";
             options.ServiceId = "elysium";
         })
-        //.AddMemoryGrainStorageAsDefault()
         .AddElysiumStorageGrainStorage(GrainConstants.SimpleStreamProvider)
         .AddElysiumStorageGrainStorage(GrainConstants.GrainDocumentStorage)
         .AddElysiumStorageGrainStorage(GrainConstants.GrainStorage)
@@ -38,6 +36,16 @@ await Host.CreateDefaultBuilder(args)
             .AddElysiumCryptoServices()
             .AddElysiumHostingServices(context.Configuration)
             .AddElysiumPersistenceServices(context.Configuration);
-    })
-    .Build()
-    .RunAsync();
+    });
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+
+//app.UseAuthorization();
+
+if (app.Environment.IsDevelopment())
+    app.UseDeveloperExceptionPage();
+
+app.MapControllers();
+app.Run();

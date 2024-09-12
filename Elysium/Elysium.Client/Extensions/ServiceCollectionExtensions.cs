@@ -1,4 +1,5 @@
-﻿using Elysium.Client.Services;
+﻿using Elysium.Client.Hubs;
+using Elysium.Client.Services;
 using Elysium.Core.Models;
 using Elysium.GrainInterfaces.Services;
 using Haondt.Identity.StorageKey;
@@ -17,6 +18,7 @@ namespace Elysium.Client.Extensions
         {
             services.AddScoped<IActivityPubClientService, ActivityPubClientService>();
             services.AddScoped<IElysiumService, ElysiumService>();
+            services.AddSingleton<IClientActorActivityDeliveryObserverRegistry, ClientActorActivityDeliveryObserverRegistry>();
             services.AddElysiumClientGrainFactories();
             return services;
         }

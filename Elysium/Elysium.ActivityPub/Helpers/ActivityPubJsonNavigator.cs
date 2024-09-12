@@ -53,10 +53,14 @@ namespace Elysium.ActivityPub.Helpers
         /// <remarks><see href="https://www.w3.org/TR/activitypub/#obj-id"/></remarks>
         /// <param name="expanded"></param>
         /// <returns></returns>
-        public static string GetType(JObject target)
+        public static string GetType(JArray expanded)
         {
-            throw new NotImplementedException();
-            //return target.Get("type").AsString();
+            return expanded
+                .Single()
+                .As<JObject>()
+                .Get<JArray>("@type")
+                .Single()
+                .AsString();
         }
 
 

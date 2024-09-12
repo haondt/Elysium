@@ -40,6 +40,7 @@
 - telemetry
 - work collections into storeddocumentfacade
 - public objects should be available to anyone without authentication
+- flesh out hub to work with multiple silos - see https://github.com/dotnet/samples/blob/main/orleans/GPSTracker/GPSTracker.Service/HubListUpdater.cs
 
 ## currently doing
 - get message sending successfully

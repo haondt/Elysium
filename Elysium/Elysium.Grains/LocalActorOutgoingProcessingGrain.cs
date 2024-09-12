@@ -20,8 +20,8 @@ using System.Threading.Tasks;
 namespace Elysium.Grains
 {
 
-    [ImplicitStreamSubscription(GrainConstants.LocalActorWorkStream)]
-    public class LocalActorWorkerGrain : Grain, ILocalActorWorkerGrain
+    [ImplicitStreamSubscription(GrainConstants.LocalActorOutgoingProcessingStream)]
+    public class LocalActorOutgoingProcessingGrain : Grain, ILocalActorOutgoingProcessingGrain
     {
         private readonly ILocalActorAuthorGrain _authorGrain;
         private readonly IInstanceActorAuthorGrain _instanceAuthorGrain;
@@ -30,16 +30,16 @@ namespace Elysium.Grains
         private readonly IIriService _iriService;
         private readonly IDocumentService _documentService;
         private readonly IHostingService _hostingService;
-        private readonly ILogger<LocalActorWorkerGrain> _logger;
+        private readonly ILogger<LocalActorOutgoingProcessingGrain> _logger;
         private readonly IActivityPubHttpService _httpService;
-        private StreamSubscriptionHandle<LocalActorWorkData>? _subscription;
+        private StreamSubscriptionHandle<LocalActorOutgoingProcessingData>? _subscription;
 
-        public LocalActorWorkerGrain(IGrainFactory<LocalIri> grainFactory,
+        public LocalActorOutgoingProcessingGrain(IGrainFactory<LocalIri> grainFactory,
             IGrainFactory baseGrainFactory,
             IIriService iriService,
             IDocumentService documentService,
             IHostingService hostingService,
-            ILogger<LocalActorWorkerGrain> logger,
+            ILogger<LocalActorOutgoingProcessingGrain> logger,
             IActivityPubHttpService httpService)
         {
             _id = grainFactory.GetIdentity(this);
@@ -55,8 +55,8 @@ namespace Elysium.Grains
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
             var streamProvider = this.GetStreamProvider(GrainConstants.SimpleStreamProvider);
-            var streamId = StreamId.Create(GrainConstants.LocalActorWorkStream, _id.Iri.ToString());
-            var stream = streamProvider.GetStream<LocalActorWorkData>(streamId);
+            var streamId = StreamId.Create(GrainConstants.LocalActorOutgoingProcessingStream, _id.Iri.ToString());
+            var stream = streamProvider.GetStream<LocalActorOutgoingProcessingData>(streamId);
             _subscription = await stream.SubscribeAsync(OnNextAsync);
             await base.OnActivateAsync(cancellationToken);
         }
@@ -79,7 +79,7 @@ namespace Elysium.Grains
         /// <param name="recepient"></param>
         /// <param name="activity"></param>
         /// <returns></returns>
-        public async Task OnNextAsync(LocalActorWorkData data, StreamSequenceToken? token)
+        public async Task OnNextAsync(LocalActorOutgoingProcessingData data, StreamSequenceToken? token)
         {
             var swallowExceptions = true;
             if (swallowExceptions)
@@ -96,7 +96,7 @@ namespace Elysium.Grains
 
         }
 
-        public async Task OnNextAsyncInternal(LocalActorWorkData data, StreamSequenceToken? token)
+        public async Task OnNextAsyncInternal(LocalActorOutgoingProcessingData data, StreamSequenceToken? token)
         { 
             // create list of inboxes
             List<LocalIri> localRecipientIris = [];
@@ -181,7 +181,7 @@ namespace Elysium.Grains
                 {
 
                     var localActorGrain = _grainFactory.GetGrain<ILocalActorGrain>(r);
-                    return localActorGrain.IngestActivityAsync(data.Activity);
+                    return localActorGrain.IngestActivityAsync(_id.Iri, data.Activity);
                 }
                 catch (Exception ex)
                 {

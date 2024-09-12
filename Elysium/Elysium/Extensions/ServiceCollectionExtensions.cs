@@ -49,6 +49,18 @@ namespace Elysium.Extensions
                     ]
                 }",
             });
+            services.AddScoped<IHeadEntryDescriptor>(_ => new ScriptDescriptor
+            {
+                Uri = "https://unpkg.com/@microsoft/signalr@8.0.7/dist/browser/signalr.js"
+            });
+            services.AddScoped<IHeadEntryDescriptor>(_ => new ScriptDescriptor
+            {
+                Uri = $"/_asset/{assemblyPrefix}.wwwroot.hx-signalr.js"
+            });
+            services.AddScoped<IHeadEntryDescriptor>(_ => new ScriptDescriptor
+            {
+                Uri = "https://unpkg.com/htmx.org@1.9.12/dist/ext/ws.js"
+            });
             return services;
         }
 

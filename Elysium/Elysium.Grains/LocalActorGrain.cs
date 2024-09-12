@@ -54,7 +54,8 @@ namespace Elysium.Grains
         private readonly IGrainFactory<LocalIri> _localGrainFactory;
         private readonly LocalIri _id;
         private readonly ILocalActorAuthorGrain _authorGrain;
-        private readonly IAsyncStream<LocalActorWorkData> _workStream;
+        private readonly IAsyncStream<LocalActorOutgoingProcessingData> _outgoingStream;
+        private readonly IAsyncStream<LocalActorIncomingProcessingData> _incomingStream;
 
         private byte[]? _signingKey;
 
@@ -84,8 +85,10 @@ namespace Elysium.Grains
             _authorGrain = localGrainFactory.GetGrain<ILocalActorAuthorGrain>(_id);
 
             var streamProvider = this.GetStreamProvider(GrainConstants.SimpleStreamProvider);
-            var streamId = StreamId.Create(GrainConstants.LocalActorWorkStream, _id.Iri.ToString());
-            _workStream = streamProvider.GetStream<LocalActorWorkData>(streamId);
+            var outgoingStreamId = StreamId.Create(GrainConstants.LocalActorOutgoingProcessingStream, _id.Iri.ToString());
+            _outgoingStream = streamProvider.GetStream<LocalActorOutgoingProcessingData>(outgoingStreamId);
+            var incomingStreamId = StreamId.Create(GrainConstants.LocalActorIncomingProcessingStream, _id.Iri.ToString());
+            _incomingStream = streamProvider.GetStream<LocalActorIncomingProcessingData>(incomingStreamId);
         }
 
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
@@ -187,15 +190,14 @@ namespace Elysium.Grains
         //}
 
 
-        public async Task IngestActivityAsync(JToken activity)
+        public async Task IngestActivityAsync(Iri sender, JToken activity)
         {
-            var expanded = await _jsonLdService.ExpandAsync(_authorGrain, activity);
-
-            // dereference the object
-
-            throw new NotImplementedException();
-            //var activityId = _jsonNavigator.GetId(activity);
-            //throw new NotImplementedException();
+            // todo: save the activity (id) in my inbox grain, if it has an id
+            await _incomingStream.OnNextAsync(new LocalActorIncomingProcessingData
+            {
+                Activity = activity,
+                Sender = sender
+            });
         }
 
         // this iri is the iri of the *activity*, not the object.
@@ -322,7 +324,7 @@ namespace Elysium.Grains
 
                 // dispatch the activity
                 // todo: we can optimize this, since when communicating local -> local there's no point in compacting the activity
-                await _workStream.OnNextAsync(new LocalActorWorkData
+                await _outgoingStream.OnNextAsync(new LocalActorOutgoingProcessingData
                 {
                     Activity = outgoingCompactedActivity,
                     Recipients = recepients.ToList()

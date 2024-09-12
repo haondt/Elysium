@@ -1,5 +1,5 @@
-﻿using Elysium.Persistence.Services;
-using Elysium.Silo.Exceptions;
+﻿using Elysium.Grains.Exceptions;
+using Elysium.Persistence.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Orleans.Configuration;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Silo.Services
+namespace Elysium.Grains.Persistence
 {
     public class ElysiumStorageGrainStorage(IElysiumStorage elysiumStorage,
         IServiceProvider serviceProvider,
@@ -56,7 +56,8 @@ namespace Elysium.Silo.Services
                 grainState.State = result.Value.Value;
                 grainState.RecordExists = true;
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 // todo: log
                 WrappedException.CreateAndRethrow(ex);
             }
@@ -75,7 +76,8 @@ namespace Elysium.Silo.Services
                 });
                 grainState.RecordExists = true;
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 // todo: log
                 WrappedException.CreateAndRethrow(ex);
             }
