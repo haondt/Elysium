@@ -18,8 +18,7 @@ namespace Elysium.Client.Services
         IIriService iriService,
         IHostingService hostingService,
         IUserCryptoService cryptoService,
-        IGrainFactory grainFactory,
-        ILocalActorRegistrar registrar,
+        IGrainFactory<LocalIri> grainFactory,
         UserManager<UserIdentity> userManager
         ) : IElysiumService
     {
@@ -43,7 +42,8 @@ namespace Elysium.Client.Services
             var userIri = iriService.GetIriForLocalizedActorname(localizedUsername);
             try
             {
-                await registrar.RegisterActor(userIri, new ActorRegistrationDetails
+                var grain = grainFactory.GetGrain<ILocalActorGrain>(userIri);
+                await grain.InitializeAsync(new ActorRegistrationDetails
                 {
                     EncryptedSigningKey = encryptedPrivateKey,
                     PublicKey = publicKey,

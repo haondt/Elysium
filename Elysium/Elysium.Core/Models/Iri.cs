@@ -104,6 +104,18 @@ namespace Elysium.Core.Models
             return obj is not null && obj is Iri iri && iri.Host == Host && iri.Scheme == Scheme && iri.Path == Path;   
         }
 
+        public static bool operator ==(Iri left,  Iri right)
+        {
+            if (ReferenceEquals(left, null))
+                return ReferenceEquals(right, null);
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Iri left,  Iri right)
+        {
+            return !(left == right);
+        }
+
         [GeneratedRegex(@"/{2,}")]
         private static partial Regex PathSepRegex();
         [GeneratedRegex(@"^[a-zA-Z0-9-_]+$")]

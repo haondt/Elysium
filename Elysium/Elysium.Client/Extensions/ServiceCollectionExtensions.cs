@@ -17,7 +17,6 @@ namespace Elysium.Client.Extensions
         {
             services.AddScoped<IActivityPubClientService, ActivityPubClientService>();
             services.AddScoped<IElysiumService, ElysiumService>();
-            services.AddScoped<ILocalActorRegistrar, LocalActorRegistrar>();
             services.AddElysiumClientGrainFactories();
             return services;
         }

@@ -16,7 +16,6 @@ namespace Elysium.Services
 {
     public class ElysiumPublishActivityEventHandler(
         IActivityPubClientService activityPubService,
-        IHostingService hostingService,
         ISessionService sessionService,
         IElysiumService elysiumService,
         IComponentFactory componentFactory) : IEventHandler
@@ -43,7 +42,7 @@ namespace Elysium.Services
                     return await GetMessageErrorComponentAsOptionalAsync("recepient cannot be empty");
                 var recepientIri = await elysiumService.GetIriForFediverseUsernameAsync(recepientResult.Value);
                 if (!recepientIri.IsSuccessful)
-                    return await GetMessageErrorComponentAsOptionalAsync("unable to parse receiver username");
+                    return await GetMessageErrorComponentAsOptionalAsync(recepientIri.Reason);
 
                 var activityObjectDetails = new MessageDetails
                 {

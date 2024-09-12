@@ -29,8 +29,8 @@ namespace Elysium.GrainInterfaces.Surrogates
         public OptionalSurrogate<T> ConvertToSurrogate(in Optional<T> value)
         {
             if (value.HasValue)
-                return new() { HasValue = false };
-            return new() { HasValue = true, Value = value.Value };
+                return new() { HasValue = true, Value = value.Value };
+            return new() { HasValue = false };
         }
     }
 }

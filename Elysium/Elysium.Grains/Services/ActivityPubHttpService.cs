@@ -137,17 +137,24 @@ namespace Elysium.Grains.Services
         {
             var hostIntegrityGrain = await ValidateHostAsync(data.Target);
             if (!hostIntegrityGrain.HasValue)
-                return new (ElysiumWebReason.FaultyHost);
+                return new(ElysiumWebReason.FaultyHost);
 
-            var date = DateTimeOffset.UtcNow.ToString("r", CultureInfo.InvariantCulture);
-            var stringToSign = $"(request-target): get {data.Target.Iri.ToString()}\nhost: {data.Target.Iri.Host}\ndate: {date}";
-            var signature = await data.Author.SignAsync(stringToSign);
-            var signatureHeaderValue = $"keyId=\"{await data.Author.GetKeyIdAsync()}\",headers=\"(request-target) host date\",signature=\"{signature}\"";
+            //var x = await httpClient.GetAsync("https://w3id.org/security/v1");
+            //var y = await httpClient.GetAsync(data.Target.Iri);
 
             var message = new HttpRequestMessage(HttpMethod.Get, data.Target.Iri);
-            message.Headers.Add("Host", data.Target.Iri.Host);
-            message.Headers.Add("Date", date);
-            message.Headers.Add("Signature", signatureHeaderValue);
+
+            if (await data.Author.IsInASigningMoodAsync())
+            {
+                var date = DateTimeOffset.UtcNow.ToString("r", CultureInfo.InvariantCulture);
+                var stringToSign = $"(request-target): get {data.Target.Iri.ToString()}\nhost: {data.Target.Iri.Host}\ndate: {date}";
+                var signature = await data.Author.SignAsync(stringToSign);
+                var signatureHeaderValue = $"keyId=\"{await data.Author.GetKeyIdAsync()}\",headers=\"(request-target) host date\",signature=\"{signature}\"";
+
+                message.Headers.Add("Host", data.Target.Iri.Host);
+                message.Headers.Add("Date", date);
+                message.Headers.Add("Signature", signatureHeaderValue);
+            }
 
             HttpResponseMessage response;
             try
@@ -192,20 +199,24 @@ namespace Elysium.Grains.Services
             if (!hostIntegrityGrain.HasValue)
                 return new (ElysiumWebReason.FaultyHost);
 
-            var digest = $"SHA-256={SHA256.HashData(Encoding.UTF8.GetBytes(data.JsonLdPayload))}";
-            var date = DateTimeOffset.UtcNow.ToString("r", CultureInfo.InvariantCulture);
-            var stringToSign = $"(request-target): post {data.Target.Iri.ToString()}\nhost: {data.Target.Iri.Host}\ndate: {date}\ndigest: {digest}";
-            var signature = await data.Author.SignAsync(stringToSign);
-            var signatureHeaderValue = $"keyId=\"{await data.Author.GetKeyIdAsync()}\",headers=\"(request-target) host date digest\",signature=\"{signature}\"";
-
             var message = new HttpRequestMessage(HttpMethod.Post, data.Target.Iri)
             {
                 Content = new StringContent(data.JsonLdPayload, Encoding.UTF8, "application/ld+json"),
             };
-            message.Headers.Add("Host", data.Target.Iri.Host);
-            message.Headers.Add("Date", date);
-            message.Headers.Add("Digest", digest);
-            message.Headers.Add("Signature", signatureHeaderValue);
+
+            if (await data.Author.IsInASigningMoodAsync())
+            {
+                var digest = $"SHA-256={SHA256.HashData(Encoding.UTF8.GetBytes(data.JsonLdPayload))}";
+                var date = DateTimeOffset.UtcNow.ToString("r", CultureInfo.InvariantCulture);
+                var stringToSign = $"(request-target): post {data.Target.Iri.ToString()}\nhost: {data.Target.Iri.Host}\ndate: {date}\ndigest: {digest}";
+                var signature = await data.Author.SignAsync(stringToSign);
+                var signatureHeaderValue = $"keyId=\"{await data.Author.GetKeyIdAsync()}\",headers=\"(request-target) host date digest\",signature=\"{signature}\"";
+
+                message.Headers.Add("Host", data.Target.Iri.Host);
+                message.Headers.Add("Date", date);
+                message.Headers.Add("Digest", digest);
+                message.Headers.Add("Signature", signatureHeaderValue);
+            }
 
             HttpResponseMessage response;
             try

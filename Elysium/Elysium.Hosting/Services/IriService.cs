@@ -29,7 +29,7 @@ namespace Elysium.Hosting.Services
                 {
                     Host = hostingService.Host,
                     Scheme = Uri.UriSchemeHttps,
-                    Path = $"/users/{localizedUsername}"
+                    Path = $"/actors/{localizedUsername}"
                 }.Iri
             };
         }
@@ -100,6 +100,24 @@ namespace Elysium.Hosting.Services
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentException("cannot be empty", nameof(id));
             return new LocalIri { Iri = user.Iri.Concatenate($"activities/{id}") };
+        }
+
+        public bool IsLocalActorIri(LocalIri iri)
+        {
+            var partialActorIri = GetIriForLocalizedActorname("");
+            var iriString = iri.ToString();
+            var partialActorIriString = partialActorIri.ToString();
+            if (!iri.ToString().StartsWith(partialActorIriString))
+                return false;
+            var next = partialActorIriString.Substring(partialActorIriString.Length);
+            if (next.Length < 2)
+                return false;
+            if (!next.StartsWith('/'))
+                return false;
+            next = next.Substring(1);
+            if (next.Contains('/'))
+                return false;
+            return true;
         }
 
         public LocalActorIriCollection GetLocalActorIris(LocalIri iri)

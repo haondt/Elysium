@@ -11,6 +11,9 @@ namespace Elysium.Grains
     [GenerateSerializer, Immutable]
     public class LocalActorWorkData
     {
+        /// <summary>
+        /// Each iri in this list is either a target or a collection. if it is a collection, you must resolve it recursively
+        /// </summary>
         [Id(0)]
         public List<Iri> Recipients { get; set; } = [];
         [Id(1)]

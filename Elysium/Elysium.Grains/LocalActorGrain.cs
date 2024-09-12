@@ -25,6 +25,8 @@ using Elysium.ActivityPub.Helpers.ActivityCompositor;
 using Orleans.Streams;
 using Elysium.Hosting.Services;
 using Microsoft.AspNetCore.DataProtection;
+using Elysium.ActivityPub.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Elysium.Grains
 {
@@ -96,8 +98,11 @@ namespace Elysium.Grains
 
         public async Task InitializeAsync(ActorRegistrationDetails registrationDetails)
         {
+            // todo: saga pattern
             if (_state.State.IsInitialized)
                 throw new InvalidOperationException($"actor {_id} is already initialized");
+
+            var actorDocument = await GenerateDocumentAsync(registrationDetails.PublicKey, registrationDetails.EncryptedSigningKey);
 
             _state.State = new LocalActorState
             {
@@ -108,7 +113,32 @@ namespace Elysium.Grains
                 Type = registrationDetails.Type,
             };
             await _state.WriteStateAsync();
+
+            var result = await _documentService.CreateDocumentAsync(_id, _id, actorDocument, [], []);
+            if (!result.IsSuccessful)
+                throw new Exception("todo: saga pattern would've saved ya here");
+
+
             _signingKey = _cryptoService.DecryptPrivateKey(registrationDetails.EncryptedSigningKey);
+        }
+        private async Task<JObject> GenerateDocumentAsync(string publicKey, string type)
+        {
+            var publicKeyPem = _cryptoService.EncodePublicKeyToPemX509(publicKey);
+            var iriCollection = _iriService.GetLocalActorIris(_id);
+
+            var expandedDocument = new ActivityPubJsonBuilder()
+                .Id(_id.Iri)
+                .Type(type)
+                .Inbox(iriCollection.Inbox.Iri)
+                .Outbox(iriCollection.Outbox.Iri)
+                .Followers(iriCollection.Followers.Iri)
+                .Following(iriCollection.Following.Iri)
+                .PublicKeyPem(iriCollection.PublicKey.Iri, _id.Iri, publicKeyPem)
+                .Build();
+
+            var instanceActor = _grainFactory.GetGrain<IInstanceActorAuthorGrain>(Guid.Empty);
+
+            return await _jsonLdService.CompactAsync(instanceActor, expandedDocument);
         }
 
         public Task ClearAsync()
@@ -157,10 +187,13 @@ namespace Elysium.Grains
         //}
 
 
-        public Task IngestActivityAsync(JToken activity)
+        public async Task IngestActivityAsync(JToken activity)
         {
+            var expanded = await _jsonLdService.ExpandAsync(_authorGrain, activity);
+
+            // dereference the object
+
             throw new NotImplementedException();
-            // see https://www.w3.org/TR/activitypub/#inbox-forwarding
             //var activityId = _jsonNavigator.GetId(activity);
             //throw new NotImplementedException();
         }
@@ -223,7 +256,7 @@ namespace Elysium.Grains
                 var bccList = ExtractListIdValues(JsonLdTypes.BCC, mainObjectResult);
                 var toList = ExtractListIdValues(JsonLdTypes.TO, mainObjectResult);
                 var btoList = ExtractListIdValues(JsonLdTypes.BTO, mainObjectResult);
-                var audienceList = ExtractListIdValues(JsonLdTypes.BTO, mainObjectResult);
+                var audienceList = ExtractListIdValues(JsonLdTypes.AUDIENCE, mainObjectResult);
 
                 var recepients = new HashSet<Iri>();
                 recepients.UnionWith(ccList);

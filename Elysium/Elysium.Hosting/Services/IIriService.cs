@@ -18,5 +18,6 @@ namespace Elysium.Hosting.Services
         LocalIri GetActorScopedActivityIri(LocalIri user, string id);
         bool IsScopedToLocalActor(LocalIri iri, LocalIri user);
         bool IsScopedToLocalActor(LocalIri iri);
+        bool IsLocalActorIri(LocalIri iri);
     }
 }

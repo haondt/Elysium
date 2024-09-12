@@ -37,7 +37,9 @@
 - the new publickey spec with multikey, currently just implementing the old one at https://w3c-ccg.github.io/security-vocab/#publicKey
 - etag support for IStorage
 -  configureawait false in haondt lib
-
+- telemetry
+- work collections into storeddocumentfacade
+- public objects should be available to anyone without authentication
 
 ## currently doing
 - get message sending successfully

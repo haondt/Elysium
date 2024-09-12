@@ -9,5 +9,7 @@ namespace Elysium.GrainInterfaces.Services
         Task<LocalIri> GetIriAsync();
         [AlwaysInterleave]
         Task<string> SignAsync(string stringToSign);
+        [AlwaysInterleave]
+        Task<bool> IsInASigningMoodAsync();
     }
 }

@@ -42,5 +42,7 @@ namespace Elysium.Grains
         {
             return Task.FromResult(_cryptoService.Sign(stringToSign, _signingKey!));
         }
+
+        public Task<bool> IsInASigningMoodAsync() => Task.FromResult(true);
     }
 }

@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 namespace Elysium.Core.Models
 {
     [GenerateSerializer, Immutable]
-    public readonly record struct LocalIri(Iri iri)
+    public readonly record struct LocalIri
     {
         [Id(0)]
-        public Iri Iri { get; init; } = iri;
+        public Iri Iri { get; init; }
 
         public override string ToString()
         {

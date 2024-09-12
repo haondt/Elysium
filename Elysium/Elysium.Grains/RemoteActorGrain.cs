@@ -86,6 +86,7 @@ namespace Elysium.Grains
         public Task PublishEvent(IncomingRemoteActivityData activity)
         {
             //_activityPubService.PublishLocalActivityAsync
+            // see https://www.w3.org/TR/activitypub/#inbox-forwarding
             throw new NotImplementedException();
         }
     }

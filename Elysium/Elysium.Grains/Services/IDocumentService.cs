@@ -33,5 +33,6 @@ namespace Elysium.Grains.Services
             List<Iri> bcc);
         Task<Result<DocumentReason>> ReserveDocumentIriAsync(LocalIri actor, LocalIri documentIri);
         Task<LocalIri> ReserveDocumentIriAsync(LocalIri actor, Func<LocalIri> iriFactory, int maxAttempts);
+        Task<Result<JArray, ElysiumWebReason>> GetExpandedDocumentAsync(IHttpMessageAuthor requester, LocalIri iri);
     }
 }

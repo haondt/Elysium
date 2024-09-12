@@ -20,6 +20,7 @@ namespace Elysium.Grains.Extensions
         {
             services.Configure<HostIntegritySettings>(configuration.GetSection(nameof(HostIntegritySettings)));
             services.Configure<RemoteDocumentSettings>(configuration.GetSection(nameof(RemoteDocumentSettings)));
+            services.Configure<InstanceActorSettings>(configuration.GetSection(nameof(InstanceActorSettings)));
             services.AddSingleton<IJsonLdService, JsonLdService>();
             //services.AddSingleton<IStoredDocumentFacade, StoredDocumentFacade>();
             services.AddSingleton<IStoredDocumentFacadeFactory, StoredDocumentFacadeFactory>();

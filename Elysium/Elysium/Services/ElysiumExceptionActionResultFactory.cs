@@ -12,7 +12,7 @@ namespace Elysium.Services
     public class ElysiumExceptionActionResultFactory(ISingletonComponentFactory componentFactoryFactory, IOptions<ErrorSettings> errorOptions) : IExceptionActionResultFactory
     {
         public async Task<IActionResult> CreateAsync(Exception exception, HttpContext context)
-        {
+       {
             var result = exception switch
             {
                 KeyNotFoundException => new ErrorModel { ErrorCode = 404, Message = "Not Found" },

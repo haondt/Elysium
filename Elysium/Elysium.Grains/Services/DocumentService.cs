@@ -19,15 +19,18 @@ namespace Elysium.Grains.Services
     public class DocumentService : IDocumentService
 
     {
-        private IStoredDocumentFacade _documentFacade;
+        private readonly IInstanceActorAuthorGrain _instanceActorGrain;
+        private readonly IStoredDocumentFacade _documentFacade;
         private readonly IActivityPubHttpService _httpService;
         private readonly IIriService _iriService;
         public DocumentService(
         //IGrainFactory<StorageKey<DocumentState>> localGrainFactory, 
         IActivityPubHttpService httpService,
+        IGrainFactory baseGrainFactory,
         IStoredDocumentFacadeFactory documentFacadeFactory,
         IIriService iriService)
         {
+            _instanceActorGrain = baseGrainFactory.GetGrain<IInstanceActorAuthorGrain>(Guid.Empty);
             _documentFacade = documentFacadeFactory.Create(this);
             _httpService = httpService;
             _iriService = iriService;
@@ -167,12 +170,57 @@ namespace Elysium.Grains.Services
             _ => throw new InvalidCastException($"Unable to map {typeof(StorageResultReason)}.{reason} to {typeof(ElysiumWebReason)}")
         };
 
-        public async Task<Result<JToken, ElysiumWebReason>> GetDocumentAsync(IHttpMessageAuthor requester, LocalIri iri)
+        public Task<Result<JArray, ElysiumWebReason>> GetExpandedDocumentAsync(IHttpMessageAuthor requester, LocalIri iri)
         {
-            //var storageKey = LocalDocumentState.GetStorageKey(objectUri);
-            //if (await storage.ContainsKey(storageKey))
-            //var storageKeyGrain = localDocumentGrainFactory.GetGrain(DocumentState.GetStorageKey(iri));
-            var document = await _documentFacade.GetAsync(iri.Iri);
+            return GetDocumentAsync<JArray>(requester, iri, async (iri) =>
+            {
+                var result = await _documentFacade.GetExpandedAsync(iri);
+                return result.IsSuccessful
+                    ? new(result.Value)
+                    : new(result.Reason);
+            });
+        }
+
+        public Task<Result<JToken, ElysiumWebReason>> GetDocumentAsync(IHttpMessageAuthor requester, LocalIri iri)
+        {
+            return GetDocumentAsync<JToken>(requester, iri, async (iri) =>
+            {
+                var result = await _documentFacade.GetAsync(iri);
+                return result.IsSuccessful
+                    ? new(result.Value)
+                    : new(result.Reason);
+            });
+        }
+
+        private async Task<Result<T, ElysiumWebReason>> GetDocumentAsync<T>(
+            IHttpMessageAuthor requester,
+            LocalIri iri,
+            Func<Iri, Task<Result<DocumentState<T>, StorageResultReason>>> fetcher) where T : JToken
+        {
+            // todo: permission checks on the result, since the requester may or may not be in the to/bto/bcc/cc/audience/author
+            // todo: populate the bto/bcc based on the requesters identity
+            // this would mean using the document facade to expand the document, then setting the info, then (optionally) compacting it back down
+
+            if(iri.Iri == _iriService.InstanceActorIri.Iri)
+            {
+                var documentResult = await fetcher(_iriService.InstanceActorIri.Iri);
+                if (documentResult.IsSuccessful)
+                    return new(documentResult.Value.Value!);
+                var instanceActorDocument = await _instanceActorGrain.GenerateDocumentAsync();
+                await _documentFacade.SetAsync(_iriService.InstanceActorIri.Iri, new DocumentState
+                {
+                    Value = instanceActorDocument
+                });
+
+                if (instanceActorDocument is T casted)
+                    return new(casted);
+                var converted = await fetcher(_iriService.InstanceActorIri.Iri);
+                if (converted.IsSuccessful)
+                    return new(converted.Value.Value ?? throw new NullReferenceException($"document with id {iri} exists but has a null value"));
+                return new(MapReason(converted.Reason));
+            }
+
+            var document = await fetcher(iri.Iri);
             if (!document.IsSuccessful)
                 return new(MapReason(document.Reason));
 
@@ -184,9 +232,6 @@ namespace Elysium.Grains.Services
             if (document.Value.IsReservation)
                 return new(ElysiumWebReason.NotFound);
 
-            // todo: permission checks on the result, since the requester may or may not be in the to/bto/bcc/cc/audience/author
-            // todo: populate the bto/bcc based on the requesters identity
-            // this would mean using the document facade to expand the document, then setting the info, then (optionally) compacting it back down
 
             return new(document.Value.Value ?? throw new NullReferenceException($"document with id {iri} exists but has a null value"));
         }
