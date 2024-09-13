@@ -10,6 +10,7 @@ using Elysium.Middlewares;
 using Elysium.Client.Extensions;
 using Orleans.Configuration;
 using Elysium.Client.Hubs;
+using Elysium.Components.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,7 @@ builder.Services
     .AddElysiumServices(builder.Configuration)
     .AddElysiumComponents()
     .AddElysiumAssetSources()
+    .AddElysiumComponentServices()
     .AddElysiumClientServices()
     .AddElysiumHostingServices(builder.Configuration)
     .AddElysiumPersistenceServices(builder.Configuration)

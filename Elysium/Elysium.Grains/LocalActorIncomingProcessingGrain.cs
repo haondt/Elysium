@@ -6,6 +6,8 @@ using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Client;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Grains.Services;
+using Elysium.Hosting.Services;
+using Haondt.Core.Models;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using Orleans.Streams;
@@ -24,20 +26,26 @@ namespace Elysium.Grains
         private readonly ILocalActorAuthorGrain _actorAuthorGrain;
         private readonly LocalIri _id;
         private readonly IClientActorActivityDeliveryGrain _clientDeliveryGrain;
+        private readonly IDocumentService _documentService;
         private readonly IJsonLdService _jsonLdService;
+        private readonly IIriService _iriService;
         private readonly ILogger<LocalActorIncomingProcessingGrain> _logger;
         private StreamSubscriptionHandle<LocalActorIncomingProcessingData>? _subscription;
 
         public LocalActorIncomingProcessingGrain(IGrainFactory<LocalIri> grainFactory,
             IGrainFactory baseGrainFactory,
+            IDocumentService documentService,
             IJsonLdService jsonLdService,
+            IIriService iriService,
             ILogger<LocalActorIncomingProcessingGrain> logger)
         {
             _id = grainFactory.GetIdentity(this);
             _clientDeliveryGrain = grainFactory.GetGrain<IClientActorActivityDeliveryGrain>(_id);
             _instanceAuthorGrain = baseGrainFactory.GetGrain<IInstanceActorAuthorGrain>(Guid.Empty);
             _actorAuthorGrain = grainFactory.GetGrain<ILocalActorAuthorGrain>(_id);
+            _documentService = documentService;
             _jsonLdService = jsonLdService;
+            _iriService = iriService;
             _logger = logger;
         }
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
@@ -79,11 +87,19 @@ namespace Elysium.Grains
             var typeEnumValue = ActivityType.Unknown;
             if (Enum.TryParse<ActivityType>(type, out var parsedType))
                 typeEnumValue = parsedType;
+
+            var profile = await _documentService.GetExpandedDocumentAsync(_instanceAuthorGrain, data.Sender);
+            Optional<string> preferredUsername = profile.IsSuccessful
+                ? ActivityPubJsonNavigator.TryGetPreferredUsername(profile.Value)
+                : new();
+
+
             // todo: should probably batch these
             await _clientDeliveryGrain.PublishAsync(new ClientIncomingActivityDetails
             {
                 Sender = data.Sender,
-                ExpandedObject = expanded,
+                ExpandedObject = ActivityPubJsonNavigator.GetObject(expanded),
+                SenderPreferredUsername = preferredUsername,
                 Receiver = _id,
                 Type = typeEnumValue
             });

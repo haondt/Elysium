@@ -128,6 +128,7 @@ namespace Elysium.Grains
         {
             var publicKeyPem = _cryptoService.EncodePublicKeyToPemX509(publicKey);
             var iriCollection = _iriService.GetLocalActorIris(_id);
+            var localizedUsername = _iriService.GetLocalizedActornameForLocalIri(_id);
 
             var expandedDocument = new ActivityPubJsonBuilder()
                 .Id(_id.Iri)
@@ -136,6 +137,7 @@ namespace Elysium.Grains
                 .Outbox(iriCollection.Outbox.Iri)
                 .Followers(iriCollection.Followers.Iri)
                 .Following(iriCollection.Following.Iri)
+                .PreferredUsername(localizedUsername)
                 .PublicKeyPem(iriCollection.PublicKey.Iri, _id.Iri, publicKeyPem)
                 .Build();
 

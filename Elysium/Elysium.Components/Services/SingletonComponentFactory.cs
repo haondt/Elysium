@@ -1,6 +1,6 @@
 ﻿using Haondt.Web.Core.Components;
 
-namespace Elysium.Services
+namespace Elysium.Components.Services
 {
     public class SingletonComponentFactory(IServiceProvider serviceProvider) : ISingletonComponentFactory
     {

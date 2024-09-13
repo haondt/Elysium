@@ -78,6 +78,11 @@ namespace Elysium.Client.Services
             return new((await GetUriForRemoteUsernameAsync(fediverseUsername)).Iri);
         }
 
+        public string GetFediverseUsernameAsync(string username, string host)
+        {
+            return $"{username}@{host}";
+        }
+
         public Task<RemoteIri> GetUriForRemoteUsernameAsync(string username)
         {
             //if (username.Count(c => c == '@') != 1)

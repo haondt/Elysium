@@ -4,12 +4,11 @@ using Haondt.Web.Core.Controllers;
 using Haondt.Web.Core.Extensions;
 using Haondt.Web.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 
 namespace Elysium.Controllers
 {
     [Route("identity")]
-    public class IdentityController(IPageComponentFactory pageFactory, IHubContext<ElysiumHub> hub) : BaseController
+    public class IdentityController(IPageComponentFactory pageFactory) : BaseController
     {
         [HttpGet("login")]
         public async Task<IActionResult> Login()

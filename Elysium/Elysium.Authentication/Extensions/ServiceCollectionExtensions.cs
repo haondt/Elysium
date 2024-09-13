@@ -30,9 +30,14 @@ namespace Elysium.Authentication.Extensions
             {
                 o.User.AllowedUserNameCharacters = AuthenticationConstants.ALLOWED_USERNAME_CHARACTERS;
             });
-            services.AddScoped<ISessionService, SessionService>();
+            services.AddScoped<SessionService>();
+            services.AddScoped<ISessionService, ProxySessionService>(sp =>
+                ActivatorUtilities.CreateInstance<ProxySessionService>(
+                    sp, sp.GetRequiredService<SessionService>()));
             services.AddScoped<ComponentFactory>();
-            services.AddScoped<IComponentFactory>(sp => ActivatorUtilities.CreateInstance<VerifiesAuthenticationComponentFactory>(sp, sp.GetRequiredService<ComponentFactory>()));
+            services.AddScoped<IComponentFactory>(sp => 
+                ActivatorUtilities.CreateInstance<VerifiesAuthenticationComponentFactory>(
+                    sp, sp.GetRequiredService<ComponentFactory>()));
             services.AddElysiumCryptoServices();
             return services;
         }

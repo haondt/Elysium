@@ -2,6 +2,7 @@
 using Elysium.Core.Exceptions;
 using Elysium.Core.Extensions;
 using Elysium.Core.Models;
+using Haondt.Core.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,17 @@ namespace Elysium.ActivityPub.Helpers
                 .AsString();
 
             return Iri.FromUnencodedString(uriString);
+        }
+
+        public static JToken GetValue(JArray expanded, string key)
+        {
+            return expanded
+                .Single()
+                .As<JObject>()
+                .Get<JArray>(key)
+                .Single()
+                .As<JObject>()
+                ["@value"]!;
         }
 
         public static bool IsActor(JArray actor)
@@ -61,6 +73,35 @@ namespace Elysium.ActivityPub.Helpers
                 .Get<JArray>("@type")
                 .Single()
                 .AsString();
+        }
+
+        public static Optional<string> TryGetPreferredUsername(JArray expanded)
+        {
+            if (expanded.Count == 1
+                && expanded[0] is JObject jo
+                && jo.TryGetValue(JsonLdTypes.PREFERRED_USERNAME, out var jt)
+                && jt is JArray ja
+                && ja.Count == 1
+                && ja[0] is JObject jo1
+                && jo1.TryGetValue("@value", out var jt1)
+                && jt1 is JValue jv
+                && jv.Type == JTokenType.String)
+                return new(jv.ToString());
+            return new();
+        }
+
+        /// <summary>
+        /// return the object field
+        /// </summary>
+        /// <param name="expanded"></param>
+        /// <returns></returns>
+        public static JArray GetObject(JArray expanded)
+        {
+            return expanded
+                .Single()
+                .As<JObject>()
+                .Get<JArray>(JsonLdTypes.OBJECT)
+                .As<JArray>();
         }
 
 

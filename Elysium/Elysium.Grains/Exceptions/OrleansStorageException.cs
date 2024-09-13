@@ -21,8 +21,5 @@ namespace Elysium.Grains.Exceptions
         {
         }
 
-        protected OrleansStorageException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

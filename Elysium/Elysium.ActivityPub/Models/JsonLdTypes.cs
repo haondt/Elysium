@@ -35,6 +35,7 @@ namespace Elysium.ActivityPub.Models
         public const string ATTRIBUTED_TO = "https://www.w3.org/ns/activitystreams#attributedTo";
         public const string OBJECT = "https://www.w3.org/ns/activitystreams#object";
         public const string ACTOR = "https://www.w3.org/ns/activitystreams#actor";
+        public const string NAME = "https://www.w3.org/ns/activitystreams#name";
 
         // crypto
         public const string PUBLIC_KEY = "https://w3id.org/security#publicKey";

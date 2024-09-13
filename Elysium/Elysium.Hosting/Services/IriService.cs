@@ -115,9 +115,9 @@ namespace Elysium.Hosting.Services
             var partialActorIri = GetIriForLocalizedActorname("");
             var iriString = iri.ToString();
             var partialActorIriString = partialActorIri.ToString();
-            if (!iri.ToString().StartsWith(partialActorIriString))
+            if (!iriString.StartsWith(partialActorIriString))
                 return false;
-            var next = partialActorIriString.Substring(partialActorIriString.Length);
+            var next = iriString.Substring(partialActorIriString.Length);
             if (next.Length < 2)
                 return false;
             if (!next.StartsWith('/'))

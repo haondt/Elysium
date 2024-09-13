@@ -1,5 +1,6 @@
 ﻿using Elysium.ActivityPub.Models;
 using Elysium.Core.Models;
+using Haondt.Core.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -20,5 +21,7 @@ namespace Elysium.GrainInterfaces.Client
         public required Iri Sender { get; set; }
         [Id(3)]
         public required LocalIri Receiver { get; set; }
+        [Id(4)]
+        public required Optional<string> SenderPreferredUsername { get; set; }
     }
 }

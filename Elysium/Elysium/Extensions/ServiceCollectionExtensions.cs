@@ -10,6 +10,7 @@ using Haondt.Web.Core.Extensions;
 using Haondt.Web.Components;
 using Elysium.Authentication.Components;
 using Elysium.Hosting.Services;
+using Elysium.Components.Services;
 
 namespace Elysium.Extensions
 {
@@ -19,7 +20,6 @@ namespace Elysium.Extensions
         {
             services.Configure<ErrorSettings>(configuration.GetSection(nameof(ErrorSettings)));
             services.AddScoped<IEventHandler, ElysiumPublishActivityEventHandler>(); 
-            services.AddSingleton<ISingletonComponentFactory, SingletonComponentFactory>();
             services.AddSingleton<ISingletonPageComponentFactory, SingletonPageComponentFactory>();
             services.AddScoped<IEventHandler, AuthenticationEventHandler>();
             services.AddSingleton<IExceptionActionResultFactory, ElysiumExceptionActionResultFactory>();

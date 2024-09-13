@@ -22,17 +22,20 @@ namespace Elysium.Grains.Services
         private readonly IInstanceActorAuthorGrain _instanceActorGrain;
         private readonly IStoredDocumentFacade _documentFacade;
         private readonly IActivityPubHttpService _httpService;
+        private readonly IHostingService _hostingService;
         private readonly IIriService _iriService;
         public DocumentService(
         //IGrainFactory<StorageKey<DocumentState>> localGrainFactory, 
         IActivityPubHttpService httpService,
         IGrainFactory baseGrainFactory,
+        IHostingService hostingService,
         IStoredDocumentFacadeFactory documentFacadeFactory,
         IIriService iriService)
         {
             _instanceActorGrain = baseGrainFactory.GetGrain<IInstanceActorAuthorGrain>(Guid.Empty);
             _documentFacade = documentFacadeFactory.Create(this);
             _httpService = httpService;
+            _hostingService = hostingService;
             _iriService = iriService;
         }
 
@@ -129,6 +132,13 @@ namespace Elysium.Grains.Services
         }
 
 
+        public Task<Result<JToken, ElysiumWebReason>> GetDocumentAsync(IHttpMessageAuthor requester, Iri iri)
+        {
+            if (iri.Host == _hostingService.Host)
+                return GetDocumentAsync(requester, new LocalIri { Iri = iri });
+            return GetDocumentAsync(requester, new RemoteIri { Iri = iri });
+
+        }
 
         public async Task<Result<JToken, ElysiumWebReason>> GetDocumentAsync(IHttpMessageAuthor requester, RemoteIri iri)
         {
@@ -169,6 +179,22 @@ namespace Elysium.Grains.Services
             StorageResultReason.NotFound => ElysiumWebReason.NotFound,
             _ => throw new InvalidCastException($"Unable to map {typeof(StorageResultReason)}.{reason} to {typeof(ElysiumWebReason)}")
         };
+
+        public Task<Result<JArray, ElysiumWebReason>> GetExpandedDocumentAsync(IHttpMessageAuthor requester, Iri iri)
+        {
+
+            if (iri.Host == _hostingService.Host)
+                return GetExpandedDocumentAsync(requester, new LocalIri { Iri = iri });
+            return GetExpandedDocumentAsync(requester, new RemoteIri { Iri = iri });
+        }
+
+        public async Task<Result<JArray, ElysiumWebReason>> GetExpandedDocumentAsync(IHttpMessageAuthor requester, RemoteIri iri)
+        {
+            var document = await _documentFacade.GetExpandedAsync(iri.Iri);
+            if (!document.IsSuccessful)
+                return new(MapReason(document.Reason));
+            return new(document.Value.Value ?? throw new NullReferenceException($"document with id {iri} exists but has a null value"));
+        }
 
         public Task<Result<JArray, ElysiumWebReason>> GetExpandedDocumentAsync(IHttpMessageAuthor requester, LocalIri iri)
         {

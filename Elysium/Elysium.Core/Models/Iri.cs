@@ -22,7 +22,7 @@ namespace Elysium.Core.Models
             Scheme = scheme.Trim().ToLower();
             if (Scheme != "http" && Scheme != "https")
                 throw new ArgumentException($"Scheme {scheme} is not supported. Must be one of http, https.");
-            Path = PathSepRegex().Replace(path.TrimStart('/'), "/");
+            Path = PathSepRegex().Replace(path.Trim('/'), "/");
         }
 
         public static Iri FromUri(Uri uri)

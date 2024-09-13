@@ -19,9 +19,9 @@ using System.Threading.Tasks;
 namespace Elysium.Client.Hubs
 {
     public class ElysiumHub(
-        IIriService iriService,
         IGrainFactory grainFactory,
         IClientActorActivityDeliveryObserverRegistry registry,
+        IServiceProvider serviceProvider,
         IGrainFactory<LocalIri> localGrainFactory) : Hub
     {
         public override async Task OnConnectedAsync()
@@ -49,7 +49,11 @@ namespace Elysium.Client.Hubs
             var localIri = await activityPubClientService.GetLocalIriFromUserIdentityAsync(userIdentity.Value);
 
             var deliveryGrain = localGrainFactory.GetGrain<IClientActorActivityDeliveryGrain>(localIri);
-            var observer = ActivatorUtilities.CreateInstance<ClientActorActivityDeliveryObserver>(httpContext.RequestServices, httpContext, Context.ConnectionId);
+            var observer = new ClientActorActivityDeliveryObserver(
+                Context.ConnectionId,
+                userIdentity.Value,
+                serviceProvider.GetRequiredService<IServiceScopeFactory>(),
+                serviceProvider.GetRequiredService<IHubContext<ElysiumHub>>());
             registry.RegisterObserver(Context.ConnectionId, localIri, observer);
             var reference = grainFactory.CreateObjectReference<IClientActorActivityDeliveryObserver>(observer);
             await deliveryGrain.Subscribe(reference);
