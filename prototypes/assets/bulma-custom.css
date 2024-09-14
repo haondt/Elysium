@@ -32,3 +32,8 @@
 .toast.created {
     opacity: 1;
 }
+
+.button.is-outlined.is-hovered {
+    --bulma-button-border-width: max(2px,0.125em);
+    --bulma-button-outer-shadow-alpha: 1;
+}

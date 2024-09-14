@@ -3,7 +3,7 @@
     <!-- Left column -->
     <div class="is-flex is-flex-direction-column" style="width:225px;">
         <!-- logo -->
-        <div style="width:100%;height:75px;" class="is-flex is-align-items-center">
+        <div style="width:100%;height:75px;" class="pl-1 is-flex is-align-items-center">
             <img src="/_asset/logo.svg" style="height:25px;"/>
         </div>
 
@@ -12,32 +12,10 @@
             <style>
                 @scope {
                     .actor-button {
-                        height: 50px;
-                        border-radius: 4px;
-                    }
-                    .actor-button:hover {
-                        cursor: pointer;
-                    }
-                    .actor-button.main.active {
-                        background-color: var(--bulma-primary);
-                        color: var(--bulma-primary-invert);
-                    }
-                    .actor-button.main.showing-help {
-                        background-color: var(--bulma-primary-dark);
-                        color: var(--bulma-primary-dark-invert);
-                    }
-                    .actor-button:not(.main):not(.active) {
-                        background-color: none;
-                        outline: max(1px, 0.0625em) solid;
-                        border-color: var(--bulma-link);
-                        color: var(--bulma-link);
-                    }
-                    .actor-button.showing-help:not(.main):not(.active) {
-                        border-color: var(--bulma-info);
-                        color: var(--bulma-info);
+                        height: 42px;
                     }
 
-                    .actor-button.showing-help .actor-name-label {
+                    .actor-button.is-hovered .actor-name-label, .actor-button:hover .actor-name-label {
                         font-size: 0.7rem;
                     }
 
@@ -46,32 +24,46 @@
                         height: 10px;
                         border-radius: 50%;
                     }
+                    .actor-action-button.main.notify, .actor-action-button.notify {
+                        background-color: var(--bulma-danger);
+                    }
                     .actor-action-button.main {
                         background-color: var(--bulma-primary);
-                        color: var(--bulma-primary-invert);
                     }
-                    .actor-action-button.main:hover {
-                        background-color: var(--bulma-primary-dark);
-                        color: var(--bulma-primary-dark-invert);
+                    .actor-action-button-container:hover > .actor-action-button.main {
+                        background-color: var(--bulma-primary-light);
                     }
                     .actor-action-button {
                         background-color: var(--bulma-link);
                     }
-                    .actor-action-button:hover {
-                        background-color: var(--bulma-info);
+                    .actor-action-button-container:hover {
                         cursor: pointer;
+                    }
+                    .actor-action-button-container:hover > .actor-action-button {
+                        background-color: var(--bulma-info);
                     }
 
                     .fa-xl {
                         font-size: 1.5rem;
                     }
+
+                    .fa-ghost {
+                    }
+                    .is-outlined .fa-ghost {
+                        color: transparent;
+                        -webkit-text-stroke-width: 1px;
+                    }
+                    .is-outlined .fa-ghost {
+                        -webkit-text-stroke-color: var(--bulma-link);
+                    }
+
                 }
             </style>
-            <div hx-trigger="load" hx-swap="outerHTML" hx-get="/shade?name=haondt&isactive=true&ismain=true"></div>
+            <div hx-trigger="load" hx-swap="outerHTML" hx-get="/shade?name=haondt&isactive=true&ismain=true&hasnotifications=true"></div>
             {% for name in ['art', 'programming', 'discussion'] %}
             <div hx-trigger="load" hx-get="/shade?name=haondt%2B{{name}}"></div>
             {% endfor %}
-            <button class="button">
+            <button class="button is-dark">
                 Add shade
             </button>
          </div>

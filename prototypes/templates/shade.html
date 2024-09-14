@@ -12,40 +12,54 @@
     </div> -->
 
     <!-- button -->
-    <div class="pl-2 is-flex is-flex-direction-row actor-button
-        {% if params.ismain %}main{% endif %}
-        {% if params.isactive %}active{% endif %}"
-        style="gap:5px;"
+    <button class="ml-1 button is-flex is-flex-direction-row actor-button is-justify-content-flex-start
+        {% if params.ismain %}
+            is-primary
+        {% else %}
+            is-link
+        {% endif %}
+        {% if not params.isactive %}
+            is-outlined
+        {% endif %}
+        "
         _="
             on mouseenter remove .is-hidden from the first <.main-feed-help-label/> in me then add .showing-help to me end
             on mouseleave add .is-hidden to the first <.main-feed-help-label/> in me then remove .showing-help from me end
         ">
         <!-- ghost -->
-        <div class="is-flex is-flex-direction-column is-justify-content-center">
-            <span class="icon is-medium" style="transition:initial;">
-                <i class="fas fa-solid fa-ghost fa-xl"></i>
-            </span>
-        </div>
+        <span class="icon is-medium" style="transition:initial;">
+            <i class="fas fa-solid fa-ghost fa-xl"></i>
+        </span>
          <!-- text -->
           <div class="is-flex is-flex-direction-column is-justify-content-center" style="line-height:0.9;">
-            <div class="actor-name-label">@{{params.name}}</div>
-            <strong class="profile-help-label is-hidden" style="color:inherit;">view profile</strong>
-            <strong class="notifications-help-label is-hidden" style="color:inherit;">notifications</strong>
-            <strong class="firehose-help-label is-hidden" style="color:inherit;">firehose</strong>
-            <strong class="more-help-label is-hidden" style="color:inherit;">more</strong>
-            <strong class="main-feed-help-label is-hidden" style="color:inherit;">main feed</strong>
+            <div class="has-text-weight-medium actor-name-label" style="display:flex;">@{{params.name}}</div>
+            <strong class="notifications-help-label is-hidden" style="color:inherit;display:flex;">notifications</strong>
+            <strong class="profile-help-label is-hidden" style="color:inherit;display:flex;">view profile</strong>
+            <strong class="firehose-help-label is-hidden" style="color:inherit;display:flex;">firehose</strong>
+            <strong class="more-help-label is-hidden" style="color:inherit;display:flex;">more</strong>
+            <strong class="main-feed-help-label is-hidden" style="color:inherit;display:flex;">main feed</strong>
           </div>
 
 
-    </div>
+    </button>
 
-    <div class="is-flex is-flex-direction-row" style="gap:10px;">
-        {% for target in ['profile', 'notifications', 'firehose', 'more'] %}
-        <div class="actor-action-button {% if params.ismain %}main{% endif %}"
+    <div class="is-flex is-flex-direction-row">
+        {% for target in ['notifications', 'profile', 'firehose', 'more'] %}
+        <div
+            class="pr-1 pl-1 actor-action-button-container "
             _="
-                on mouseenter remove .is-hidden from the previous <.{{ target }}-help-label/> then add .showing-help to the previous <.actor-button/> end
-                on mouseleave add .is-hidden to the previous <.{{ target }}-help-label/> then remove .showing-help from the previous <.actor-button/> end
-            "></div>
+                on mouseenter remove .is-hidden from the previous <.{{ target }}-help-label/> then add .is-hovered to the previous <.actor-button/> end
+                on mouseleave add .is-hidden to the previous <.{{ target }}-help-label/> then remove .is-hovered from the previous <.actor-button/> end
+            "
+        >
+            <div
+                class="
+                    actor-action-button
+                    {% if params.ismain %}main{% endif %}
+                    {% if params.hasnotifications and target == 'notifications' %}notify{% endif %}
+                "
+            ></div>
+        </div>
         {% endfor %}
     </div>
 
