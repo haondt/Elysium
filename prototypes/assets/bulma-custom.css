@@ -16,6 +16,8 @@
   --bulma-danger-h: 0deg;
   --bulma-danger-s: 53%;
   --bulma-danger-l: 75%;
+
+  --bulma-body-line-height:1.35;
 }
 
 @media(prefers-color-scheme: dark) {
@@ -36,20 +38,6 @@
 .button.is-outlined.is-hovered {
     --bulma-button-border-width: max(2px,0.125em);
     --bulma-button-outer-shadow-alpha: 1;
-}
-
-.button.is-icon-button {
-  --bulma-button-border-style: none;
-}
-
-
-.button.is-icon-button.is-danger {
-    background-color: transparent;
-    color: var(--bulma-danger);
-}
-.button.is-icon-button.is-danger:hover,
-.button.is-icon-button.is-danger.is-hovered {
-    color:var(--bulma-danger-dark-backgroud);
 }
 
 .fa-xl {

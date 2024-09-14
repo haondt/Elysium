@@ -1,0 +1,35 @@
+<div>
+    <style>
+        @scope {
+            article.elysium-media {
+                /* background-color: blue; */
+                /* padding: 20px; */
+                /* border-radius: var(--bulma-radius); */
+                box-shadow: 0 2px 0 var(--shadow-color, var(--bulma-white));
+            }
+
+            .depth-0 { --shadow-color: var(--bulma-primary); }
+            .depth-1 { --shadow-color: var(--bulma-link); }
+            .depth-2 { --shadow-color: var(--bulma-info); }
+            .depth-3 { --shadow-color: var(--bulma-success); }
+            .depth-4 { --shadow-color: var(--bulma-warning); }
+            .depth-5 { --shadow-color: var(--bulma-danger); }
+
+            /* hr {
+                margin: 0;
+                color: var(--bulma)
+            } */
+        }
+    </style>
+    <div class="is-flex is-flex-direction-column" style="gap:14px;">
+        <div hx-trigger="load" hx-get="/feed_objects/media?title=true" hx-swap="outerHTML" hx-target="this"></div>
+        <div hx-trigger="load" hx-get="/feed_objects/media" hx-swap="outerHTML" hx-target="this"></div>
+        <div hx-trigger="load" hx-get="/feed_objects/media" hx-swap="outerHTML" hx-target="this"></div>
+        <hr class="m-0 has-background-grey-dark"/>
+        <hr class="m-0 has-background-grey-dark"/>
+        <div hx-trigger="load" hx-get="/feed_objects/media" hx-swap="outerHTML" hx-target="this"></div>
+        <hr class="m-0 has-background-grey-dark"/>
+        <div hx-trigger="load" hx-get="/feed_objects/media" hx-swap="outerHTML" hx-target="this"></div>
+        <div hx-trigger="load" hx-get="/feed_objects/media" hx-swap="outerHTML" hx-target="this"></div>
+    </div>
+</div>

@@ -1,5 +1,5 @@
 <div class = "container">
-<div class="is-flex is-flex-direction-row">
+<div class="is-flex is-flex-direction-row" style="gap:40px;">
     <!-- Left column -->
     <div class="is-flex is-flex-direction-column" style="width:225px;">
         <!-- logo -->
@@ -8,7 +8,7 @@
         </div>
 
         <!-- shade list-->
-         <div class="is-flex is-flex-direction-column" style="gap:20px;">
+         <div class="is-flex is-flex-direction-column" style="gap:10px;">
             <style>
                 @scope {
                     .actor-button {
@@ -143,9 +143,7 @@
         </div>
 
         <!-- content -->
-         <div>
-            content yay!
-         </div>
+        <div hx-trigger="load" hx-get="/feed_objects/thread" hx-swap="outerHTML" hx-target="this"></div>
     </div>
 
 
