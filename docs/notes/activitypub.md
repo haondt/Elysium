@@ -47,10 +47,10 @@
   - the object contains a type property whose value includes "Link"
   - any of the types included in the type property are defined as extensions of link (e.g. Mention)
   - https://www.w3.org/TR/activitystreams-core/#model
+- a link must have an href property https://www.w3.org/TR/activitystreams-core/#link
 
-### required properties
-
-- object must have type https://www.w3.org/TR/activitypub/#obj-id
+- objects must have type https://www.w3.org/TR/activitypub/#obj-id
+  - all other properties are optional https://www.w3.org/TR/activitystreams-core/#object
 - actor must have type (inherited), inbox, outbox, following, followers https://www.w3.org/TR/activitypub/#actor-objects
 
 ## serialization

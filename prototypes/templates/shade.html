@@ -1,0 +1,53 @@
+<div class="is-flex is-flex-direction-column" style="gap:10px;">
+    <!-- {% if params.ismain %}
+    yuhhhhh
+    {%endif%} -->
+    <!-- label part-->
+    <!-- <div class="ml-5 is-flex is-flex-direction-column actor-button {% if params.ismain %}main{% endif %}">
+        <div class="is-flex is-flex-direction-row is-align-items-center" style="height:100%;">
+            <i class="fa-solid fa-ghost"></i>
+            <div>@{{ params.name}}</div>
+        </div>
+        <div class="profile-label is-hidden">view profile</div>
+    </div> -->
+
+    <!-- button -->
+    <div class="pl-2 is-flex is-flex-direction-row actor-button
+        {% if params.ismain %}main{% endif %}
+        {% if params.isactive %}active{% endif %}"
+        style="gap:5px;"
+        _="
+            on mouseenter remove .is-hidden from the first <.main-feed-help-label/> in me then add .showing-help to me end
+            on mouseleave add .is-hidden to the first <.main-feed-help-label/> in me then remove .showing-help from me end
+        ">
+        <!-- ghost -->
+        <div class="is-flex is-flex-direction-column is-justify-content-center">
+            <span class="icon is-medium" style="transition:initial;">
+                <i class="fas fa-solid fa-ghost fa-xl"></i>
+            </span>
+        </div>
+         <!-- text -->
+          <div class="is-flex is-flex-direction-column is-justify-content-center" style="line-height:0.9;">
+            <div class="actor-name-label">@{{params.name}}</div>
+            <strong class="profile-help-label is-hidden" style="color:inherit;">view profile</strong>
+            <strong class="notifications-help-label is-hidden" style="color:inherit;">notifications</strong>
+            <strong class="firehose-help-label is-hidden" style="color:inherit;">firehose</strong>
+            <strong class="more-help-label is-hidden" style="color:inherit;">more</strong>
+            <strong class="main-feed-help-label is-hidden" style="color:inherit;">main feed</strong>
+          </div>
+
+
+    </div>
+
+    <div class="is-flex is-flex-direction-row" style="gap:10px;">
+        {% for target in ['profile', 'notifications', 'firehose', 'more'] %}
+        <div class="actor-action-button {% if params.ismain %}main{% endif %}"
+            _="
+                on mouseenter remove .is-hidden from the previous <.{{ target }}-help-label/> then add .showing-help to the previous <.actor-button/> end
+                on mouseleave add .is-hidden to the previous <.{{ target }}-help-label/> then remove .showing-help from the previous <.actor-button/> end
+            "></div>
+        {% endfor %}
+    </div>
+
+
+<div>

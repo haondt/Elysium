@@ -4,6 +4,7 @@ links
 
 - https://www.w3.org/wiki/ActivityPub/Primer/Authentication_Authorization#Authorization
 - https://docs.joinmastodon.org/admin/config/#authorized_fetch
+- https://w3c-ccg.github.io/security-vocab/#publicKey
 
 ---
 

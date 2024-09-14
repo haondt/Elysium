@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" style="overflow:auto;">
+    <head>
+        <title></title>
+        <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
+        <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+        <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+<link rel="stylesheet" href="/_asset/bulma-custom.css">
+<link rel="icon" href="/_asset/icon.ico">
+<script src="https://kit.fontawesome.com/afd44816da.js" crossorigin="anonymous"></script>
+
+<meta name="htmx-config" content="{
+                    &quot;responseHandling&quot;: [
+                        { &quot;code&quot;: &quot;204&quot;, &quot;swap&quot;: false },
+                        { &quot;code&quot;: &quot;.*&quot;, &quot;swap&quot;: true }
+                    ]
+                }" />
+        </head>
+    <body style="display:flex;flex-direction:column;overflow:auto;height:100vh;">
+
+
+
+<div id="navigation">
+
+<!-- <nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+            <a class="navbar-item" href="/messages">
+                <img src="/logo.svg" style="height:25px;"/>
+            </a>
+         <a role="button" class="navbar-burger"
+            _="on click toggle .is-active on me"
+            aria-label="menu" aria-expanded="false"
+            data-target="navbarBasicExample">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+    </div>
+</nav> -->
+
+</div>
+<div id="toast-container"></div>
+<div id="modal" class="modal"></div>
+<div id="content">
+    <div hx-trigger="load" hx-get="/home" hx-swap="outerHTML" hx-target="this"></div>
+
+</div>
+<div id="fill-content" style="flex-grow:1;overflow-y:auto;"></div>
+
+
+
+
+
+<!-- Visual Studio Browser Link -->
+<script type="text/javascript" src="/_vs/browserLink" async="async" id="__browserLink_initializationData" data-requestId="2a5f333b307f4b5393765ff3c6f4a1d2" data-requestMappingFromServer="false" data-connectUrl="http://localhost:53311/f58e490e41734e7aa9c0e9319cfbdbe3/browserLink"></script>
+<!-- End Browser Link -->
+<script src="/_framework/aspnetcore-browser-refresh.js"></script></body>
+</html>

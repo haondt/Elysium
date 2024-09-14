@@ -1,0 +1,34 @@
+﻿:root {
+  --bulma-primary-h: 45deg;
+  --bulma-primary-l: 80%;
+  --bulma-link-h: 190deg;
+  --bulma-link-s: 39%;
+  --bulma-link-l: 32%;
+  --bulma-info-h: 201deg;
+  --bulma-info-s: 54%;
+  --bulma-info-l: 73%;
+  --bulma-success-h: 142deg;
+  --bulma-success-s: 37%;
+  --bulma-success-l: 45%;
+  --bulma-warning-h: 38deg;
+  --bulma-warning-s: 46%;
+  --bulma-warning-l: 56%;
+  --bulma-danger-h: 0deg;
+  --bulma-danger-s: 53%;
+  --bulma-danger-l: 75%;
+}
+
+@media(prefers-color-scheme: dark) {
+    html {
+        color-scheme: dark;
+    }
+}
+
+.toast {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.toast.created {
+    opacity: 1;
+}

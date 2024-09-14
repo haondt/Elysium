@@ -41,6 +41,9 @@
 - work collections into storeddocumentfacade
 - public objects should be available to anyone without authentication
 - flesh out hub to work with multiple silos - see https://github.com/dotnet/samples/blob/main/orleans/GPSTracker/GPSTracker.Service/HubListUpdater.cs
+- define dms? - item where the complete list of recipients is an individual? doesn't work for group chats though
+  - maybe define the chat as a collection, where both actors add notes etc to it?
+- seperate out localizedUsername, display name and iris - the mapping should be done by webfinger i think?
 
 ## currently doing
 - get message sending successfully
