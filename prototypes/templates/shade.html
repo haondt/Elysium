@@ -15,6 +15,7 @@
     <button class="ml-1 button is-flex is-flex-direction-row actor-button is-justify-content-flex-start
         {% if params.ismain %}
             is-primary
+            main
         {% else %}
             is-link
         {% endif %}
@@ -32,7 +33,7 @@
         </span>
          <!-- text -->
           <div class="is-flex is-flex-direction-column is-justify-content-center" style="line-height:0.9;">
-            <div class="has-text-weight-medium actor-name-label" style="display:flex;">@{{params.name}}</div>
+            <div class="has-text-weight-medium actor-name-label" style="display:flex;">{{params.name}}</div>
             <strong class="notifications-help-label is-hidden" style="color:inherit;display:flex;">notifications</strong>
             <strong class="profile-help-label is-hidden" style="color:inherit;display:flex;">view profile</strong>
             <strong class="firehose-help-label is-hidden" style="color:inherit;display:flex;">firehose</strong>
