@@ -14,8 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Elysium.Authentication\Elysium.Authentication.csproj" />
+    <ProjectReference Include="..\Elysium.Cryptography\Elysium.Cryptography.csproj" />
     <ProjectReference Include="..\Elysium.GrainInterfaces\Elysium.GrainInterfaces.csproj" />
+    <ProjectReference Include="..\Elysium.Persistence\Elysium.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

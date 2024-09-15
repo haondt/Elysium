@@ -1,16 +1,18 @@
-using Elysium.Authentication.Extensions;
 using Elysium.GrainInterfaces;
 using Elysium.Grains.Extensions;
 using Elysium.Silo.Extensions;
 using Orleans.Configuration;
 using Elysium.Hosting.Extensions;
 using Elysium.Persistence.Extensions;
+using Elysium.Cryptography.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddApplicationPart(typeof(Elysium.ActivityPub.Api.Controllers.ActorController).Assembly);
 
 builder.Configuration.AddEnvironmentVariables();
 

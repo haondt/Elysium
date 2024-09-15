@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Elysium.ActivityPub.Api\Elysium.ActivityPub.Api.csproj" />
     <ProjectReference Include="..\Elysium.GrainInterfaces\Elysium.GrainInterfaces.csproj" />
     <ProjectReference Include="..\Elysium.Grains\Elysium.Grains.csproj" />
     <ProjectReference Include="..\Elysium.Hosting\Elysium.Hosting.csproj" />

@@ -1,6 +1,5 @@
 ﻿using Elysium.ActivityPub.Helpers;
 using Elysium.ActivityPub.Models;
-using Elysium.Authentication.Services;
 using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;

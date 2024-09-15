@@ -1,0 +1,6 @@
+@Elysium.ActivityPub.Api_HostAddress = http://localhost:5173
+
+GET {{Elysium.ActivityPub.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

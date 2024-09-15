@@ -2,6 +2,7 @@
 using Elysium.Authentication.Constants;
 using Elysium.Authentication.Services;
 using Elysium.Core.Models;
+using Elysium.Cryptography.Extensions;
 using Haondt.Identity.StorageKey;
 using Haondt.Persistence.Extensions;
 using Haondt.Web.Core.Components;
@@ -42,12 +43,5 @@ namespace Elysium.Authentication.Extensions
             return services;
         }
 
-        public static IServiceCollection AddElysiumCryptoServices(this IServiceCollection services)
-        {
-            services.AddDataProtection(p => p.ApplicationDiscriminator = "Elysium");
-            services.AddSingleton<ICryptoService, CryptoService>();
-            services.AddSingleton<IUserCryptoService, UserCryptoService>();
-            return services;
-        }
     }
 }

@@ -1,5 +1,4 @@
-﻿
-namespace Elysium.Authentication.Services
+﻿namespace Elysium.Cryptography.Services
 {
     public interface IUserCryptoService
     {
