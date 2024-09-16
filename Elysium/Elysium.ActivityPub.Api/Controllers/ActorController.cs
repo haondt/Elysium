@@ -34,7 +34,7 @@ namespace Elysium.ActivityPub.Api.Controllers
             // Construct the IRI
             Iri iri = iriBuilder.Iri;
 
-            // Use NoSignatureAuthor.Instance as the IHttpMessageAuthor
+            // todo:  use remote actor
             var author = NoSignatureAuthor.Instance;
 
             // Fetch the document from the document service

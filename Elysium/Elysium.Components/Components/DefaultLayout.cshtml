@@ -1,0 +1,11 @@
+﻿@using Haondt.Web.Core.Extensions
+@model Elysium.Components.Components.DefaultLayoutModel
+
+<div id="modal"></div>
+<div id="content">
+    @await Html.PartialAsync(Model.Content)
+</div>
+<div id="fill-content" style="flex-grow:1;overflow-y:auto;"></div>
+
+
+

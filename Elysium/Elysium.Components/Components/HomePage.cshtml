@@ -1,0 +1,99 @@
+﻿@using Haondt.Web.Core.Extensions
+@model Elysium.Components.Components.HomePageModel
+<div class = "container">
+    <div class="is-flex is-flex-direction-row" style="gap:40px;">
+        <!-- Left column -->
+        <div class="is-flex is-flex-direction-column" style="width:225px;">
+            <!-- logo -->
+            <div style="width:100%;height:75px;" class="pl-1 is-flex is-align-items-center">
+                <img src="/_asset/Elysium.wwwroot.logo.svg" style="height:25px;"/>
+            </div>
+
+            <!-- shade list-->
+            @await Html.PartialAsync(Model.ShadeSelector)
+        </div>
+
+        <!-- Right Column -->
+        <div
+            class="is-flex is-flex-direction-column"
+            style="width:100%;"
+        >
+            <!-- nav bar-->
+            <div class="is-flex is-flex-direction-row is-align-items-center is-justify-content-space-between"
+                style="height:75px;"
+            >
+                <!-- left section-->
+                <div>
+                    <button hx-get="/search">
+                        <span class="icon is-medium has-text-link"
+                            _="
+                                on mouseenter add .has-text-link-light to me then remove .has-text-link from me end
+                                on mouseleave add .has-text-link to me then remove .has-text-link-light from me end
+                            ">
+                            <i class="fa-xl fa-solid fa-magnifying-glass"></i>
+                        </span>
+                    </button>
+                </div>
+
+                <!-- center section -->
+                 <div class="is-flex flex-direction-row is-align-items-center" style="gap:30px;">
+                    <style>
+                        @@scope {
+                            .navigation-dot-container {
+                                width: 40px;
+                                height: 40px;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                            }
+                            .navigation-dot-container:hover {
+                                cursor: pointer;
+                            }
+                            .navigation-dot {
+                                background-color: var(--bulma-primary);
+                                width: 10px;
+                                height: 10px;
+                                border-radius: 50%;
+                                transition:
+                                    width 0.3s ease,
+                                    height 0.3s ease,
+                                    background-color 0.3s ease;
+                            }
+                            .navigation-dot-container:hover > .navigation-dot {
+                                background-color: var(--bulma-info);
+                                width: 20px;
+                                height: 20px;
+                            }
+                        }
+                    </style>
+
+                    @for(int i=0; i < 8; i++)
+                    {
+                        <div class="navigation-dot-container">
+                            <div class="navigation-dot"></div>
+                        </div>
+                    }
+                 </div>
+
+                <!-- right section-->
+                <div>
+                    <button>
+                        <span class="icon is-medium has-text-danger"
+                            _="
+                                on mouseenter add .has-text-danger-light to me then remove .has-text-danger from me end
+                                on mouseleave add .has-text-danger to me then remove .has-text-danger-light from me end
+                            ">
+                            <i class="fa-xl fa-solid fa-arrow-right-from-bracket"></i>
+                        </span>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- content -->
+            @await Html.PartialAsync(Model.Feed)
+        </div>
+
+
+    </div>
+</div>

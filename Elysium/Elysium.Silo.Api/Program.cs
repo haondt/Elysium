@@ -12,6 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+    })
     .AddApplicationPart(typeof(Elysium.ActivityPub.Api.Controllers.ActorController).Assembly);
 
 builder.Configuration.AddEnvironmentVariables();

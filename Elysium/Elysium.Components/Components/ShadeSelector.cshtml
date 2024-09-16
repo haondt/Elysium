@@ -1,0 +1,124 @@
+﻿@model Elysium.Components.Components.ShadeSelectorModel
+
+<div id="shade-selector" class="is-flex is-flex-direction-column" style="gap:10px;">
+    <style>
+        @@scope {
+            .actor-button {
+                height: 42px;
+            }
+            .actor-button.is-hovered .actor-name-label, .actor-button:hover .actor-name-label {
+                font-size: 0.7rem;
+            }
+
+            .actor-action-button {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+            }
+            .actor-action-button.main.notify, .actor-action-button.notify {
+                background-color: var(--bulma-danger);
+            }
+            .actor-action-button.main {
+                background-color: var(--bulma-primary);
+            }
+            .actor-action-button-container:hover > .actor-action-button.main {
+                background-color: var(--bulma-primary-light);
+            }
+            .actor-action-button {
+                background-color: var(--bulma-link);
+            }
+            .actor-action-button-container:hover {
+                cursor: pointer;
+            }
+            .actor-action-button-container:hover > .actor-action-button {
+                background-color: var(--bulma-info);
+            }
+
+            .is-outlined .fa-ghost {
+                color: transparent;
+                -webkit-text-stroke-width: 1px;
+            }
+            .is-outlined .fa-ghost {
+                -webkit-text-stroke-color: var(--bulma-link);
+            }
+
+        }
+    </style>
+
+    @foreach(var shade in Model.ShadeSelections)
+    {
+        <div class="is-flex is-flex-direction-column" style="gap:10px;">
+            <button
+                class="
+                    ml-1 button is-flex is-flex-direction-row actor-button is-justify-content-flex-start
+                    @if(shade.IsPrimary)
+                    {
+                        <text>is-primary main</text>
+                    }
+                    else
+                    {
+                        <text>is-link</text>
+                    }
+                    @if(!shade.IsActive)
+                    {
+                        <text>is-outlined</text>
+                    }
+                "
+                _="
+                    on mouseenter
+                        remove .is-hidden from the first <.main-feed-help-label/> in me
+                        then add .showing-help to me
+                    end
+                    on mouseleave
+                        add .is-hidden to the first <.main-feed-help-label/> in me
+                        then remove .showing-help from me
+                    end
+                ">
+
+                <span class="icon is-medium" style="transition:initial;">
+                    <i class="fas fa-solid fa-ghost fa-xl"></i>
+                </span>
+
+                <div class="is-flex is-flex-direction-column is-justify-content-center" style="line-height:0.9;">
+                    <div class="has-text-weight-medium actor-name-label" style="display:flex;">@shade.Text</div>
+                    <strong class="notifications-help-label is-hidden" style="color:inherit;display:flex;">notifications</strong>
+                    <strong class="profile-help-label is-hidden" style="color:inherit;display:flex;">view profile</strong>
+                    <strong class="firehose-help-label is-hidden" style="color:inherit;display:flex;">firehose</strong>
+                    <strong class="more-help-label is-hidden" style="color:inherit;display:flex;">more</strong>
+                    <strong class="main-feed-help-label is-hidden" style="color:inherit;display:flex;">main feed</strong>
+                </div>
+            </button>
+
+            <div class="is-flex is-flex-direction-row">
+                @foreach(var action in new List<string> { "notifications", "profile", "firehose", "more" })
+                {
+                    <div
+                        class="pr-1 pl-1 actor-action-button-container"
+                        _="
+                            on mouseenter 
+                                remove .is-hidden from the previous <.@action-help-label/> 
+                                then add .is-hovered to the previous <.actor-button/>
+                            end
+                            on mouseleave
+                                add .is-hidden to the previous <.@action-help-label/>
+                                then remove .is-hovered from the previous <.actor-button/>
+                            end
+                        "
+                    >
+                        <div
+                            class="
+                                actor-action-button
+                                @if(shade.IsPrimary){ <text>main</text> }
+                                @if(shade.HasNotifications && action == "notifications"){ <text>notify</text> }
+                            "
+                        ></div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <button class="button is-dark">
+        Add shade
+    </button>
+</div>

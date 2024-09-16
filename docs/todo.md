@@ -44,6 +44,7 @@
 - define dms? - item where the complete list of recipients is an individual? doesn't work for group chats though
   - maybe define the chat as a collection, where both actors add notes etc to it?
 - seperate out localizedUsername, display name and iris - the mapping should be done by webfinger i think?
+- instanceActorAuthorGrain can be made into a static class
 
 ## currently doing
 - get message sending successfully

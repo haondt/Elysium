@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 namespace Elysium.Grains.Services
 {
     public class ActivityPubHttpService(
+        IOptions<ActivityPubHttpSettings> settings,
         IGrainFactory<RemoteIri> uriGrainFactory, 
         HttpClient httpClient) : IActivityPubHttpService
     {
@@ -144,7 +145,7 @@ namespace Elysium.Grains.Services
 
             var message = new HttpRequestMessage(HttpMethod.Get, data.Target.Iri);
 
-            if (await data.Author.IsInASigningMoodAsync())
+            if (settings.Value.SignFetches && await data.Author.IsInASigningMoodAsync())
             {
                 var date = DateTimeOffset.UtcNow.ToString("r", CultureInfo.InvariantCulture);
                 var stringToSign = $"(request-target): get {data.Target.Iri.ToString()}\nhost: {data.Target.Iri.Host}\ndate: {date}";
@@ -204,7 +205,7 @@ namespace Elysium.Grains.Services
                 Content = new StringContent(data.JsonLdPayload, Encoding.UTF8, "application/ld+json"),
             };
 
-            if (await data.Author.IsInASigningMoodAsync())
+            if (settings.Value.SignPushes && await data.Author.IsInASigningMoodAsync())
             {
                 var digest = $"SHA-256={SHA256.HashData(Encoding.UTF8.GetBytes(data.JsonLdPayload))}";
                 var date = DateTimeOffset.UtcNow.ToString("r", CultureInfo.InvariantCulture);

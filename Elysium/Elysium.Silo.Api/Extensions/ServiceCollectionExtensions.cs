@@ -5,6 +5,7 @@ using Elysium.Grains.Persistence;
 using Elysium.Grains.Services;
 using Elysium.Hosting.Services;
 using Elysium.Server.Services;
+using Elysium.Silo.Api.Services;
 using Haondt.Identity.StorageKey;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +28,7 @@ namespace Elysium.Silo.Extensions
             //services.AddSingleton<IHostingService, HostingService>();
             //services.AddScoped<IActivityPubClientService, ActivityPubClientService>();
             services.AddElysiumSiloGrainFactories();
+            services.AddSingleton<IDevHandler, DevHandler>();
             return services;
         }
 

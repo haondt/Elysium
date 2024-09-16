@@ -18,7 +18,7 @@ namespace Elysium.Controllers
         [HttpGet("home")]
         public async Task<IActionResult> Home()
         {
-            var result = await pageFactory.GetComponent<HomeLayoutModel>();
+            var result = await pageFactory.GetComponent<HomePageModel>();
             return result.CreateView(this);
         } 
 

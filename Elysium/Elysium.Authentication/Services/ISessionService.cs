@@ -14,5 +14,7 @@ namespace Elysium.Authentication.Services
         public bool IsAuthenticated();
         public Task<Optional<StorageKey<UserIdentity>>> GetUserKeyAsync();
         public void ClearCache();
+        Optional<T> GetFromCookie<T>(string key);
+        void SetCookie<T>(string key, T value);
     }
 }

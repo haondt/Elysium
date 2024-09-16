@@ -11,6 +11,9 @@ using Haondt.Web.Components;
 using Elysium.Authentication.Components;
 using Elysium.Hosting.Services;
 using Elysium.Components.Services;
+using Elysium.Client.Services;
+using Elysium.Exceptions;
+using Elysium.Core.Models;
 
 namespace Elysium.Extensions
 {
@@ -66,16 +69,62 @@ namespace Elysium.Extensions
 
         public static IServiceCollection AddElysiumComponents(this IServiceCollection services)
         {
-            services.AddScoped<IComponentDescriptor>(sp => new NeedsAuthenticationComponentDescriptor<HomeLayoutModel>(async (cf) =>
+            services.AddScoped<IComponentDescriptor>(sp => new NeedsAuthenticationComponentDescriptor<ShadeSelectorModel>(async (cf, rd) =>
+            {
+                var session = sp.GetRequiredService<IUserSessionService>();
+                var username = await session.GetLocalizedUsernameAsync();
+                if (!username.IsSuccessful)
+                    throw new ComponentException($"Failed to retrieve username. reason: {username.Reason}");
+                var iri = await session.GetIriAsync();
+                if (!iri.IsSuccessful)
+                    throw new ComponentException($"Failed to retrieve iri. reason: {iri.Reason}");
+                var shades = await session.GetShadesAsync();
+                if (!shades.IsSuccessful)
+                    throw new ComponentException($"Failed to load user shades. reason: {shades.Reason}");
+                var activeShadeOptional = session.GetActiveShade();
+                var activeShade = activeShadeOptional.HasValue ? activeShadeOptional.Value : iri.Value;
+
+                var model = new ShadeSelectorModel
+                {
+                    ShadeSelections = new List<ShadeSelection>
+                    {
+                        new ()
+                        {
+                            IsPrimary = true,
+                            Text = $"@{username.Value}",
+                            IsActive = activeShade == iri.Value
+                        }
+                    }
+                };
+
+                var elysiumService = sp.GetRequiredService<IElysiumService>();
+                foreach ( var shade in shades.Value)
+                {
+                    model.ShadeSelections.Add(new ShadeSelection
+                    {
+                        IsActive = activeShade == shade,
+                        IsPrimary = false,
+                        Text = elysiumService.GetShadeNameFromLocalIri(iri.Value, shade)
+                    });
+                }
+
+                return model;
+            })
+            {
+                ViewPath = "~/Components/ShadeSelector.cshtml",
+            });
+            services.AddScoped<IComponentDescriptor>(sp => new NeedsAuthenticationComponentDescriptor<HomePageModel>(async (cf) =>
             {
                 var feed = await cf.GetComponent(new FeedModel());
-                return new HomeLayoutModel
+                var shadeSelector = await cf.GetComponent<ShadeSelectorModel>();
+                return new HomePageModel
                 {
+                    ShadeSelector = shadeSelector,
                     Feed = feed
                 };
             })
             {
-                ViewPath = "~/Components/HomeLayout.cshtml",
+                ViewPath = "~/Components/HomePage.cshtml",
             });
             services.AddScoped<IComponentDescriptor>(_ => new ComponentDescriptor<FeedModel>()
             {
@@ -139,6 +188,10 @@ namespace Elysium.Extensions
                 ConfigureResponse = new(m => m.ConfigureHeadersAction = new HxHeaderBuilder()
                     .ReSwap("none")
                     .Build())
+            });
+            services.AddScoped<IComponentDescriptor>(sp => new ComponentDescriptor<DefaultLayoutModel>
+            {
+                ViewPath = $"~/Components/DefaultLayout.cshtml",
             });
 
 

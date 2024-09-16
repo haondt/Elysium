@@ -25,6 +25,7 @@ namespace Elysium.Grains.Extensions
             //services.AddSingleton<IStoredDocumentFacade, StoredDocumentFacade>();
             services.AddSingleton<IStoredDocumentFacadeFactory, StoredDocumentFacadeFactory>();
             services.AddSingleton<IDocumentService, DocumentService>();
+            services.Configure<ActivityPubHttpSettings>(configuration.GetSection(nameof(ActivityPubHttpSettings)));
             services.AddHttpClient<IActivityPubHttpService, ActivityPubHttpService>(client =>
             {
                 client.DefaultRequestHeaders.Add("Accept", "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"");

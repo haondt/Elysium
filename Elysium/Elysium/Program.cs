@@ -17,18 +17,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddApplicationPart(typeof(Haondt.Web.Extensions.ServiceCollectionExtensions).Assembly)
     .AddApplicationPart(typeof(Haondt.Web.BulmaCSS.Extensions.ServiceCollectionExtensions).Assembly)
-    .AddApplicationPart(typeof(Elysium.Components.Components.HomeLayoutModel).Assembly);
+    .AddApplicationPart(typeof(Elysium.Components.Components.HomePageModel).Assembly);
 
 builder.Configuration.AddEnvironmentVariables();
 
 builder.Services
     .AddHaondtWebCoreServices()
     .AddHaondtWebServices(builder.Configuration)
-    .UseBulmaCSS(builder.Configuration)
+    .AddElysiumComponentServices() // must come before AddElysiumServices so bulma css overrides get loaded in correct order
     .AddElysiumServices(builder.Configuration)
     .AddElysiumComponents()
     .AddElysiumAssetSources()
-    .AddElysiumComponentServices()
     .AddElysiumClientServices()
     .AddElysiumHostingServices(builder.Configuration)
     .AddElysiumPersistenceServices(builder.Configuration)

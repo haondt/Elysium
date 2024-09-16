@@ -83,6 +83,18 @@ namespace Elysium.Client.Services
             return $"{username}@{host}";
         }
 
+        public string GetShadeNameFromLocalIri(LocalIri userIri, LocalIri shadeIri)
+        {
+            var userIriString = userIri.ToString();
+            var shadeIriString = shadeIri.ToString();
+            if (!shadeIriString.StartsWith(userIriString))
+                throw new ArgumentException($"shadeIri {shadeIriString} does not start with userIri {userIriString}");
+            var addition = shadeIriString.Substring(userIriString.Length);
+            if (!shadeIriString.StartsWith('+') || shadeIriString.Contains('/'))
+                throw new ArgumentException($"shaedIriAddition was not in the expected format: {addition}");
+            return addition;
+        }
+
         public Task<RemoteIri> GetUriForRemoteUsernameAsync(string username)
         {
             //if (username.Count(c => c == '@') != 1)

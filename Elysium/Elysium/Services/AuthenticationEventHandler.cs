@@ -118,7 +118,7 @@ namespace Elysium.Authentication.Services
             var closeModalComponent = await componentFactory.GetPlainComponent<CloseModalModel>();
             var loaderComponent = await componentFactory.GetPlainComponent(new LoaderModel
             {
-                Target = $"/_component/{ComponentDescriptor<HomeLayoutModel>.TypeIdentity}"
+                Target = $"/_component/{ComponentDescriptor<HomePageModel>.TypeIdentity}"
             });
             var appendComponent = await componentFactory.GetPlainComponent(new AppendComponentLayoutModel
             {
