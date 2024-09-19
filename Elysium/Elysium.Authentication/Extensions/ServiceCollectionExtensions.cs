@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Elysium.Core.Extensions;
 
 namespace Elysium.Authentication.Extensions
 {
@@ -40,6 +41,7 @@ namespace Elysium.Authentication.Extensions
                 ActivatorUtilities.CreateInstance<VerifiesAuthenticationComponentFactory>(
                     sp, sp.GetRequiredService<ComponentFactory>()));
             services.AddElysiumCryptoServices();
+
             return services;
         }
 

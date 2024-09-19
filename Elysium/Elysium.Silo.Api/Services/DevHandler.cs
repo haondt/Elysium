@@ -15,8 +15,7 @@ namespace Elysium.Silo.Api.Services
         IGrainFactory grainFactory,
         IIriService iriService,
         IJsonLdService jsonLdService,
-        IUserCryptoService cryptoService,
-        IHostingService hostingService) : IDevHandler
+        IUserCryptoService cryptoService) : IDevHandler
     {
         private static Func<JObject> JObjectFactory = () => new();
         public async Task CreateForLocal(DevLocalActivityPayload payload)

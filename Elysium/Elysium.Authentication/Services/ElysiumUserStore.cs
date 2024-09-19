@@ -1,4 +1,5 @@
 ﻿using Elysium.Core.Models;
+using Elysium.Core.Services;
 using Elysium.Persistence.Services;
 using Haondt.Identity.StorageKey;
 using Haondt.Persistence.Services;
@@ -12,8 +13,10 @@ using System.Threading.Tasks;
 namespace Elysium.Authentication.Services
 {
     // todo: use storagekeygrain instead of storage
-    public class ElysiumUserStore(IElysiumStorage storage) : ElysiumStorageKeyIdModelStore<UserIdentity>(storage), IUserStore<UserIdentity>, IUserPasswordStore<UserIdentity>
+    public class ElysiumUserStore(IElysiumStorage storage, IElysiumStorageKeyConverter converter) : ElysiumStorageKeyIdModelStore<UserIdentity>(storage, converter), IUserStore<UserIdentity>, IUserPasswordStore<UserIdentity>
     {
+        private readonly IElysiumStorageKeyConverter _converter = converter;
+
         public async Task<UserIdentity?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
             var result = await storage.GetUserByNameAsync(normalizedUserName);
@@ -34,7 +37,7 @@ namespace Elysium.Authentication.Services
 
         public Task<string> GetUserIdAsync(UserIdentity user, CancellationToken cancellationToken)
         {
-            return Task.FromResult(StorageKeyConvert.Serialize(user.Id));
+            return Task.FromResult(_converter.Serialize(user.Id));
         }
 
         public Task<string?> GetUserNameAsync(UserIdentity user, CancellationToken cancellationToken)

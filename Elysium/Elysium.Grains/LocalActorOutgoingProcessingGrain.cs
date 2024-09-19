@@ -24,6 +24,7 @@ namespace Elysium.Grains
     {
         private readonly ILocalActorAuthorGrain _authorGrain;
         private readonly IInstanceActorAuthorGrain _instanceAuthorGrain;
+        private readonly IPublicCollectionGrain _publicCollectionGrain;
         private readonly LocalIri _id;
         private readonly IGrainFactory<LocalIri> _grainFactory;
         private readonly IIriService _iriService;
@@ -44,6 +45,7 @@ namespace Elysium.Grains
             _id = grainFactory.GetIdentity(this);
             _authorGrain = grainFactory.GetGrain<ILocalActorAuthorGrain>(_id);
             _instanceAuthorGrain = baseGrainFactory.GetGrain<IInstanceActorAuthorGrain>(Guid.Empty);
+            _publicCollectionGrain = baseGrainFactory.GetGrain<IPublicCollectionGrain>(Guid.Empty);
             _grainFactory = grainFactory;
             _iriService = iriService;
             _documentService = documentService;
@@ -126,7 +128,10 @@ namespace Elysium.Grains
                 // all the GETs should be authored by the instance grain
 
                 if (recipient == ActivityPubConsts.PUBLIC_COLLECTION.Iri)
+                {
+                    await _publicCollectionGrain.IngestReferenceAsync(data.ActivityIri.ToString());
                     continue;
+                }
 
                 if (_hostingService.Host == recipient.Host)
                 {

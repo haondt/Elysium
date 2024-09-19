@@ -7,6 +7,8 @@ namespace Elysium.Persistence.Services
 {
     public interface IElysiumStorage : IStorage
     {
-        public Task<Result<UserIdentity, StorageResultReason>> GetUserByNameAsync(string normalizedUsername);
+        Task<Result<UserIdentity, StorageResultReason>> GetUserByNameAsync(string normalizedUsername);
+        Task SetMany(List<(StorageKey Key, object Value)> values);
+        Task<List<Result<(StorageKey Key, object Value), StorageResultReason>>> GetMany(List<StorageKey> keys);
     }
 }

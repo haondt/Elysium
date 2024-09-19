@@ -328,7 +328,9 @@ namespace Elysium.Grains
                 await _outgoingStream.OnNextAsync(new LocalActorOutgoingProcessingData
                 {
                     Activity = outgoingCompactedActivity,
-                    Recipients = recepients.ToList()
+                    Recipients = recepients.ToList(),
+                    ActivityIri = activityIri
+
                 });
 
                 return (activityIri, objectIri);

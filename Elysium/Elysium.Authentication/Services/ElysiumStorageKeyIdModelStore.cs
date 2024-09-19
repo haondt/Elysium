@@ -1,4 +1,5 @@
 ﻿using Elysium.Core.Models;
+using Elysium.Core.Services;
 using Haondt.Identity.StorageKey;
 using Haondt.Persistence.Services;
 using Microsoft.AspNetCore.Identity;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.Authentication.Services
 {
-    public class ElysiumStorageKeyIdModelStore<T>(IStorage storage) where T : class, IStorageKeyIdModel<T>
+    public class ElysiumStorageKeyIdModelStore<T>(IStorage storage, IElysiumStorageKeyConverter converter) where T : class, IStorageKeyIdModel<T>
     {
         public async Task<IdentityResult> CreateAsync(T user, CancellationToken cancellationToken)
         {
@@ -33,7 +34,7 @@ namespace Elysium.Authentication.Services
 
         public async Task<T?> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
-            var storageKey = StorageKeyConvert.Deserialize<T>(userId);
+            var storageKey = converter.Deserialize<T>(userId);
             var user = await storage.Get(storageKey);
             if (!user.IsSuccessful)
                 return null;

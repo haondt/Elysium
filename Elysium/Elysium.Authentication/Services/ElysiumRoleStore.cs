@@ -1,5 +1,5 @@
 ﻿using Elysium.Core.Models;
-using Haondt.Identity.StorageKey;
+using Elysium.Core.Services;
 using Haondt.Persistence.Services;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -10,8 +10,10 @@ using System.Threading.Tasks;
 
 namespace Elysium.Authentication.Services
 {
-    public class ElysiumRoleStore(IStorage storage) : ElysiumStorageKeyIdModelStore<RoleIdentity>(storage), IRoleStore<RoleIdentity>
+    public class ElysiumRoleStore(IStorage storage, IElysiumStorageKeyConverter converter) : ElysiumStorageKeyIdModelStore<RoleIdentity>(storage, converter), IRoleStore<RoleIdentity>
     {
+        private readonly IElysiumStorageKeyConverter _converter = converter;
+
         public Task<RoleIdentity?> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
             throw new NotSupportedException();
@@ -24,7 +26,7 @@ namespace Elysium.Authentication.Services
 
         public Task<string> GetRoleIdAsync(RoleIdentity role, CancellationToken cancellationToken)
         {
-            return Task.FromResult(StorageKeyConvert.Serialize(role.Id));
+            return Task.FromResult(_converter.Serialize(role.Id));
         }
 
         public Task<string?> GetRoleNameAsync(RoleIdentity role, CancellationToken cancellationToken)

@@ -16,6 +16,10 @@ namespace Elysium.GrainInterfaces.Surrogates
         public string Path;
         [Id(2)]
         public string Scheme;
+        [Id(3)]
+        public string? Fragment;
+        [Id(4)]
+        public string? Query;
     }
 
     [RegisterConverter]
@@ -23,12 +27,19 @@ namespace Elysium.GrainInterfaces.Surrogates
     {
         public Iri ConvertFromSurrogate(in IriSurrogate surrogate)
         {
-            return new Iri(surrogate.Scheme, surrogate.Host, surrogate.Path);
+            return new Iri(surrogate.Scheme, surrogate.Host, surrogate.Path, surrogate.Fragment, surrogate.Query);
         }
 
         public IriSurrogate ConvertToSurrogate(in Iri value)
         {
-            return new IriSurrogate { Host = value.Host, Path = value.Path, Scheme = value.Scheme };
+            return new IriSurrogate 
+            { 
+                Host = value.Host,
+                Path = value.Path,
+                Scheme = value.Scheme,
+                Fragment = value.Fragment,
+                Query = value.Query 
+            };
         }
     }
 }

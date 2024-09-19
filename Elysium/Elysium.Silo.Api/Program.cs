@@ -5,6 +5,7 @@ using Orleans.Configuration;
 using Elysium.Hosting.Extensions;
 using Elysium.Persistence.Extensions;
 using Elysium.Cryptography.Extensions;
+using Elysium.Core.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,7 @@ builder.Host
     .ConfigureServices((context, services) =>
     {
         services
+            .AddElysiumStorageKeyConverter()
             .AddElysiumSiloServices()
             .AddElysiumGrainServices(context.Configuration)
             .AddElysiumCryptoServices()

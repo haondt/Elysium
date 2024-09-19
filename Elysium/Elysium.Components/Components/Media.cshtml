@@ -1,0 +1,41 @@
+﻿@model Elysium.Components.Components.MediaModel
+<article class="elysium-media
+    depth-@Model.Depth
+    has-background-black-ter
+    p-2
+    has-radius-small">
+  <div class="media-content">
+    <div>
+        <div class="is-flex is-flex-direction-column">
+            <div class="is-flex is-flex-direction-row is-align-items-center" style="gap:10px;">
+                <strong>@Model.AuthorName</strong>
+                <a><small>@@@Model.AuthorFediverseHandle</small></a>
+                <small>@Model.Timestamp</small>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.SanitizedTitle))
+            {
+                <span class="is-size-4">@Model.SanitizedTitle</span>
+            }
+            @if (!string.IsNullOrEmpty(Model.SanitizedText))
+            {
+                <div class="is-flex is-flex-direction-column" style="gap:0.4rem;">
+                    <p>Model.Text</p>
+                </div>
+            }
+        </div>
+    </div>
+    <nav class="level is-mobile">
+      <div class="level-left">
+        <a class="level-item">
+          <span class="icon is-small"><i class="fas fa-reply"></i></span>
+        </a>
+        <a class="level-item">
+          <span class="icon is-small"><i class="fas fa-retweet"></i></span>
+        </a>
+        <a class="level-item">
+          <span class="icon is-small"><i class="fas fa-heart"></i></span>
+        </a>
+      </div>
+    </nav>
+  </div>
+</article>

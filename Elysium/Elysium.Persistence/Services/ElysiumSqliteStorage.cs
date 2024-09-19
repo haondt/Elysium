@@ -1,4 +1,5 @@
 ﻿using Elysium.Core.Models;
+using Elysium.Core.Services;
 using Elysium.Persistence.Converters;
 using Haondt.Core.Models;
 using Haondt.Identity.StorageKey;
@@ -21,8 +22,9 @@ namespace Elysium.Persistence.Services
         private readonly JsonSerializerSettings _serializerSettings;
         private readonly string _connectionString;
         private readonly ConcurrentDictionary<string, bool> _existingTables = [];
+        private readonly IElysiumStorageKeyConverter _storageKeyConverter;
 
-        public ElysiumSqliteStorage(IOptions<ElysiumPersistenceSettings> options)
+        public ElysiumSqliteStorage(IOptions<ElysiumPersistenceSettings> options, IElysiumStorageKeyConverter storageKeyConverter)
         {
             _settings = options.Value.SqliteStorageSettings;
             _serializerSettings = new JsonSerializerSettings();
@@ -32,18 +34,18 @@ namespace Elysium.Persistence.Services
                 Mode = SqliteOpenMode.ReadWriteCreate,
                 Cache = SqliteCacheMode.Private
             }.ToString();
+            _storageKeyConverter = storageKeyConverter;
             ConfigureSerializerSettings(_serializerSettings);
             GetExistingTables();
         }
 
-        private static JsonSerializerSettings ConfigureSerializerSettings(JsonSerializerSettings settings)
+        private JsonSerializerSettings ConfigureSerializerSettings(JsonSerializerSettings settings)
         {
-            //settings.TypeNameHandling = TypeNameHandling.All;
             settings.TypeNameHandling = TypeNameHandling.Auto;
             settings.MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Error;
             settings.Formatting = Newtonsoft.Json.Formatting.None;
             settings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
-            settings.Converters.Add(new GenericStorageKeyJsonConverter());
+            settings.Converters.Add(new GenericStorageKeyJsonConverter(_storageKeyConverter));
             return settings;
         }
 
@@ -64,7 +66,8 @@ namespace Elysium.Persistence.Services
 
         private async Task<string> GetOrCreateTableAsync(Type tableType, SqliteConnection connection)
         {
-            var tableName = tableType.AssemblyQualifiedName ?? throw new InvalidOperationException("Type name is null");
+            //var tableName = tableType.AssemblyQualifiedName ?? throw new InvalidOperationException("Type name is null");
+            var tableName = SimpleTypeConverter.TypeToString(tableType);
             tableName = SanitizeTableName(tableName);
 
             if (_existingTables.ContainsKey(tableName)) return tableName;
@@ -84,7 +87,8 @@ namespace Elysium.Persistence.Services
                         Value TEXT NOT NULL
                     )";
 
-            using var command = new SqliteCommand(createTableQuery, connection);
+            using var command = connection.CreateCommand();
+            command.CommandText = createTableQuery;
             await command.ExecuteNonQueryAsync();
 
             _existingTables[tableName] = true;
@@ -94,7 +98,7 @@ namespace Elysium.Persistence.Services
 
         public async Task<Result<T, StorageResultReason>> Get<T>(StorageKey<T> key)
         {
-            var keyString = StorageKeyConvert.Serialize(key);
+            var keyString = _storageKeyConverter.Serialize(key);
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
             var table = await GetOrCreateTableAsync(key.Type, connection);
@@ -114,7 +118,7 @@ namespace Elysium.Persistence.Services
 
         public async Task<bool> ContainsKey(StorageKey key)
         {
-            var keyString = StorageKeyConvert.Serialize(key);
+            var keyString = _storageKeyConverter.Serialize(key);
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
             var table = await GetOrCreateTableAsync(key.Type, connection);
@@ -127,47 +131,14 @@ namespace Elysium.Persistence.Services
             return longCount > 0;
         }
 
-        public async Task Set<T>(StorageKey<T> key, T value)
+        public Task Set<T>(StorageKey<T> key, T value)
         {
-            var keyString = StorageKeyConvert.Serialize(key);
-            var valueString = JsonConvert.SerializeObject(value, _serializerSettings);
-
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync();
-            var table = await GetOrCreateTableAsync(key.Type, connection);
-
-            string query;
-            Action<SqliteCommand>? setAdditionalParameter = null; 
-            if (typeof(T) == typeof(UserIdentity))
-            {
-                if (value is not UserIdentity userIdentity)
-                    throw new InvalidOperationException($"storage key {key} has type UserIdentity but the value was not a UserIdentity");
-
-                if (_settings.StoreKeyStrings)
-                    query = $"INSERT OR REPLACE INTO {table} (Key, KeyString, Value, NormalizedUsername) " +
-                        $"VALUES (@key, @keyString, @value, @normalizedUsername)";
-                else
-                    query = $"INSERT OR REPLACE INTO {table} (Key, Value, NormalizedUsername) " +
-                        $"VALUES (@key, @value, @normalizedUsername)";
-                setAdditionalParameter = c => c.Parameters.AddWithValue("@normalizedUsername", userIdentity.NormalizedUsername ?? (object)DBNull.Value);
-            }
-            else if (_settings.StoreKeyStrings)
-               query = $"INSERT OR REPLACE INTO {table} (Key, KeyString, Value) VALUES (@key, @keyString, @value)";
-            else
-               query = $"INSERT OR REPLACE INTO {table} (Key, Value) VALUES (@key, @value)";
-
-            using var command = new SqliteCommand(query, connection);
-            command.Parameters.AddWithValue("@key", keyString);
-            if (_settings.StoreKeyStrings)
-                command.Parameters.AddWithValue("@keyString", key.ToString());
-            command.Parameters.AddWithValue("@value", valueString);
-            setAdditionalParameter?.Invoke(command);
-            await command.ExecuteNonQueryAsync();
+            return SetMany([(key, value!)]);
         }
 
         public async Task<Result<StorageResultReason>> Delete(StorageKey key)
         {
-            var keyString = StorageKeyConvert.Serialize(key);
+            var keyString = _storageKeyConverter.Serialize(key);
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
             var table = await GetOrCreateTableAsync(key.Type, connection);
@@ -203,6 +174,118 @@ namespace Elysium.Persistence.Services
     
             // Surround the sanitized table name with double quotes
             return $"\"{sanitized}\"";
+        }
+
+        public async Task SetMany(List<(StorageKey Key, object Value)> values)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
+            using var transaction = await connection.BeginTransactionAsync();
+
+            var commands = new Dictionary<Type, (SqliteCommand Command, Action<StorageKey, object> SetParameters)>(); ;
+            async Task<(SqliteCommand Command, Action<StorageKey,  object> SetParameters)> PreparedCommandAsync(Type keyType)
+            {
+                var table = await GetOrCreateTableAsync(keyType, connection);
+
+                var setParametersList = new List<Action<StorageKey,  object>>();
+
+                var command = connection.CreateCommand();
+                if (keyType == typeof(UserIdentity))
+                {
+                    if (_settings.StoreKeyStrings)
+                        command.CommandText = $"INSERT OR REPLACE INTO {table} (Key, KeyString, Value, NormalizedUsername) " +
+                            $"VALUES (@key, @keyString, @value, @normalizedUsername)";
+                    else
+                        command.CommandText = $"INSERT OR REPLACE INTO {table} (Key, Value, NormalizedUsername) " +
+                            $"VALUES (@key, @value, @normalizedUsername)";
+                    var normalizedUsernameParameter = command.CreateParameter();
+                    normalizedUsernameParameter.ParameterName = "@normalizedUsername";
+                    command.Parameters.Add(normalizedUsernameParameter);
+                    setParametersList.Add((key, value) =>
+                    {
+                        if (value is not UserIdentity userIdentity)
+                            throw new InvalidOperationException($"storage key {key} has type UserIdentity but the value was not a UserIdentity");
+                        normalizedUsernameParameter.Value = userIdentity.NormalizedUsername;
+                    });
+                }
+                else if (_settings.StoreKeyStrings)
+                   command.CommandText = $"INSERT OR REPLACE INTO {table} (Key, KeyString, Value) VALUES (@key, @keyString, @value)";
+                else
+                   command.CommandText = $"INSERT OR REPLACE INTO {table} (Key, Value) VALUES (@key, @value)";
+
+                var keyParameter = command.CreateParameter();
+                keyParameter.ParameterName = "@key";
+                command.Parameters.Add(keyParameter);
+                setParametersList.Add((key, _) =>
+                {
+                    keyParameter.Value = _storageKeyConverter.Serialize(key);
+                });
+                if (_settings.StoreKeyStrings)
+                {
+                    var keyStringParameter = command.CreateParameter();
+                    keyStringParameter.ParameterName = "@keyString";
+                    command.Parameters.Add(keyStringParameter);
+                    setParametersList.Add((key, _) =>
+                    {
+                        keyStringParameter.Value = key.ToString();
+                    });
+                }
+                var valueParameter = command.CreateParameter();
+                valueParameter.ParameterName = "@value";
+                command.Parameters.Add(valueParameter);
+                setParametersList.Add((_, value) =>
+                {
+                    valueParameter.Value = JsonConvert.SerializeObject(value, _serializerSettings);
+                });
+
+                return (command, (key, value) =>
+                {
+                    foreach (var action in setParametersList)
+                        action(key, value);
+                });
+            }
+
+            foreach(var (key, value) in values)
+            {
+                var keyString = _storageKeyConverter.Serialize(key);
+                var valueString = JsonConvert.SerializeObject(value, _serializerSettings);
+
+                if (!commands.ContainsKey(key.Type))
+                    commands[key.Type] = await PreparedCommandAsync(key.Type);
+
+                var (command, setParameters) = commands[key.Type];
+                setParameters(key, value);
+                await command.ExecuteNonQueryAsync();
+            }
+
+            await transaction.CommitAsync();
+        }
+
+        public async Task<List<Result<(StorageKey Key, object Value), StorageResultReason>>> GetMany(List<StorageKey> keys)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
+
+
+            var resultTasks = keys.Select(async key =>
+            {
+                var keyString = _storageKeyConverter.Serialize(key);
+                var table = await GetOrCreateTableAsync(key.Type, connection);
+                var query = $"SELECT Value FROM {table} WHERE Key = @key";
+                using var command = new SqliteCommand(query, connection);
+                command.Parameters.AddWithValue("@key", keyString);
+                var result = await command.ExecuteScalarAsync();
+
+                if (result == null)
+                    return new(StorageResultReason.NotFound);
+                var resultString = result.ToString()
+                    ?? throw new JsonException("unable to deserialize result");
+                var value = JsonConvert.DeserializeObject(resultString, key.Type, _serializerSettings)
+                    ?? throw new JsonException("unable to deserialize result");
+                return new Result<(StorageKey, object), StorageResultReason>((key, value));
+            });
+
+            return (await Task.WhenAll(resultTasks)).ToList();
         }
     }
 }

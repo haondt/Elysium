@@ -19,5 +19,6 @@ namespace Elysium.GrainInterfaces
         public const string DispatchRemoteActivityStream = "DispatchRemoteActivityStream";
         public const string LocalActorOutgoingProcessingStream = "LocalActorOutgoingProcessingStream";
         public const string LocalActorIncomingProcessingStream = "LocalActorIncomingProcessingStream";
+
     }
 }

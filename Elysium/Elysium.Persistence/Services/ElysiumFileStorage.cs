@@ -1,4 +1,5 @@
 ﻿using Elysium.Core.Models;
+using Elysium.Core.Services;
 using Elysium.Persistence.Converters;
 using Haondt.Core.Models;
 using Haondt.Identity.StorageKey;
@@ -21,23 +22,25 @@ namespace Elysium.Persistence.Services
         private readonly JsonSerializerSettings _serializerSettings;
         private DataObject? _dataCache;
         private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
+        private readonly IElysiumStorageKeyConverter _storageKeyConverter;
 
         // TODO: fix this Ioptions, use same style as sqlite settings
-        public ElysiumFileStorage(IOptions<HaondtFileStorageSettings> options)
+        public ElysiumFileStorage(IOptions<HaondtFileStorageSettings> options, IElysiumStorageKeyConverter storageKeyConverter)
         {
             _dataFile = options.Value.DataFile;
 
             _serializerSettings = new JsonSerializerSettings();
+            _storageKeyConverter = storageKeyConverter;
             ConfigureSerializerSettings(_serializerSettings);
         }
 
-        private static JsonSerializerSettings ConfigureSerializerSettings(JsonSerializerSettings settings)
+        private JsonSerializerSettings ConfigureSerializerSettings(JsonSerializerSettings settings)
         {
             settings.TypeNameHandling = TypeNameHandling.All;
             settings.MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Error;
             settings.Formatting = Newtonsoft.Json.Formatting.Indented;
             settings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
-            settings.Converters.Add(new GenericStorageKeyJsonConverter());
+            settings.Converters.Add(new GenericStorageKeyJsonConverter(_storageKeyConverter));
             return settings;
         }
 
@@ -101,14 +104,14 @@ namespace Elysium.Persistence.Services
             TryAcquireSemaphoreAnd(async () =>
             {
                 var data = await GetDataAsync();
-                return data.Values.ContainsKey(StorageKeyConvert.Serialize(key));
+                return data.Values.ContainsKey(_storageKeyConverter.Serialize(key));
             });
 
         public Task<Result<StorageResultReason>> Delete(StorageKey key) =>
             TryAcquireSemaphoreAnd(async () =>
             {
                 var data = await GetDataAsync();
-                if (!data.Values.Remove(StorageKeyConvert.Serialize(key)))
+                if (!data.Values.Remove(_storageKeyConverter.Serialize(key)))
                     return new(StorageResultReason.NotFound);
                 await SetDataAsync(data);
                 return new Result<StorageResultReason>();
@@ -118,7 +121,7 @@ namespace Elysium.Persistence.Services
             TryAcquireSemaphoreAnd(async () =>
             {
                 var data = await GetDataAsync();
-                var stringKey = StorageKeyConvert.Serialize(key);
+                var stringKey = _storageKeyConverter.Serialize(key);
                 if (!data.Values.TryGetValue(stringKey, out var value))
                     return new(StorageResultReason.NotFound);
                 if (value is not T castedValue)
@@ -130,7 +133,7 @@ namespace Elysium.Persistence.Services
             TryAcquireSemaphoreAnd(async () =>
             {
                 var data = await GetDataAsync();
-                data.Values[StorageKeyConvert.Serialize(key)] = value;
+                data.Values[_storageKeyConverter.Serialize(key)] = value;
                 await SetDataAsync(data);
             });
 
@@ -147,6 +150,30 @@ namespace Elysium.Persistence.Services
                         return new Result<UserIdentity, StorageResultReason>(userIdentity);
                 }
                 return new(StorageResultReason.NotFound);
+            });
+
+        public Task SetMany(List<(StorageKey Key, object Value)> values) =>
+            TryAcquireSemaphoreAnd(async () =>
+            {
+                var data = await GetDataAsync();
+                foreach(var (key, value) in values)
+                    data.Values[_storageKeyConverter.Serialize(key)] = value;
+                await SetDataAsync(data);
+            });
+
+        public Task<List<Result<(StorageKey Key, object Value), StorageResultReason>>> GetMany(List<StorageKey> keys) =>
+            TryAcquireSemaphoreAnd(async () =>
+            {
+                var data = await GetDataAsync();
+                return keys.Select(key =>
+                {
+                    var stringKey = _storageKeyConverter.Serialize(key);
+                    if (!data.Values.TryGetValue(stringKey, out var value))
+                        return new(StorageResultReason.NotFound);
+                    if (value?.GetType() != key.Type)
+                        throw new InvalidCastException($"Cannot convert {key} to type {key.Type}");
+                    return new Result<(StorageKey Key, object Value), StorageResultReason>((key, value));
+                }).ToList();
             });
     }
 }

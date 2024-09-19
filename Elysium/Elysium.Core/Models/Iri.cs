@@ -14,8 +14,10 @@ namespace Elysium.Core.Models
         public string Host { get; private init; }
         public string Scheme { get; private init; }
         public string Path { get; private init; }
+        public string? Fragment { get; private init; }
+        public string? Query { get; private init; }
 
-        public Iri(string scheme, string host, string path)
+        public Iri(string scheme, string host, string path, string? fragment, string? query)
         {
             Host = host.Trim().ToLower();
             ValidateHost(host);
@@ -23,6 +25,8 @@ namespace Elysium.Core.Models
             if (Scheme != "http" && Scheme != "https")
                 throw new ArgumentException($"Scheme {scheme} is not supported. Must be one of http, https.");
             Path = PathSepRegex().Replace(path.Trim('/'), "/");
+            Fragment = fragment;
+            Query = query;  
         }
 
         public static Iri FromUri(Uri uri)
@@ -30,7 +34,7 @@ namespace Elysium.Core.Models
             if (!uri.IsAbsoluteUri)
                 throw new ArgumentException("The Uri must be absolute", nameof(uri));
 
-            return new Iri(uri.Scheme, uri.Host, uri.AbsolutePath);
+            return new Iri(uri.Scheme, uri.Host, uri.AbsolutePath, uri.Fragment, uri.Query);
         }
 
         public static Iri FromUrlEncodedString(string urlEncodedString)
@@ -84,14 +88,14 @@ namespace Elysium.Core.Models
             subpath = PathSepRegex().Replace(subpath.TrimStart('/').TrimEnd('/'), "/");
             if (subpath.Length == 0)
                 return this;
-            return new(Scheme, Host, $"{Path}/{subpath}");
+            return new(Scheme, Host, $"{Path}/{subpath}", Fragment, Query);
         }
 
         public override string ToString()
         {
             if (string.IsNullOrEmpty(Path))
                 return $"{Scheme}://{Host}";
-            return $"{Scheme}://{Host}/{Path}";
+            return $"{Scheme}://{Host}/{Path}{Query ?? string.Empty}{Fragment ?? string.Empty}";
         }
 
         public override int GetHashCode()
@@ -127,7 +131,9 @@ namespace Elysium.Core.Models
         public required string Host { get; set; }
         public string Scheme { get; set; } = "https";
         public string Path { get; set; } = "";
+        public string? Fragment { get; set; }
+        public string? Query { get; set; }
 
-        public Iri Iri => new(Scheme, Host, Path);
+        public Iri Iri => new(Scheme, Host, Path, Fragment, Query);
     }
 }

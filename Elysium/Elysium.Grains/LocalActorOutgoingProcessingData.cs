@@ -19,5 +19,7 @@ namespace Elysium.Grains
         public List<Iri> Recipients { get; set; } = [];
         [Id(1)]
         public required JObject Activity { get; set; }
+        [Id(2)]
+        public required LocalIri ActivityIri { get; set; }
     }
 }

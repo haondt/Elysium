@@ -11,6 +11,7 @@ using Elysium.Client.Extensions;
 using Orleans.Configuration;
 using Elysium.Client.Hubs;
 using Elysium.Components.Extensions;
+using Elysium.Core.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,7 @@ builder.Services
     .AddElysiumComponentServices() // must come before AddElysiumServices so bulma css overrides get loaded in correct order
     .AddElysiumServices(builder.Configuration)
     .AddElysiumComponents()
+    .AddElysiumStorageKeyConverter()
     .AddElysiumAssetSources()
     .AddElysiumClientServices()
     .AddElysiumHostingServices(builder.Configuration)
