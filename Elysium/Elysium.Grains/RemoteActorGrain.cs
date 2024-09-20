@@ -4,8 +4,8 @@ using Elysium.Core.Models;
 using Elysium.Cryptography.Services;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Grains.Exceptions;
-using Elysium.Grains.Services;
+using Elysium.Domain.Exceptions;
+using Elysium.Domain.Services;
 using Microsoft.Extensions.Caching.Memory;
 using Orleans;
 using Orleans.Runtime;
@@ -18,7 +18,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains
+namespace Elysium.Domain
 {
     public class RemoteActorGrain : Grain, IRemoteActorGrain
     {

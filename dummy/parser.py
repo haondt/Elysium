@@ -1,6 +1,10 @@
 import json, requests
 from datetime import datetime
 
+# this script consumes a reddit post json (reddit.com/some/post.json)
+# and pumps it into elysium to generate content
+session = requests.Session()
+
 def load_json():
     with open('data/whats_a_pain.json') as f:
         return json.load(f)
@@ -33,10 +37,10 @@ def create_post(post):
         "actorName": author
     }
 
-    response = requests.post('http://localhost/_dev/as-local',
+    response = session.post('http://localhost/_dev/as-local',
                 json=payload,
                 headers={'Accept': 'application/ld+json',
-                         'Content-Type': 'application/ld+json'})
+                        'Content-Type': 'application/ld+json'})
 
     print(response.status_code, response.text)
 

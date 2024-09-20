@@ -1,4 +1,4 @@
-﻿using Elysium.Grains.Exceptions;
+﻿using Elysium.Domain.Exceptions;
 using Elysium.Persistence.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains.Persistence
+namespace Elysium.Domain.Persistence
 {
     public class ElysiumStorageGrainStorage(IElysiumStorage elysiumStorage,
         IServiceProvider serviceProvider,

@@ -3,7 +3,7 @@ using Elysium.ActivityPub.Models;
 using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Grains.Services;
+using Elysium.Domain.Services;
 using Elysium.Hosting.Services;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -16,7 +16,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains
+namespace Elysium.Domain
 {
 
     [ImplicitStreamSubscription(GrainConstants.LocalActorOutgoingProcessingStream)]
@@ -129,7 +129,7 @@ namespace Elysium.Grains
 
                 if (recipient == ActivityPubConsts.PUBLIC_COLLECTION.Iri)
                 {
-                    await _publicCollectionGrain.IngestReferenceAsync(data.ActivityIri.ToString());
+                    await _publicCollectionGrain.IngestReferenceAsync(data.ActivityType, data.ActivityIri.Iri);
                     continue;
                 }
 
@@ -185,7 +185,7 @@ namespace Elysium.Grains
                 {
 
                     var localActorGrain = _grainFactory.GetGrain<ILocalActorGrain>(r);
-                    return localActorGrain.IngestActivityAsync(_id.Iri, data.Activity);
+                    return localActorGrain.IngestActivityAsync(_id.Iri, data.ActivityType, data.Activity);
                 }
                 catch (Exception ex)
                 {

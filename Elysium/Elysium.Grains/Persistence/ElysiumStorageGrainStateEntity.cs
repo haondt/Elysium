@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains.Persistence
+namespace Elysium.Domain.Persistence
 {
     public class ElysiumStorageGrainStateEntity<T>
     {

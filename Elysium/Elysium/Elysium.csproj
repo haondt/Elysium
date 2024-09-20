@@ -34,6 +34,7 @@
     <ProjectReference Include="..\Elysium.Authentication\Elysium.Authentication.csproj" />
     <ProjectReference Include="..\Elysium.Client\Elysium.Client.csproj" />
     <ProjectReference Include="..\Elysium.Components\Elysium.Components.csproj" />
+    <ProjectReference Include="..\Elysium.Domain\Elysium.Domain.csproj" />
     <ProjectReference Include="..\Elysium.Hosting\Elysium.Hosting.csproj" />
     <ProjectReference Include="..\Elysium.Persistence\Elysium.Persistence.csproj" />
   </ItemGroup>

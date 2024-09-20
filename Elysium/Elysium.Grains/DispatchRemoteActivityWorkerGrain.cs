@@ -1,7 +1,7 @@
 ﻿using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Grains.Services;
+using Elysium.Domain.Services;
 using Microsoft.Extensions.Logging;
 using Orleans.Streams;
 using System;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains
+namespace Elysium.Domain
 {
     [ImplicitStreamSubscription(GrainConstants.DispatchRemoteActivityStream)]
     public class DispatchRemoteActivityWorkerGrain(

@@ -12,9 +12,9 @@ using System.Threading.Tasks;
 using Haondt.Persistence.Services;
 using Elysium.Core.Models;
 using Elysium.Hosting.Services;
-using Elysium.Grains.Exceptions;
+using Elysium.Domain.Exceptions;
 
-namespace Elysium.Grains.Services
+namespace Elysium.Domain.Services
 {
     public class DocumentService : IDocumentService
 
@@ -143,6 +143,7 @@ namespace Elysium.Grains.Services
         public async Task<Result<JToken, ElysiumWebReason>> GetDocumentAsync(IHttpMessageAuthor requester, RemoteIri iri)
         {
             // todo: permission checks on the result, since it may be cached from a different requester
+            // also todo, limiting how long the remote document cache lasts for
             var document = await _documentFacade.GetAsync(iri.Iri);
             if (document.IsSuccessful)
             {

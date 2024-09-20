@@ -1,3 +1,26 @@
-﻿@model Elysium.Components.Components.FeedModel
+﻿@using Haondt.Web.Core.Extensions
+@model Elysium.Components.Components.FeedModel
 
-<div>this is the feed!</div>
+<div>
+    <style>
+        @@scope {
+            article.elysium-media {
+                box-shadow: 0 2px var(--shadow-color, var(--bulma-white));
+            }
+
+            .depth-0 { --shadow-color: var(--bulma-primary); }
+            .depth-1 { --shadow-color: var(--bulma-link); }
+            .depth-2 { --shadow-color: var(--bulma-info); }
+            .depth-3 { --shadow-color: var(--bulma-success); }
+            .depth-4 { --shadow-color: var(--bulma-warning); }
+            .depth-5 { --shadow-color: var(--bulma-danger); }
+        }
+    </style>
+
+<div class="is-flex is-flex-direction-column" style="gap:14px;">
+@foreach(var media in Model.Media)
+{
+    @await Html.PartialAsync(media);
+}
+</div>
+</div>

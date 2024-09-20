@@ -65,7 +65,7 @@ namespace Elysium.Client.Services
                 proxySessionService.SessionService = new StaticSessionService(identity);
 
             string author = details.SenderPreferredUsername.HasValue
-                ? elysiumService.GetFediverseUsernameAsync(details.SenderPreferredUsername.Value, details.Sender.Host)
+                ? elysiumService.GetFediverseUsername(details.SenderPreferredUsername.Value, details.Sender.Host)
                 : details.Sender.ToString();
 
             var updaterComponent = await componentFactory.GetPlainComponent(new TemporaryMessageComponentUpdateModel

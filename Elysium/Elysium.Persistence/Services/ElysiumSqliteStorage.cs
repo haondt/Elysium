@@ -49,10 +49,18 @@ namespace Elysium.Persistence.Services
             return settings;
         }
 
-        private void GetExistingTables()
+        private async Task EnableWalModeAsync(SqliteConnection connection)
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = "PRAGMA journal_mode=WAL;";
+            await command.ExecuteNonQueryAsync();
+        }
+
+        private async Task GetExistingTables()
         {
             using var connection = new SqliteConnection(_connectionString);
-            connection.Open();
+            await connection.OpenAsync();
+            await EnableWalModeAsync(connection);
             var query = "SELECT name FROM sqlite_master where type='table'";
             using var command = new SqliteCommand(query, connection);
             using var reader = command.ExecuteReader();
@@ -101,6 +109,7 @@ namespace Elysium.Persistence.Services
             var keyString = _storageKeyConverter.Serialize(key);
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
+            await EnableWalModeAsync(connection);
             var table = await GetOrCreateTableAsync(key.Type, connection);
             var query = $"SELECT Value FROM {table} WHERE Key = @key";
             using var command = new SqliteCommand(query, connection);
@@ -121,6 +130,7 @@ namespace Elysium.Persistence.Services
             var keyString = _storageKeyConverter.Serialize(key);
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
+            await EnableWalModeAsync(connection);
             var table = await GetOrCreateTableAsync(key.Type, connection);
             string query = $"SELECT COUNT(1) FROM {table} WHERE Key = @key";
             using var command = new SqliteCommand(query, connection);
@@ -141,6 +151,7 @@ namespace Elysium.Persistence.Services
             var keyString = _storageKeyConverter.Serialize(key);
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
+            await EnableWalModeAsync(connection);
             var table = await GetOrCreateTableAsync(key.Type, connection);
             string query = $"DELETE FROM {table} WHERE Key = @key";
             using var command = new SqliteCommand(query, connection);
@@ -153,6 +164,7 @@ namespace Elysium.Persistence.Services
         {
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
+            await EnableWalModeAsync(connection);
             var table = await GetOrCreateTableAsync(typeof(UserIdentity), connection);
             var query = $" SELECT Value FROM {table} WHERE NormalizedUsername = @normalizedUsername";
             using var command = new SqliteCommand(query, connection);
@@ -180,6 +192,7 @@ namespace Elysium.Persistence.Services
         {
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
+            await EnableWalModeAsync(connection);
             using var transaction = await connection.BeginTransactionAsync();
 
             var commands = new Dictionary<Type, (SqliteCommand Command, Action<StorageKey, object> SetParameters)>(); ;
@@ -265,6 +278,7 @@ namespace Elysium.Persistence.Services
         {
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
+            await EnableWalModeAsync(connection);
 
 
             var resultTasks = keys.Select(async key =>

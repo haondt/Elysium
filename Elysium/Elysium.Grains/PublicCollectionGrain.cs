@@ -1,4 +1,8 @@
-﻿using Elysium.GrainInterfaces;
+﻿using Elysium.ActivityPub.Models;
+using Elysium.Core.Converters;
+using Elysium.Core.Models;
+using Elysium.Domain;
+using Elysium.GrainInterfaces;
 using Elysium.Persistence.Exceptions;
 using Elysium.Persistence.Services;
 using Haondt.Identity.StorageKey;
@@ -34,6 +38,7 @@ namespace Elysium.Grains
             _baseKey = PublicCollectionState.GetStorageKey(this.GetPrimaryKey());
         }
 
+
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
             var result = await _elysiumStorage.Get(_baseKey);
@@ -45,47 +50,60 @@ namespace Elysium.Grains
         }
 
         // todo: maybe implement a buffer here to not bottleneck the ingestion stream
-        public async Task IngestReferenceAsync(string iri)
+        public async Task IngestReferenceAsync(ActivityType activityType, Iri iri)
         {
             var reference = new CollectionDocumentReference
             {
-                Iri = iri,
-                Previous = _state.Last
+                Iri = iri.ToString(),
             };
             var stateCopy = new PublicCollectionState
             {
-                Last = _state.Last + 1
+                Lasts = _state.Lasts.ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
             };
+            if (!stateCopy.Lasts.ContainsKey(activityType))
+                stateCopy.Lasts[activityType] = 0;
+            else
+                stateCopy.Lasts[activityType]++;
 
             await _elysiumStorage.SetMany(
             [
-                (_baseKey.Extend<CollectionDocumentReference>($"{stateCopy.Last}"), reference),
+                (_baseKey.Extend<CollectionDocumentReference>(LongConverter.EncodeLong(stateCopy.Lasts[activityType])), reference),
                 (_baseKey, stateCopy)
             ]);
 
-            _cache.Set(stateCopy.Last, reference, _cacheDuration);
+            _cache.Set((activityType, stateCopy.Lasts[activityType]), reference, _cacheDuration);
             _state = stateCopy;
         }
 
         /// <summary>
-        /// Get references from - to. This returns items in the most recent order, so
-        /// items from 5 - 15 would 5, 6, 7, ..., 15, where 5 is the newest entry. 0-indexed.
+        /// Get <paramref name="count"/> references from before <paramref name="before"/>
+        /// e.g. (before: 16, count: 5) -> [15, 14, 13, 12, 11]
         /// </summary>
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<string>> GetReferencesAsync(int from, int to)
+        public async Task<CollectionResult> GetReferencesAsync(ActivityType activityType, long before, int count)
         {
-            var start = _state.Last;
-            if (start == -1)
-                return [];
-            var end = to >= _state.Last ? 0 : _state.Last - to;
+            if (!_state.Lasts.TryGetValue(activityType, out var last))
+                return new CollectionResult { References = [], Last = -1 };
+            if (before <= 0)
+                return new CollectionResult { References = [], Last = -1 };
+            if (count <= 0)
+                return new CollectionResult { References = [], Last = -1 };
 
-            List<string?> found = new((end - start) + 1);
-            List<int> missing = [];
+            var start = before - 1;
+            if (start > last)
+                start = last;
 
-            for(int i = start; i <= end; i++)
-                if (_cache.TryGetValue(i, out var foundObject) && foundObject is CollectionDocumentReference reference)
+            var end = start - (count - 1);
+            if (end < 0)
+                end = 0;
+
+            List<string?> found = new((int)(start - end));
+            List<long> missing = [];
+
+            for (long i = start; i >= end; i--)
+                if (_cache.TryGetValue((activityType, i), out var foundObject) && foundObject is CollectionDocumentReference reference)
                     found.Add(reference.Iri);
                 else
                 {
@@ -94,13 +112,16 @@ namespace Elysium.Grains
                 }
 
             var missingLookup = await _elysiumStorage
-                .GetMany(missing.Select(i => (StorageKey)_baseKey.Extend<CollectionDocumentReference>($"{i}")).ToList());
+                .GetMany(missing.Select(i => (StorageKey)_baseKey.Extend<CollectionDocumentReference>(LongConverter.EncodeLong(i))).ToList());
 
-            foreach(var (i, lookup) in missing.Zip(missingLookup))
+            foreach (var (i, lookup) in missing.Zip(missingLookup))
                 if (lookup.IsSuccessful && lookup.Value.Value is CollectionDocumentReference reference)
-                    found[i] = reference.Iri;
+                    found[(int)(start - i)] = reference.Iri;
 
-            return found.Where(s => !string.IsNullOrEmpty(s)).Cast<string>();
+            var references = found.Where(r => !string.IsNullOrEmpty(r))
+                .Cast<string>()
+                .Select(Iri.FromUnencodedString).ToList();
+            return new CollectionResult { References = references, Last = last };
         }
 
         /// <summary>
@@ -108,13 +129,13 @@ namespace Elysium.Grains
         /// </summary>
         /// <param name="count"></param>
         /// <returns></returns>
-        public Task<IEnumerable<string>> GetReferencesAsync(int count) => GetReferencesAsync(0, 0 + count);
-
+        public Task<CollectionResult> GetReferencesAsync(ActivityType activityType, int count) => 
+            GetReferencesAsync(activityType, _state.Lasts.TryGetValue(activityType, out var last) ? last + 1 : 0, count);
     }
 
     public class PublicCollectionState
     {
         public static StorageKey<PublicCollectionState> GetStorageKey(Guid id) => StorageKey<PublicCollectionState>.Create(id.ToString());
-        public int Last { get; set; } = -1;
+        public Dictionary<ActivityType, long> Lasts = []; 
     }
 }

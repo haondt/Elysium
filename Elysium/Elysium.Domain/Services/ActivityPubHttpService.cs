@@ -2,7 +2,7 @@
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Reasons;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Grains.Exceptions;
+using Elysium.Domain.Exceptions;
 using Elysium.Hosting.Services;
 using Haondt.Core.Models;
 using Microsoft.Extensions.Options;
@@ -16,7 +16,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains.Services
+namespace Elysium.Domain.Services
 {
     public class ActivityPubHttpService(
         IOptions<ActivityPubHttpSettings> settings,

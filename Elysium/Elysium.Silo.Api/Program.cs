@@ -1,11 +1,12 @@
 using Elysium.GrainInterfaces;
-using Elysium.Grains.Extensions;
+using Elysium.Domain.Extensions;
 using Elysium.Silo.Extensions;
 using Orleans.Configuration;
 using Elysium.Hosting.Extensions;
 using Elysium.Persistence.Extensions;
 using Elysium.Cryptography.Extensions;
 using Elysium.Core.Extensions;
+using Elysium.Domain.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,7 @@ builder.Host
             .AddElysiumStorageKeyConverter()
             .AddElysiumSiloServices()
             .AddElysiumGrainServices(context.Configuration)
+            .AddElysiumDomainServices(context.Configuration)
             .AddElysiumCryptoServices()
             .AddElysiumHostingServices(context.Configuration)
             .AddElysiumPersistenceServices(context.Configuration);

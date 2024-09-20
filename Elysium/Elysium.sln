@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.ActivityPub.Api", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Cryptography", "Elysium.Cryptography\Elysium.Cryptography.csproj", "{A64CCB3B-639E-41CD-AAA6-9CADDD9FA2D0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Domain", "Elysium.Domain\Elysium.Domain.csproj", "{ADCD9E39-FB92-471B-ADEB-5FBCDA632EEF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -95,6 +97,10 @@ Global
 		{A64CCB3B-639E-41CD-AAA6-9CADDD9FA2D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A64CCB3B-639E-41CD-AAA6-9CADDD9FA2D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A64CCB3B-639E-41CD-AAA6-9CADDD9FA2D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADCD9E39-FB92-471B-ADEB-5FBCDA632EEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADCD9E39-FB92-471B-ADEB-5FBCDA632EEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADCD9E39-FB92-471B-ADEB-5FBCDA632EEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADCD9E39-FB92-471B-ADEB-5FBCDA632EEF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

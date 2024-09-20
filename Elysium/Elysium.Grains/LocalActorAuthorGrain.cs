@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains
+namespace Elysium.Domain
 {
     [StatelessWorker, Reentrant]
     public class LocalActorAuthorGrain : Grain, ILocalActorAuthorGrain

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains.Exceptions
+namespace Elysium.Domain.Exceptions
 {
     public class OrleansStorageException : Exception
     {

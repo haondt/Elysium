@@ -1,8 +1,8 @@
 ﻿using Elysium.Core.Models;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Grains;
-using Elysium.Grains.Persistence;
-using Elysium.Grains.Services;
+using Elysium.Domain;
+using Elysium.Domain.Persistence;
+using Elysium.Domain.Services;
 using Elysium.Hosting.Services;
 using Elysium.Server.Services;
 using Elysium.Silo.Api.Services;
@@ -37,7 +37,6 @@ namespace Elysium.Silo.Extensions
             services.AddSingleton(typeof(IStorageKeyGrainFactory<>), typeof(StorageKeyGrainFactory<>));
             services.AddSingleton<IGrainFactory<LocalIri>, LocalIriGrainFactory>();
             services.AddSingleton<IGrainFactory<RemoteIri>, RemoteIriGrainFactory>();
-            services.AddSingleton<IGrainFactory<Iri>, IriGrainFactory>();
             return services;
         }
 

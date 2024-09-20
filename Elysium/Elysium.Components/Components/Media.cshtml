@@ -7,19 +7,19 @@
   <div class="media-content">
     <div>
         <div class="is-flex is-flex-direction-column">
-            <div class="is-flex is-flex-direction-row is-align-items-center" style="gap:10px;">
+            <div class="is-flex is-flex-direction-row is-align-items-baseline" style="gap:10px;">
                 <strong>@Model.AuthorName</strong>
                 <a><small>@@@Model.AuthorFediverseHandle</small></a>
                 <small>@Model.Timestamp</small>
             </div>
-            @if (!string.IsNullOrEmpty(Model.SanitizedTitle))
+            @if (!string.IsNullOrEmpty(Model.Title))
             {
-                <span class="is-size-4">@Model.SanitizedTitle</span>
+                <span class="is-size-4">@Model.Title</span>
             }
-            @if (!string.IsNullOrEmpty(Model.SanitizedText))
+            @if (!string.IsNullOrEmpty(Model.Text))
             {
                 <div class="is-flex is-flex-direction-column" style="gap:0.4rem;">
-                    <p>Model.Text</p>
+                    <p>@Model.Text</p>
                 </div>
             }
         </div>

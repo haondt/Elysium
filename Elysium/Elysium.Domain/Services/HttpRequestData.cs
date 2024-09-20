@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains.Services
+namespace Elysium.Domain.Services
 {
     public class HttpRequestData
     {

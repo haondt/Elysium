@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains.Services
+namespace Elysium.Domain.Services
 {
     /// <summary>
     /// This factory is just to break the dependency cycle between <see cref="DocumentService"/>

@@ -14,6 +14,8 @@ using Elysium.Components.Services;
 using Elysium.Client.Services;
 using Elysium.Exceptions;
 using Elysium.Core.Models;
+using Elysium.GrainInterfaces;
+using Elysium.Domain.Services;
 
 namespace Elysium.Extensions
 {
@@ -115,7 +117,7 @@ namespace Elysium.Extensions
             });
             services.AddScoped<IComponentDescriptor>(sp => new NeedsAuthenticationComponentDescriptor<HomePageModel>(async (cf) =>
             {
-                var feed = await cf.GetComponent(new FeedModel());
+                var feed = await cf.GetComponent<FeedModel>();
                 var shadeSelector = await cf.GetComponent<ShadeSelectorModel>();
                 return new HomePageModel
                 {
@@ -126,9 +128,25 @@ namespace Elysium.Extensions
             {
                 ViewPath = "~/Components/HomePage.cshtml",
             });
-            services.AddScoped<IComponentDescriptor>(_ => new ComponentDescriptor<FeedModel>()
+            services.AddScoped<IComponentDescriptor>(sp => new ComponentDescriptor<FeedModel>(async cf =>
+            {
+                var elysiumService = sp.GetRequiredService<IElysiumService>();
+                var creations = await elysiumService.GetPublicCreations();
+                var mediaModels = creations.Creations.ToList();
+                var mediaComponents = await Task.WhenAll(creations.Creations.Select(c => cf.GetComponent(c)));
+
+                return new FeedModel
+                {
+                    Media = mediaComponents.ToList()
+                };
+            })
             {
                 ViewPath = "~/Components/Feed.cshtml",
+            });
+
+            services.AddScoped<IComponentDescriptor>(sp => new ComponentDescriptor<MediaModel>
+            {
+                ViewPath = $"~/Components/Media.cshtml",
             });
             services.AddScoped<IComponentDescriptor>(_ => new ComponentDescriptor<ErrorModel>((componentFactory, requestData) =>
             {

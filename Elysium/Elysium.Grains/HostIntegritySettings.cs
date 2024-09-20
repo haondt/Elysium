@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains
+namespace Elysium.Domain
 {
     public class HostIntegritySettings
     { 

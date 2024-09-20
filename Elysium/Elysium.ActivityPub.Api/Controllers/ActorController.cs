@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Elysium.Core.Models;
-using Elysium.Grains.Services;
+using Elysium.Domain.Services;
 using Elysium.GrainInterfaces.Services;
 
 namespace Elysium.ActivityPub.Api.Controllers

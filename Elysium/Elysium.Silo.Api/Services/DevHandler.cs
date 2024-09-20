@@ -4,7 +4,7 @@ using Elysium.Core.Models;
 using Elysium.Cryptography.Services;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Grains.Services;
+using Elysium.Domain.Services;
 using Elysium.Hosting.Services;
 using Newtonsoft.Json.Linq;
 

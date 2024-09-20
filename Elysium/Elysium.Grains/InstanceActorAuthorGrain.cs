@@ -4,7 +4,7 @@ using Elysium.Core.Models;
 using Elysium.Cryptography.Services;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Grains.Services;
+using Elysium.Domain.Services;
 using Elysium.Hosting.Services;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
@@ -15,7 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains
+namespace Elysium.Domain
 {
     [StatelessWorker]
     class InstanceActorAuthorGrain(

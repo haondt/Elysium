@@ -1,4 +1,4 @@
-﻿namespace Elysium.Grains.Persistence;
+﻿namespace Elysium.Domain.Persistence;
 /// <summary>
 /// yonked from https://github.com/dotnet/orleans/blob/main/src/Azure/Shared/Cosmos/CosmosIdSanitizer.cs
 /// </summary>

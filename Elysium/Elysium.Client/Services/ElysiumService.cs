@@ -1,11 +1,17 @@
-﻿using Elysium.ActivityPub.Models;
+﻿using Elysium.ActivityPub.Helpers;
+using Elysium.ActivityPub.Models;
+using Elysium.Components.Components;
+using Elysium.Core.Converters;
 using Elysium.Core.Models;
 using Elysium.Cryptography.Services;
+using Elysium.Domain.Services;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Hosting.Services;
 using Haondt.Core.Models;
 using Microsoft.AspNetCore.Identity;
+using Newtonsoft.Json;
+using Elysium.Core.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +25,13 @@ namespace Elysium.Client.Services
         IHostingService hostingService,
         IUserCryptoService cryptoService,
         IGrainFactory<LocalIri> grainFactory,
+        IGrainFactory baseGrainFactory,
+        IDocumentService documentService,
         UserManager<UserIdentity> userManager
         ) : IElysiumService
     {
+        IPublicCollectionGrain _publicCollectionGrain = baseGrainFactory.GetGrain<IPublicCollectionGrain>(Guid.Empty);
+        IInstanceActorAuthorGrain _instanceAuthor = baseGrainFactory.GetGrain<IInstanceActorAuthorGrain>(Guid.Empty);
 
         public async Task<Result<UserIdentity, List<string>>> RegisterUserAsync(string localizedUsername, string password)
         {
@@ -78,7 +88,7 @@ namespace Elysium.Client.Services
             return new((await GetUriForRemoteUsernameAsync(fediverseUsername)).Iri);
         }
 
-        public string GetFediverseUsernameAsync(string username, string host)
+        public string GetFediverseUsername(string username, string host)
         {
             return $"{username}@{host}";
         }
@@ -115,6 +125,67 @@ namespace Elysium.Client.Services
             //    throw new InvalidOperationException("unable to parse username as a local user");
             //return match.Groups[1].Value;
             throw new NotImplementedException();
+        }
+
+        public async Task<(IEnumerable<MediaModel> Creations, string Last )> GetPublicCreations(string? before = null)
+        {
+            // todo: appsettings
+            var count = 50;
+            var publicActivitiesTask = !string.IsNullOrEmpty(before)
+                ? _publicCollectionGrain.GetReferencesAsync(ActivityType.Create, LongConverter.DecodeLong(before), count)
+                : _publicCollectionGrain.GetReferencesAsync(ActivityType.Create, count);
+
+            var random = new Random();
+            var result = await publicActivitiesTask;
+            var documentTasks = result.References.Select(async r =>
+            {
+                var document = await documentService.GetExpandedDocumentAsync(_instanceAuthor, r);
+                if (!document.IsSuccessful)
+                    return new Optional<MediaModel>();
+
+                var objectObject = ActivityPubJsonNavigator.GetObject(document.Value);
+                var objectId = ActivityPubJsonNavigator.GetId(objectObject);
+                var objectDocument = await documentService.GetExpandedDocumentAsync(_instanceAuthor, Iri.FromUnencodedString(objectId));
+                if(!objectDocument.IsSuccessful)
+                    return new Optional<MediaModel>();
+
+                var model = new MediaModel
+                {
+                    Depth = random.Next(0, 6)
+                };
+
+                var authorIri = Iri.FromUnencodedString(ActivityPubJsonNavigator.GetId(objectDocument.Value, JsonLdTypes.ATTRIBUTED_TO));
+                var authorDocument = await documentService.GetExpandedDocumentAsync(_instanceAuthor, authorIri);
+
+                if (authorDocument.IsSuccessful)
+                {
+                    var preferredUsername = ActivityPubJsonNavigator.TryGetValue(authorDocument.Value, JsonLdTypes.PREFERRED_USERNAME);
+                    if (preferredUsername.HasValue)
+                        model.AuthorFediverseHandle = GetFediverseUsername(preferredUsername.Value, authorIri.Host);
+
+                    var name = ActivityPubJsonNavigator.TryGetValue(authorDocument.Value, JsonLdTypes.NAME);
+                    if (name.HasValue)
+                        model.AuthorName = name.Value;
+
+                }
+                model.AuthorFediverseHandle ??= authorIri.ToString();
+
+                var timestamp = ActivityPubJsonNavigator.TryGetPublished(objectDocument.Value);
+                if (timestamp.HasValue)
+                    model.Timestamp = timestamp.Value.ToRelativeTime();
+
+                var title = ActivityPubJsonNavigator.TryGetValue(objectDocument.Value, JsonLdTypes.NAME);
+                if (title.HasValue)
+                    model.Title = title.Value;
+
+                return new(model);
+            });
+
+            var documents = (await Task.WhenAll(documentTasks))
+                .Where(d => d.HasValue)
+                .Select(d => d.Value);
+
+            return (documents, LongConverter.EncodeLong(result.Last));
         }
     }
 }

@@ -1,11 +1,11 @@
 ﻿using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
-using Elysium.Grains.Exceptions;
-using Elysium.Grains.Services;
+using Elysium.Domain.Exceptions;
+using Elysium.Domain.Services;
 using Haondt.Identity.StorageKey;
 using Haondt.Persistence.Services;
 using Microsoft.Extensions.Options;
-using Elysium.Grains.Extensions;
+using Elysium.Domain.Extensions;
 using Orleans;
 using Orleans.Runtime;
 using System;
@@ -27,7 +27,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Elysium.Cryptography.Services;
 using Elysium.Persistence.Services;
 
-namespace Elysium.Grains
+namespace Elysium.Domain
 {
     // for when we get to the actors url body
     // need to add the public key
@@ -137,6 +137,7 @@ namespace Elysium.Grains
                 .Followers(iriCollection.Followers.Iri)
                 .Following(iriCollection.Following.Iri)
                 .PreferredUsername(localizedUsername)
+                .Name(localizedUsername)
                 .PublicKeyPem(iriCollection.PublicKey.Iri, _id.Iri, publicKeyPem)
                 .Build();
 
@@ -191,12 +192,13 @@ namespace Elysium.Grains
         //}
 
 
-        public async Task IngestActivityAsync(Iri sender, JToken activity)
+        public async Task IngestActivityAsync(Iri sender, ActivityType activityType, JToken activity)
         {
             // todo: save the activity (id) in my inbox grain, if it has an id
             await _incomingStream.OnNextAsync(new LocalActorIncomingProcessingData
             {
                 Activity = activity,
+                ActivityType = activityType,
                 Sender = sender
             });
         }
@@ -328,6 +330,7 @@ namespace Elysium.Grains
                 await _outgoingStream.OnNextAsync(new LocalActorOutgoingProcessingData
                 {
                     Activity = outgoingCompactedActivity,
+                    ActivityType = type,
                     Recipients = recepients.ToList(),
                     ActivityIri = activityIri
 

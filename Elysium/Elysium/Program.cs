@@ -12,6 +12,7 @@ using Orleans.Configuration;
 using Elysium.Client.Hubs;
 using Elysium.Components.Extensions;
 using Elysium.Core.Extensions;
+using Elysium.Domain.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,7 @@ builder.Services
     .AddElysiumStorageKeyConverter()
     .AddElysiumAssetSources()
     .AddElysiumClientServices()
+    .AddElysiumDomainServices(builder.Configuration)
     .AddElysiumHostingServices(builder.Configuration)
     .AddElysiumPersistenceServices(builder.Configuration)
     .AddElysiumAuthenticationServices(builder.Configuration);

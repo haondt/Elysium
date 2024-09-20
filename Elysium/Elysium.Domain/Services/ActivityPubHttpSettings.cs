@@ -1,4 +1,4 @@
-﻿namespace Elysium.Grains.Services
+﻿namespace Elysium.Domain.Services
 {
     public class ActivityPubHttpSettings
     {

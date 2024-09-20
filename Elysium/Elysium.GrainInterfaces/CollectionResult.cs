@@ -7,8 +7,12 @@ using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces
 {
-    public class CollectionDocumentReference
+    [GenerateSerializer]
+    public class CollectionResult
     {
-        public required string  Iri { get; set; }
+        [Id(0)]
+        public required List<Iri> References { get; set; }
+        [Id(1)]
+        public long Last { get; set; }
     }
 }

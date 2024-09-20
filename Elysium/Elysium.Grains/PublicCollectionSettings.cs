@@ -1,5 +1,5 @@
 ﻿
-namespace Elysium.Grains
+namespace Elysium.Domain
 {
     public class PublicCollectionSettings
     {

@@ -1,6 +1,6 @@
 ﻿using Elysium.GrainInterfaces;
-using Elysium.Grains.Exceptions;
-using Elysium.Grains.Services;
+using Elysium.Domain.Exceptions;
+using Elysium.Domain.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orleans.Concurrency;
@@ -15,7 +15,7 @@ using System.Text.Json;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains
+namespace Elysium.Domain
 {
     [KeepAlive]
     public class DispatchRemoteActivityGrain(IOptions<DispatchActivityGrainSettings> options) : Grain, IDispatchRemoteActivityGrain

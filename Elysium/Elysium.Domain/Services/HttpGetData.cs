@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains
+namespace Elysium.Domain.Services
 {
-    public class RemoteDocumentSettings
+    public class HttpGetData : HttpRequestData
     {
-        public int LifetimeInHours { get; set; } = 24;
     }
 }

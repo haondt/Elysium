@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains
+namespace Elysium.Domain
 {
     [GenerateSerializer, Immutable]
     public class LocalActorOutgoingProcessingData
@@ -21,5 +21,7 @@ namespace Elysium.Grains
         public required JObject Activity { get; set; }
         [Id(2)]
         public required LocalIri ActivityIri { get; set; }
+        [Id(3)]
+        public required ActivityType ActivityType { get; set; }
     }
 }

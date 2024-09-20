@@ -65,6 +65,7 @@ namespace Elysium.ActivityPub.Helpers
         public ActivityPubJsonBuilder Followers(Iri iri) => SetKeyId(JsonLdTypes.FOLLOWERS, iri.ToString());
         public ActivityPubJsonBuilder Following(Iri iri) => SetKeyId(JsonLdTypes.FOLLOWING, iri.ToString());
         public ActivityPubJsonBuilder PreferredUsername(string username) => SetKeyValue(JsonLdTypes.PREFERRED_USERNAME, username);
+        public ActivityPubJsonBuilder Name(string name) => SetKeyValue(JsonLdTypes.NAME, name);
         public ActivityPubJsonBuilder AttributedTo(Iri iri) => SetKeyId(JsonLdTypes.ATTRIBUTED_TO, iri.ToString());
         public ActivityPubJsonBuilder Content(string content) => SetKeyValue(JsonLdTypes.CONTENT, content);
         public ActivityPubJsonBuilder Cc(Iri iri) => SetKeyId(JsonLdTypes.CC, iri.ToString());

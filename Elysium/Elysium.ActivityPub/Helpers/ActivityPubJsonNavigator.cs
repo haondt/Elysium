@@ -36,6 +36,20 @@ namespace Elysium.ActivityPub.Helpers
                 .As<JObject>()
                 ["@value"]!;
         }
+        public static Optional<string> TryGetValue(JArray expanded, string key)
+        {
+            if (expanded.Count == 1
+                && expanded.Single() is JObject jo
+                && jo.TryGetValue(key, out var value)
+                && value is JArray ja
+                && ja.Count == 1
+                && ja.Single() is JObject jo2
+                && jo2.TryGetValue("@value", out var value2)
+                && value2 is JValue jv
+                && jv.Type == JTokenType.String)
+                return new(jv.ToString());
+            return new();
+        }
 
         public static bool IsActor(JArray actor)
         {
@@ -53,10 +67,24 @@ namespace Elysium.ActivityPub.Helpers
         /// <remarks><see href="https://www.w3.org/TR/activitypub/#obj-id"/></remarks>
         /// <param name="expanded"></param>
         /// <returns></returns>
-        public static string GetId(JObject target)
+        public static string GetId(JArray expandedTarget)
         {
-            //return target.Get<JValue>("id").AsString();
-            throw new NotImplementedException();
+            return expandedTarget
+                .Single()
+                .As<JObject>()
+                .Get<JValue>("@id")
+                .AsString();
+        }
+        public static string GetId(JArray expandedTarget, string key)
+        {
+            return expandedTarget
+                .Single()
+                .As<JObject>()
+                .Get<JArray>(key)
+                .Single()
+                .As<JObject>()
+                .Get<JValue>("@id")
+                .AsString();
         }
 
         /// <summary>
@@ -77,17 +105,7 @@ namespace Elysium.ActivityPub.Helpers
 
         public static Optional<string> TryGetPreferredUsername(JArray expanded)
         {
-            if (expanded.Count == 1
-                && expanded[0] is JObject jo
-                && jo.TryGetValue(JsonLdTypes.PREFERRED_USERNAME, out var jt)
-                && jt is JArray ja
-                && ja.Count == 1
-                && ja[0] is JObject jo1
-                && jo1.TryGetValue("@value", out var jt1)
-                && jt1 is JValue jv
-                && jv.Type == JTokenType.String)
-                return new(jv.ToString());
-            return new();
+            return TryGetValue(expanded, JsonLdTypes.PREFERRED_USERNAME);
         }
 
         /// <summary>
@@ -102,6 +120,30 @@ namespace Elysium.ActivityPub.Helpers
                 .As<JObject>()
                 .Get<JArray>(JsonLdTypes.OBJECT)
                 .As<JArray>();
+        }
+
+        public static Optional<DateTime> TryGetPublished(JArray expanded)
+        {
+            if (expanded.Count != 1
+                || expanded.Single() is not JObject jo
+                || !jo.TryGetValue(JsonLdTypes.PUBLISHED, out var value)
+                || value is not JArray ja
+                || ja.Count != 1
+                || ja.Single() is not JObject publishedObj)
+                return new();
+            if (!publishedObj.TryGetValue("@type", out var publishedTypeToken)
+                || publishedTypeToken is not JValue publishedTypeValue
+                || publishedTypeValue.Type != JTokenType.String
+                || publishedTypeValue.ToString() != JsonLdTypes.DATETIME)
+                return new();
+
+            if (!publishedObj.TryGetValue("@value", out var publishedValueToken)
+                || publishedValueToken is not JValue publishedValueValue)
+                return new();
+
+            if (publishedTypeToken.Type is JTokenType.Date)
+                return new((DateTime)publishedTypeToken);
+            return new(DateTime.Parse(publishedValueValue.ToString()));
         }
 
 

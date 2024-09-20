@@ -5,7 +5,7 @@ using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Client;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Grains.Services;
+using Elysium.Domain.Services;
 using Elysium.Hosting.Services;
 using Haondt.Core.Models;
 using Microsoft.Extensions.Logging;
@@ -17,7 +17,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Grains
+namespace Elysium.Domain
 {
     [ImplicitStreamSubscription(GrainConstants.LocalActorIncomingProcessingStream)]
     public class LocalActorIncomingProcessingGrain : Grain, ILocalActorIncomingProcessingGrain
