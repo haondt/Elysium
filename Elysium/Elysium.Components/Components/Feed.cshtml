@@ -4,6 +4,17 @@
 <div>
     <style>
         @@scope {
+            .elysium-media-container {
+                padding-bottom: 2px;
+            }
+
+            .elysium-media-container:hover {
+                /*outline: 1px solid var(--bulma-border-hover);*/
+                --bulma-button-border-l-delta: var(--bulma-button-hover-border-l-delta);
+                --brightness: calc(100% + var(--bulma-hover-background-l-delta));
+                filter: brightness(var(--brightness));
+            }
+
             article.elysium-media {
                 box-shadow: 0 2px var(--shadow-color, var(--bulma-white));
             }
