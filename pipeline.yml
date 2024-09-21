@@ -1,0 +1,31 @@
+tasks:
+  - type: docker-build
+    image: elysium
+    platforms:
+      - linux/arm64
+    auto:
+      - source: push
+        has_tag: true
+        tag_source: tag
+      - source: push
+        has_tag: true
+        tag_source: latest
+    context: Elysium
+    file: Elysium/Elysium/Dockerfile
+    registries:
+      - gitlab
+  - type: docker-build
+    image: elysium-silo
+    platforms:
+      - linux/arm64
+    auto:
+      - source: push
+        has_tag: true
+        tag_source: tag
+      - source: push
+        has_tag: true
+        tag_source: latest
+    context: Elysium
+    file: Elysium/Elysium.Silo.Api/Dockerfile
+    registries:
+      - gitlab
