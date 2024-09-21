@@ -1,8 +1,6 @@
 tasks:
   - type: docker-build
     image: elysium
-    platforms:
-      - linux/arm64
     auto:
       - source: push
         has_tag: true
@@ -16,8 +14,6 @@ tasks:
       - gitlab
   - type: docker-build
     image: elysium-silo
-    platforms:
-      - linux/arm64
     auto:
       - source: push
         has_tag: true

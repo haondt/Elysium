@@ -12,6 +12,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Elysium.Silo.Api/Elysium.Silo.Api.csproj", "Elysium.Silo.Api/"]
+COPY ["nuget.config", "."]
 RUN dotnet restore "./Elysium.Silo.Api/Elysium.Silo.Api.csproj"
 COPY . .
 WORKDIR "/src/Elysium.Silo.Api"
