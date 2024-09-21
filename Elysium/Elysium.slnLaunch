@@ -1,0 +1,16 @@
+[
+  {
+    "Name": "Elysium",
+    "Projects": [
+      {
+        "Path": "Elysium\\Elysium.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      },
+      {
+        "Path": "Elysium.Silo.Api\\Elysium.Silo.Api.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
