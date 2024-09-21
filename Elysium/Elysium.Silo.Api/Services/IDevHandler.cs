@@ -1,8 +1,11 @@
 ﻿
+using Elysium.Core.Models;
+using Newtonsoft.Json.Linq;
+
 namespace Elysium.Silo.Api.Services
 {
     public interface IDevHandler
     {
-        Task CreateForLocal(DevLocalActivityPayload payload);
+        Task<(LocalIri ActivityIri, JObject Activity)> CreateForLocal(DevLocalActivityPayload payload);
     }
 }

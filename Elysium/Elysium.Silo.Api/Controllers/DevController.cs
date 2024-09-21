@@ -18,8 +18,8 @@ namespace Elysium.Silo.Api.Controllers
         [Consumes("application/ld+json")]
         public async Task<IActionResult> Post([FromBody] DevLocalActivityPayload payload)
         {
-            await handler.CreateForLocal(payload);
-            return Ok();
+            var (_, activity) = await handler.CreateForLocal(payload);
+            return Ok(activity);
         }
     }
 }

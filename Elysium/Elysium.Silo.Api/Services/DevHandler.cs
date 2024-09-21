@@ -7,6 +7,7 @@ using Elysium.GrainInterfaces.Services;
 using Elysium.Domain.Services;
 using Elysium.Hosting.Services;
 using Newtonsoft.Json.Linq;
+using Haondt.Core.Models;
 
 namespace Elysium.Silo.Api.Services
 {
@@ -18,7 +19,7 @@ namespace Elysium.Silo.Api.Services
         IUserCryptoService cryptoService) : IDevHandler
     {
         private static Func<JObject> JObjectFactory = () => new();
-        public async Task CreateForLocal(DevLocalActivityPayload payload)
+        public async Task<(LocalIri ActivityIri, JObject Activity)> CreateForLocal(DevLocalActivityPayload payload)
         {
             if ((payload.SubjectObject == null) == string.IsNullOrEmpty(payload.SubjectLink))
                 throw new ArgumentException("only one of SubjectObject or SubjectLink must be supplied");
@@ -48,7 +49,7 @@ namespace Elysium.Silo.Api.Services
             var expanded = await jsonLdService.ExpandAsync(instanceActor, payload.SubjectObject!);
             expanded.SetDefault(0, JObjectFactory, JObjectFactory)
                 [JsonLdTypes.ATTRIBUTED_TO] = new JArray { new JObject { { "@id", actorIri.ToString() } } };
-            await actorGrain.PublishActivity(ActivityType.Create, expanded);
+            return await actorGrain.PublishActivity(ActivityType.Create, expanded);
         }
     }
 }

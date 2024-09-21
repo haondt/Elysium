@@ -55,7 +55,7 @@ namespace Elysium.Services
 
                 try
                 {
-                    var (activityUri, objectUri) = await activityPubService.PublishActivityAsync(userKey.Value, ActivityType.Create, activityObject);
+                    var (activityIri, activity) = await activityPubService.PublishActivityAsync(userKey.Value, ActivityType.Create, activityObject);
                 }
                 catch
                 {

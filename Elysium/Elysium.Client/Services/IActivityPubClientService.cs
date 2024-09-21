@@ -21,7 +21,7 @@ namespace Elysium.Client.Services
 
         // iri = id of the object
         // existing id will be ignored
-        Task<(LocalIri ActivityUri, LocalIri ObjectUri)> PublishActivityAsync(StorageKey<UserIdentity> author, ActivityType type, JArray @object);
+        Task<(LocalIri ActivityUri, JObject Activity)> PublishActivityAsync(StorageKey<UserIdentity> author, ActivityType type, JArray expandedObject);
         //Task<Result<LocalUri>> PublishActivityAsync(StorageKey<UserIdentity> author, ActivityType type, RemoteUri @object);
 
         // object must have an id

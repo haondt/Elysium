@@ -206,7 +206,7 @@ namespace Elysium.Domain
         // this iri is the iri of the *activity*, not the object.
         // you willl have to query the iri to get the activity object, then get the object object from that.
         // probably a good idea in case the grain or other downstream services makes changes to the object
-        public async Task<(LocalIri ActivityUri, LocalIri ObjectUri)> PublishActivity(ActivityType type, JArray expandedObject)
+        public async Task<(LocalIri ActivityUri, JObject Activity)> PublishActivity(ActivityType type, JArray expandedObject)
         {
             // todo: c/r/u/d the object on disk, create the activity on disk, send the activity to followers.
             // need to think of a way to link the document back to the user for the outbox,
@@ -336,7 +336,7 @@ namespace Elysium.Domain
 
                 });
 
-                return (activityIri, objectIri);
+                return (activityIri, outgoingCompactedActivity);
 
             }
             else

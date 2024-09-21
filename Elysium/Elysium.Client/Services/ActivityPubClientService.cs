@@ -41,7 +41,7 @@ namespace Elysium.Client.Services
             return identityUser.Id;
         }
 
-        public async Task<(LocalIri ActivityUri, LocalIri ObjectUri)> PublishActivityAsync(StorageKey<UserIdentity> author, ActivityType type, JArray expandedObject)
+        public async Task<(LocalIri ActivityUri, JObject Activity)> PublishActivityAsync(StorageKey<UserIdentity> author, ActivityType type, JArray expandedObject)
         {
             var userUri = await GetLocalIriFromUserIdentityAsync(author);
             var userGrain = grainFactory.GetGrain<ILocalActorGrain>(userUri);

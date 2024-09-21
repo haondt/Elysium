@@ -37,7 +37,7 @@ namespace Elysium.GrainInterfaces
         /// <param name="type"></param>
         /// <param name="object"></param>
         /// <returns>the <see cref="Iri"/> of the created activity</returns>
-        Task<(LocalIri ActivityUri, LocalIri ObjectUri)> PublishActivity(ActivityType type, JArray @object);
+        Task<(LocalIri ActivityUri, JObject Activity)> PublishActivity(ActivityType type, JArray @object);
 
         /// <summary>
         /// Ask the grain to publish a transient activity.

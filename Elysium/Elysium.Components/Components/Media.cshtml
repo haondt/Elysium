@@ -1,4 +1,6 @@
-﻿@model Elysium.Components.Components.MediaModel
+﻿@using Elysium.Components.Components
+@using Haondt.Web.Core.Components
+@model Elysium.Components.Components.MediaModel
 <div class="elysium-media-container has-radius-small">
 
 <article class="elysium-media
@@ -14,6 +16,8 @@
                 <a><small>@@@Model.AuthorFediverseHandle</small></a>
                 <small>@Model.Timestamp</small>
             </div>
+            <div class="is-flex is-direction-column cursor-pointer">
+            <!--hx-get="/_component/@(ComponentDescriptor<FeedModel>.TypeIdentity)">-->
             @if (!string.IsNullOrEmpty(Model.Title))
             {
                 <span class="is-size-4">@Model.Title</span>
@@ -24,6 +28,7 @@
                     <p>@Model.Text</p>
                 </div>
             }
+            </div>
         </div>
     </div>
     <nav class="level is-mobile">

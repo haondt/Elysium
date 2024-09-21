@@ -178,6 +178,10 @@ namespace Elysium.Client.Services
                 if (title.HasValue)
                     model.Title = title.Value;
 
+                var content = ActivityPubJsonNavigator.TryGetValue(objectDocument.Value, JsonLdTypes.CONTENT);
+                if (content.HasValue)
+                    model.Text = content.Value;
+
                 return new(model);
             });
 
