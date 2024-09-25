@@ -23,13 +23,8 @@ builder.Configuration.AddEnvironmentVariables();
 //builder.Services
 
 builder.Host
-    .UseOrleans(builder => builder
-        .UseLocalhostClustering()
-        .Configure<ClusterOptions>(options =>
-        {
-            options.ClusterId = "default";
-            options.ServiceId = "elysium";
-        })
+    .UseOrleans((context, builder) => builder
+        .ConfigureCluster(context.Configuration)
         .AddElysiumStorageGrainStorage(GrainConstants.SimpleStreamProvider)
         .AddElysiumStorageGrainStorage(GrainConstants.GrainDocumentStorage)
         .AddElysiumStorageGrainStorage(GrainConstants.GrainStorage)

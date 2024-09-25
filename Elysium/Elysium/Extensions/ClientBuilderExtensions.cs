@@ -1,5 +1,6 @@
 ﻿using Elysiuim.Core.Models;
 using Elysium.Core.Models;
+using Elysium.Extensions;
 using Haondt.Core.Extensions;
 using Orleans.Configuration;
 using StackExchange.Redis;
@@ -9,16 +10,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elysium.Silo.Extensions
+namespace Elysium.Extensions
 {
-    public static class SiloBuilderExtensions
+    public static class ClientBuilderExtensions
     {
-        public static ISiloBuilder AddElysiumStorageGrainStorage(this ISiloBuilder builder, string providerName)
-        {
-            builder.Services.AddElysiumStorageGrainStorage(providerName);
-            return builder;
-        }
-        public static ISiloBuilder ConfigureCluster(this ISiloBuilder builder, IConfiguration configuration)
+        public static IClientBuilder ConfigureCluster(this IClientBuilder builder, IConfiguration configuration)
         {
             var clusterSettings = configuration.GetSection<ClusterSettings>();
             switch (clusterSettings.ClusteringStrategy)

@@ -26,6 +26,7 @@
   <ItemGroup>
     <PackageReference Include="Haondt.Web" Version="0.0.3" />
     <PackageReference Include="Haondt.Web.BulmaCSS" Version="0.0.3" />
+    <PackageReference Include="Microsoft.Orleans.Clustering.Redis" Version="8.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
   </ItemGroup>
 

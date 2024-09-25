@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.8" />
+    <PackageReference Include="Microsoft.Orleans.Clustering.Redis" Version="8.2.0" />
     <PackageReference Include="Microsoft.Orleans.Server" Version="8.2.0" />
     <PackageReference Include="Microsoft.Orleans.Streaming" Version="8.2.0" />
   </ItemGroup>

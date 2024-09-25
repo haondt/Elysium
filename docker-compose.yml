@@ -1,0 +1,36 @@
+services:
+  elysium:
+    build:
+      context: ./Elysium
+      dockerfile: ./Elysium/Dockerfile
+    container_name: elysium
+    networks:
+      - elysium
+    image: elysium
+    depends_on:
+      - elysium-silo
+    ports:
+      - 9000:8080
+  elysium-silo:
+    container_name: elysium-silo
+    depends_on:
+      - redis
+    build:
+      context: ./Elysium
+      dockerfile: ./Elysium.Silo.Api/Dockerfile
+    networks:
+      - elysium
+    image: elysium-silo
+    deploy:
+      replicas: 1
+    ports:
+      - 9001:8080
+  redis:
+    container_name: redis
+    networks:
+      - elysium
+    image: redis
+
+
+networks:
+  elysium:

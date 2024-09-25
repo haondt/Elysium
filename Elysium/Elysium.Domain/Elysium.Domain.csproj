@@ -14,4 +14,8 @@
     <ProjectReference Include="..\Elysium.GrainInterfaces\Elysium.GrainInterfaces.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="NewFolder\" />
+  </ItemGroup>
+
 </Project>

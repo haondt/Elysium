@@ -43,12 +43,7 @@ builder.Services.AddMvc();
 builder.Services.AddSignalR();
 
 builder.Services.AddOrleansClient(client => client
-    .UseLocalhostClustering()
-    .Configure<ClusterOptions>(options =>
-    {
-        options.ClusterId = "default";
-        options.ServiceId = "elysium";
-    }));
+    .ConfigureCluster(builder.Configuration));
 
 var app = builder.Build();
 
