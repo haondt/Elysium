@@ -16,12 +16,28 @@ using System.Threading.Tasks;
 
 namespace Elysium.Persistence.Services
 {
+    public class TableDescriptor
+    {
+        private HashSet<string> _columns = [];
+        private List<string> _orderedColumns = [];
+        public HashSet<string> Columns { get { return _columns; } }
+        public List<string> OrderedColumns
+        {
+            get {  return _orderedColumns; }
+            set
+            {
+                _orderedColumns = value;
+                _columns = new (value);
+            }
+        }
+    }
+
     public class ElysiumSqliteStorage : IElysiumStorage
     {
         private readonly ElysiumSqliteStorageSettings _settings;
         private readonly JsonSerializerSettings _serializerSettings;
         private readonly string _connectionString;
-        private readonly ConcurrentDictionary<string, bool> _existingTables = [];
+        private readonly ConcurrentDictionary<string, TableDescriptor> _existingTables = [];
         private readonly IElysiumStorageKeyConverter _storageKeyConverter;
 
         public ElysiumSqliteStorage(IOptions<ElysiumPersistenceSettings> options, IElysiumStorageKeyConverter storageKeyConverter)
@@ -36,7 +52,7 @@ namespace Elysium.Persistence.Services
             }.ToString();
             _storageKeyConverter = storageKeyConverter;
             ConfigureSerializerSettings(_serializerSettings);
-            GetExistingTables();
+            LoadExistingTables();
         }
 
         private JsonSerializerSettings ConfigureSerializerSettings(JsonSerializerSettings settings)
@@ -56,52 +72,116 @@ namespace Elysium.Persistence.Services
             await command.ExecuteNonQueryAsync();
         }
 
-        private async Task GetExistingTables()
+        private void EnableWalMode(SqliteConnection connection)
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = "PRAGMA journal_mode=WAL;";
+            command.ExecuteNonQuery();
+        }
+
+        private void LoadExistingTables()
         {
             using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync();
-            await EnableWalModeAsync(connection);
-            var query = "SELECT name FROM sqlite_master where type='table'";
+            connection.Open();
+            EnableWalMode(connection);
+            var query = "SELECT name FROM sqlite_master WHERE type = 'table'";
             using var command = new SqliteCommand(query, connection);
             using var reader = command.ExecuteReader();
             while(reader.Read())
             {
                 var tableName = reader.GetString(0);
-                if (!string.IsNullOrEmpty(tableName))
-                    _existingTables[tableName] = true;
+                if (string.IsNullOrEmpty(tableName))
+                    continue;
+
+                var columnQuery = $"PRAGMA table_info(\"{tableName}\")";
+                using var columnCommand = new SqliteCommand(columnQuery, connection);
+                using var columnReader = columnCommand.ExecuteReader();
+
+                var columns = new List<string>();
+                while (columnReader.Read())
+                {
+                    var columnName = columnReader.GetString(1);
+                    columns.Add(columnName);
+                }
+                _existingTables[tableName] = new TableDescriptor
+                {
+                    OrderedColumns = columns,
+                };
             }
         }
 
-        private async Task<string> GetOrCreateTableAsync(Type tableType, SqliteConnection connection)
+        // todo: double check semaphore this b
+        private async Task<string> GetOrUpsertTableAsync(StorageKey storageKey, SqliteConnection connection, HashSet<string>? additionalColumns=null)
         {
-            //var tableName = tableType.AssemblyQualifiedName ?? throw new InvalidOperationException("Type name is null");
-            var tableName = SimpleTypeConverter.TypeToString(tableType);
+            var tableName = SimpleTypeConverter.TypeToString(storageKey.Type);
             tableName = SanitizeTableName(tableName);
 
-            if (_existingTables.ContainsKey(tableName)) return tableName;
+            HashSet<string>? columnsToAdd = null;
+            var tableExists = _existingTables.ContainsKey(tableName);
 
-            var createTableQuery = tableType == typeof(UserIdentity)
-                ? $@"
+            if (tableExists && additionalColumns != null)
+            {
+                columnsToAdd = new(additionalColumns);
+                columnsToAdd.ExceptWith(_existingTables[tableName].Columns);
+            }
+            else
+                columnsToAdd = additionalColumns;
+            columnsToAdd?.Remove("Key");
+            columnsToAdd?.Remove("KeyString");
+            columnsToAdd?.Remove("Value");
+
+            if (tableExists)
+            {
+                if (columnsToAdd == null || columnsToAdd.Count == 0)
+                    return tableName;
+
+                var tableDescriptor = _existingTables[tableName];
+
+                foreach (var column in columnsToAdd)
+                {
+                    var alterTableQuery = $"ALTER TABLE {tableName} ADD COLUMN {SanitizeTableName(column)} TEXT";
+                    using var command = connection.CreateCommand();
+                    command.CommandText = alterTableQuery;
+                    await command.ExecuteNonQueryAsync();
+                    _existingTables[tableName].OrderedColumns = _existingTables[tableName].OrderedColumns.Concat(columnsToAdd).ToList();
+                }
+
+                return tableName; 
+            }
+            else
+            {
+                var columnList = new List<string>
+                {
+                    "Key",
+                    "KeyString",
+                    "Value"
+                };
+                if (columnsToAdd != null)
+                    columnList.AddRange(columnsToAdd);
+
+                var additionalColumnString = "";
+                if (columnsToAdd != null && columnsToAdd.Count > 0)
+                    additionalColumnString = string.Join("", columnsToAdd.Select(x => $",\n{SanitizeTableName(x)}"));
+
+
+                var createTableQuery = $@"
                     CREATE TABLE IF NOT EXISTS {tableName} (
                         Key TEXT PRIMARY KEY,
                         KeyString TEXT NOT NULL,
-                        Value TEXT NOT NULL,
-                        NormalizedUsername TEXT
-                    )"
-                : $@"
-                    CREATE TABLE IF NOT EXISTS {tableName} (
-                        Key TEXT PRIMARY KEY,
-                        KeyString TEXT NOT NULL,
-                        Value TEXT NOT NULL
+                        Value TEXT NOT NULL{additionalColumnString}
                     )";
 
-            using var command = connection.CreateCommand();
-            command.CommandText = createTableQuery;
-            await command.ExecuteNonQueryAsync();
+                using var command = connection.CreateCommand();
+                command.CommandText = createTableQuery;
+                await command.ExecuteNonQueryAsync();
 
-            _existingTables[tableName] = true;
+                _existingTables[tableName] = new TableDescriptor
+                {
+                    OrderedColumns = columnList
+                };
 
-            return tableName;
+                return tableName;
+            }
         }
 
         public async Task<Result<T, StorageResultReason>> Get<T>(StorageKey<T> key)
@@ -110,7 +190,7 @@ namespace Elysium.Persistence.Services
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
             await EnableWalModeAsync(connection);
-            var table = await GetOrCreateTableAsync(key.Type, connection);
+            var table = await GetOrUpsertTableAsync(key, connection);
             var query = $"SELECT Value FROM {table} WHERE Key = @key";
             using var command = new SqliteCommand(query, connection);
             command.Parameters.AddWithValue("@key", keyString);
@@ -131,7 +211,7 @@ namespace Elysium.Persistence.Services
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
             await EnableWalModeAsync(connection);
-            var table = await GetOrCreateTableAsync(key.Type, connection);
+            var table = await GetOrUpsertTableAsync(key, connection);
             string query = $"SELECT COUNT(1) FROM {table} WHERE Key = @key";
             using var command = new SqliteCommand(query, connection);
             command.Parameters.AddWithValue("@key", keyString);
@@ -152,31 +232,14 @@ namespace Elysium.Persistence.Services
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
             await EnableWalModeAsync(connection);
-            var table = await GetOrCreateTableAsync(key.Type, connection);
+            var table = await GetOrUpsertTableAsync(key, connection);
             string query = $"DELETE FROM {table} WHERE Key = @key";
             using var command = new SqliteCommand(query, connection);
             command.Parameters.AddWithValue("@key", keyString);
-            await command.ExecuteNonQueryAsync();
-            return new();
-        }
-
-        public async Task<Result<UserIdentity, StorageResultReason>> GetUserByNameAsync(string normalizedUsername)
-        {
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync();
-            await EnableWalModeAsync(connection);
-            var table = await GetOrCreateTableAsync(typeof(UserIdentity), connection);
-            var query = $" SELECT Value FROM {table} WHERE NormalizedUsername = @normalizedUsername";
-            using var command = new SqliteCommand(query, connection);
-            command.Parameters.AddWithValue("@normalizedUsername", normalizedUsername);
-            using var reader = await command.ExecuteReaderAsync();
-            if (!await reader.ReadAsync())
+            var rowsAffected = await command.ExecuteNonQueryAsync();
+            if (rowsAffected == 0)
                 return new(StorageResultReason.NotFound);
-
-            var valueString = reader.GetString(0);
-            var resultUserIdentity = JsonConvert.DeserializeObject<UserIdentity>(valueString, _serializerSettings)
-                ?? throw new JsonException("Unable to deserialize result");
-            return new(resultUserIdentity);
+            return new();
         }
 
         private string SanitizeTableName(string tableName)
@@ -188,88 +251,172 @@ namespace Elysium.Persistence.Services
             return $"\"{sanitized}\"";
         }
 
-        public async Task SetMany(List<(StorageKey Key, object Value)> values)
+        public Task SetMany(List<(StorageKey Key, object Value)> values) => SetMany(values.Select(v => (v.Key, v.Value, (List<StorageKey>?)null)));
+
+        public class KeyAndForeignKeyIdentity : IEquatable<KeyAndForeignKeyIdentity>
+        {
+            public required StorageKey PrimaryKey { get; set; }
+            public required List<StorageKey> ForeignKeys { get; set; }
+
+
+            public bool Equals(KeyAndForeignKeyIdentity? other)
+            {
+                if (other == null)
+                    return false;
+                return PrimaryKey == other.PrimaryKey && ForeignKeys.SequenceEqual(other.ForeignKeys);
+            }
+
+            public override int GetHashCode()
+            {
+                HashCode hashCode = default(HashCode);
+                hashCode.Add(PrimaryKey.GetHashCode());
+
+                foreach (var foreignKey in ForeignKeys)
+                    hashCode.Add(foreignKey.GetHashCode());
+
+                return hashCode.ToHashCode();
+            }
+
+            public override bool Equals(object? obj)
+            {
+                if (obj is KeyAndForeignKeyIdentity id)
+                    return Equals(id);
+                return false;
+            }
+        }
+
+        public class SetDetails
+        {
+            public required StorageKey PrimaryKey { get; set; }
+            public required object Value { get; set; }  
+            public required List<StorageKey> ForeignKeys { get; set; }
+        }
+
+        public async Task SetMany(IEnumerable<(StorageKey Key, object Value, List<StorageKey>? ForeignKeys)> values)
         {
             using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
             await EnableWalModeAsync(connection);
             using var transaction = await connection.BeginTransactionAsync();
 
-            var commands = new Dictionary<Type, (SqliteCommand Command, Action<StorageKey, object> SetParameters)>(); ;
-            async Task<(SqliteCommand Command, Action<StorageKey,  object> SetParameters)> PreparedCommandAsync(Type keyType)
+            var details = values.Select(v => new SetDetails
             {
-                var table = await GetOrCreateTableAsync(keyType, connection);
+                ForeignKeys = v.ForeignKeys?.Distinct().Order().ToList() ?? [],
+                PrimaryKey = v.Key,
+                Value = v.Value
+            });
+            var foreignKeysGroupedByTable = details.GroupBy(d => d.PrimaryKey.Type)
+                .ToDictionary(grp => grp.First().PrimaryKey, grp => grp.SelectMany(x => x.ForeignKeys));
+            var tables = await Task.WhenAll(foreignKeysGroupedByTable.Select(kvp => GetOrUpsertTableAsync(kvp.Key, connection, kvp.Value.Select(_storageKeyConverter.GetTypeString).ToHashSet())));
+            var keyedTables = foreignKeysGroupedByTable.Zip(tables).ToDictionary(x => x.First.Key.Type, x => x.Second);
 
-                var setParametersList = new List<Action<StorageKey,  object>>();
+            var valuesGroupedByKeyAndForeignKeys = details.Select(d => new KeyValuePair<KeyAndForeignKeyIdentity, SetDetails>(new KeyAndForeignKeyIdentity
+            {
+                PrimaryKey = d.PrimaryKey,
+                ForeignKeys = d.ForeignKeys
+            }, d)).GroupBy(kvp => kvp.Key).ToDictionary(grp => grp.Key, grp => grp.Select(x => x.Value).ToList());
 
+
+            foreach(var (identity, setDetails) in valuesGroupedByKeyAndForeignKeys)
+            {
+                var table = keyedTables[identity.PrimaryKey.Type];
                 var command = connection.CreateCommand();
-                if (keyType == typeof(UserIdentity))
+                var parameters = new Dictionary<string, (string, Func<SetDetails, string>)>
                 {
-                    if (_settings.StoreKeyStrings)
-                        command.CommandText = $"INSERT OR REPLACE INTO {table} (Key, KeyString, Value, NormalizedUsername) " +
-                            $"VALUES (@key, @keyString, @value, @normalizedUsername)";
-                    else
-                        command.CommandText = $"INSERT OR REPLACE INTO {table} (Key, Value, NormalizedUsername) " +
-                            $"VALUES (@key, @value, @normalizedUsername)";
-                    var normalizedUsernameParameter = command.CreateParameter();
-                    normalizedUsernameParameter.ParameterName = "@normalizedUsername";
-                    command.Parameters.Add(normalizedUsernameParameter);
-                    setParametersList.Add((key, value) =>
-                    {
-                        if (value is not UserIdentity userIdentity)
-                            throw new InvalidOperationException($"storage key {key} has type UserIdentity but the value was not a UserIdentity");
-                        normalizedUsernameParameter.Value = userIdentity.NormalizedUsername;
-                    });
-                }
-                else if (_settings.StoreKeyStrings)
-                   command.CommandText = $"INSERT OR REPLACE INTO {table} (Key, KeyString, Value) VALUES (@key, @keyString, @value)";
-                else
-                   command.CommandText = $"INSERT OR REPLACE INTO {table} (Key, Value) VALUES (@key, @value)";
+                    { "Key", ("key", x => _storageKeyConverter.Serialize(x.PrimaryKey)) },
+                    { "Value", ("value", x => JsonConvert.SerializeObject(x.Value, _serializerSettings)) }
+                };
 
-                var keyParameter = command.CreateParameter();
-                keyParameter.ParameterName = "@key";
-                command.Parameters.Add(keyParameter);
-                setParametersList.Add((key, _) =>
-                {
-                    keyParameter.Value = _storageKeyConverter.Serialize(key);
-                });
                 if (_settings.StoreKeyStrings)
+                    parameters.Add("KeyString", ("keyString", x => x.PrimaryKey.ToString()));
+
+                for(int i=0; i < identity.ForeignKeys.Count; i++)
                 {
-                    var keyStringParameter = command.CreateParameter();
-                    keyStringParameter.ParameterName = "@keyString";
-                    command.Parameters.Add(keyStringParameter);
-                    setParametersList.Add((key, _) =>
-                    {
-                        keyStringParameter.Value = key.ToString();
-                    });
+                    var foreignKey = identity.ForeignKeys[i];
+                    var foreignKeyColumn = SanitizeTableName(_storageKeyConverter.GetTypeString(foreignKey));
+                    var j = i; // this is necessary, something something functions
+                    parameters.Add(foreignKeyColumn, ($"foreign_key_{j}", x => x.ForeignKeys[j].Parts[^1].Value));
                 }
-                var valueParameter = command.CreateParameter();
-                valueParameter.ParameterName = "@value";
-                command.Parameters.Add(valueParameter);
-                setParametersList.Add((_, value) =>
-                {
-                    valueParameter.Value = JsonConvert.SerializeObject(value, _serializerSettings);
-                });
 
-                return (command, (key, value) =>
+                command.CommandText = $"INSERT OR REPLACE INTO {table} ({string.Join(',', parameters.Keys)}) VALUES ({string.Join(',', parameters.Values.Select(v => $"@{v.Item1}"))})";
+
+
+                var setParametersList = new List<Action<SetDetails>>();
+                foreach (var set in parameters.Values)
                 {
-                    foreach (var action in setParametersList)
-                        action(key, value);
-                });
+                    var sqliteParameter = command.CreateParameter();
+                    sqliteParameter.ParameterName = $"@{set.Item1}";
+                    command.Parameters.Add(sqliteParameter);
+                    setParametersList.Add(vals => sqliteParameter.Value = set.Item2(vals));
+                }
+
+                foreach(var set in setDetails)
+                {
+                    foreach (var func in setParametersList)
+                        func(set);
+                    await command.ExecuteNonQueryAsync();
+                }
+
             }
 
-            foreach(var (key, value) in values)
-            {
-                var keyString = _storageKeyConverter.Serialize(key);
-                var valueString = JsonConvert.SerializeObject(value, _serializerSettings);
 
-                if (!commands.ContainsKey(key.Type))
-                    commands[key.Type] = await PreparedCommandAsync(key.Type);
+            //var commands = new Dictionary<Type, (SqliteCommand Command, Action<StorageKey, object> SetParameters)>();
+            //async Task<(SqliteCommand Command, Action<StorageKey,  object> SetParameters)> PreparedCommandAsync(StorageKey storageKey, List<StorageKey>? foreignKeys)
+            //{
+            //    var table = await GetOrUpsertTableAsync(storageKey,connection, foreignKeys?.Select(_storageKeyConverter.GetTypeString).ToHashSet());
 
-                var (command, setParameters) = commands[key.Type];
-                setParameters(key, value);
-                await command.ExecuteNonQueryAsync();
-            }
+            //    var setParametersList = new List<Action<StorageKey,  object>>();
+
+            //    var command = connection.CreateCommand();
+            //    if (_settings.StoreKeyStrings)
+            //       command.CommandText = $"INSERT OR REPLACE INTO {table} (Key, KeyString, Value) VALUES (@key, @keyString, @value)";
+            //    else
+            //       command.CommandText = $"INSERT OR REPLACE INTO {table} (Key, Value) VALUES (@key, @value)";
+
+            //    var keyParameter = command.CreateParameter();
+            //    keyParameter.ParameterName = "@key";
+            //    command.Parameters.Add(keyParameter);
+            //    setParametersList.Add((key, _) =>
+            //    {
+            //        keyParameter.Value = _storageKeyConverter.Serialize(key);
+            //    });
+            //    if (_settings.StoreKeyStrings)
+            //    {
+            //        var keyStringParameter = command.CreateParameter();
+            //        keyStringParameter.ParameterName = "@keyString";
+            //        command.Parameters.Add(keyStringParameter);
+            //        setParametersList.Add((key, _) =>
+            //        {
+            //            keyStringParameter.Value = key.ToString();
+            //        });
+            //    }
+            //    var valueParameter = command.CreateParameter();
+            //    valueParameter.ParameterName = "@value";
+            //    command.Parameters.Add(valueParameter);
+            //    setParametersList.Add((_, value) =>
+            //    {
+            //        valueParameter.Value = JsonConvert.SerializeObject(value, _serializerSettings);
+            //    });
+
+            //    return (command, (key, value) =>
+            //    {
+            //        foreach (var action in setParametersList)
+            //            action(key, value);
+            //    });
+            //}
+
+            //foreach(var (key, value, foreignKeys) in values)
+            //{
+            //    var keyString = _storageKeyConverter.Serialize(key);
+            //    var valueString = JsonConvert.SerializeObject(value, _serializerSettings);
+
+            //    if (!commands.ContainsKey(key.Type))
+            //        commands[key.Type] = await PreparedCommandAsync(key, foreignKeys);
+
+            //    var (command, setParameters) = commands[key.Type];
+            //    setParameters(key, value);
+            //    await command.ExecuteNonQueryAsync();
+            //}
 
             await transaction.CommitAsync();
         }
@@ -280,11 +427,10 @@ namespace Elysium.Persistence.Services
             await connection.OpenAsync();
             await EnableWalModeAsync(connection);
 
-
             var resultTasks = keys.Select(async key =>
             {
                 var keyString = _storageKeyConverter.Serialize(key);
-                var table = await GetOrCreateTableAsync(key.Type, connection);
+                var table = await GetOrUpsertTableAsync(key, connection);
                 var query = $"SELECT Value FROM {table} WHERE Key = @key";
                 using var command = new SqliteCommand(query, connection);
                 command.Parameters.AddWithValue("@key", keyString);
@@ -300,6 +446,70 @@ namespace Elysium.Persistence.Services
             });
 
             return (await Task.WhenAll(resultTasks)).ToList();
+        }
+
+        public Task Set<T>(StorageKey<T> key, T value, List<StorageKey> foreignKeys)
+        {
+            return SetMany([(key, value!, foreignKeys)]);
+        }
+
+        public async Task<List<(StorageKey<TPrimary> Key, TPrimary Value)>> Get<TPrimary, TForeign>(StorageKey<TPrimary> partialPrimaryKey, StorageKey<TForeign> foreignKey)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
+            await EnableWalModeAsync(connection);
+
+            var table = await GetOrUpsertTableAsync(partialPrimaryKey, connection);
+            var tableDescriptor = _existingTables[table];
+            var foreignKeyString = _storageKeyConverter.GetTypeString(foreignKey);
+            if (!tableDescriptor.Columns.Contains(foreignKeyString))
+                return [];
+
+
+            var query = $"SELECT Key, Value FROM {table} WHERE {SanitizeTableName(foreignKeyString)} = @foreignValue";
+            using var command = new SqliteCommand(query, connection);
+            command.Parameters.AddWithValue("@foreignValue", foreignKey.Parts[^1].Value);
+            var reader = await command.ExecuteReaderAsync();
+
+
+            var results = new List<(StorageKey<TPrimary>, TPrimary)>();
+            while (reader.Read())
+            {
+                var key = reader.GetString(0);
+                var value = reader.GetString(1);
+                var obj = JsonConvert.DeserializeObject<TPrimary>(value)
+                    ?? throw new JsonException("unable to deserialize result");
+                var sk = _storageKeyConverter.Deserialize<TPrimary>(key)
+                    ?? throw new JsonException("unable to deserialize key");
+                results.Add((sk, obj));
+            }
+
+            return results;
+        }
+
+        public async Task<Result<int, StorageResultReason>> DeleteMany<TPrimary, TForegin>(StorageKey<TPrimary> partialPrimaryKey, StorageKey<TForegin> foreignKey)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
+            await EnableWalModeAsync(connection);
+
+            var table = await GetOrUpsertTableAsync(partialPrimaryKey, connection);
+            var tableDescriptor = _existingTables[table];
+            var foreignKeyString = _storageKeyConverter.GetTypeString(foreignKey);
+
+            if (!tableDescriptor.Columns.Contains(foreignKeyString))
+                return new(StorageResultReason.NotFound);
+
+            var query = $"DELETE FROM {table} WHERE {SanitizeTableName(foreignKeyString)} = @foreignValue";
+            using var command = new SqliteCommand(query, connection);
+            command.Parameters.AddWithValue("@foreignValue", foreignKey.Parts[^1].Value);
+
+            var rowsAffected = await command.ExecuteNonQueryAsync();
+
+            if (rowsAffected == 0)
+                return new(StorageResultReason.NotFound);
+
+            return new(rowsAffected);
         }
     }
 }

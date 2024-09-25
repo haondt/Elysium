@@ -6,7 +6,6 @@ using Elysium.Hosting.Extensions;
 using Elysium.Persistence.Extensions;
 using Elysium.Cryptography.Extensions;
 using Elysium.Core.Extensions;
-using Elysium.Domain.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

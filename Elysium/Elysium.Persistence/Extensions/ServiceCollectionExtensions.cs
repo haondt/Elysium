@@ -18,10 +18,6 @@ namespace Elysium.Persistence.Extensions
                     services.AddSingleton<IElysiumStorage, ElysiumMemoryStorage>();
                     services.AddSingleton<IStorage, ElysiumMemoryStorage>();
                     break;
-                case ElysiumPersistenceDrivers.File:
-                    services.AddSingleton<IElysiumStorage, ElysiumFileStorage>();
-                    services.AddSingleton<IStorage, ElysiumFileStorage>();
-                    break;
                 case ElysiumPersistenceDrivers.Sqlite:
                     services.AddSingleton<IElysiumStorage, ElysiumSqliteStorage>();
                     services.AddSingleton<IStorage, ElysiumSqliteStorage>();

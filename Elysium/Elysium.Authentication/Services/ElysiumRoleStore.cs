@@ -1,5 +1,6 @@
 ﻿using Elysium.Core.Models;
 using Elysium.Core.Services;
+using Elysium.Persistence.Services;
 using Haondt.Persistence.Services;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.Authentication.Services
 {
-    public class ElysiumRoleStore(IStorage storage, IElysiumStorageKeyConverter converter) : ElysiumStorageKeyIdModelStore<RoleIdentity>(storage, converter), IRoleStore<RoleIdentity>
+    public class ElysiumRoleStore(IElysiumStorage storage, IElysiumStorageKeyConverter converter) : ElysiumStorageKeyIdModelStore<RoleIdentity>(storage, converter), IRoleStore<RoleIdentity>
     {
         private readonly IElysiumStorageKeyConverter _converter = converter;
 

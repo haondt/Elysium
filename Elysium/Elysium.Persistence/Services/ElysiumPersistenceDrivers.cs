@@ -9,7 +9,6 @@ namespace Elysium.Persistence.Services
     public enum ElysiumPersistenceDrivers
     {
         Memory,
-        File,
         Sqlite
     }
 }

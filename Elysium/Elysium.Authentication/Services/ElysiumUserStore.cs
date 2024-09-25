@@ -19,10 +19,34 @@ namespace Elysium.Authentication.Services
 
         public async Task<UserIdentity?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
-            var result = await storage.GetUserByNameAsync(normalizedUserName);
-            if (result.IsSuccessful)
-                return result.Value;
+            var result = await _storage.Get(UserIdentity.GetStorageKey(""), NormalizedUsername.GetStorageKey(normalizedUserName));
+            if (result.Count == 1)
+                return result.First().Value;
             return null;
+        }
+
+        public override async Task<IdentityResult> CreateAsync(UserIdentity user, CancellationToken cancellationToken)
+        {
+            var hasUser = await _storage.ContainsKey(user.Id);
+            if (hasUser)
+                return IdentityResult.Failed(new IdentityError { Code = "0", Description = "User already exists" });
+            if (!string.IsNullOrEmpty(user.NormalizedUsername))
+                await _storage.Set(user.Id, user, [NormalizedUsername.GetStorageKey(user.NormalizedUsername)]);
+            else
+                await _storage.Set(user.Id, user);
+            return IdentityResult.Success;
+        }
+
+        public override async Task<IdentityResult> UpdateAsync(UserIdentity user, CancellationToken cancellationToken)
+        {
+            var hasUser = await _storage.ContainsKey(user.Id);
+            if (!hasUser)
+                return IdentityResult.Failed(new IdentityError { Code = "1", Description = "User does not exist" });
+            if (!string.IsNullOrEmpty(user.NormalizedUsername))
+                await _storage.Set(user.Id, user, [NormalizedUsername.GetStorageKey(user.NormalizedUsername)]);
+            else
+                await _storage.Set(user.Id, user);
+            return IdentityResult.Success;
         }
 
         public Task<string?> GetNormalizedUserNameAsync(UserIdentity user, CancellationToken cancellationToken)

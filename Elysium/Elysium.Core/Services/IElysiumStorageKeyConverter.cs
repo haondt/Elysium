@@ -12,5 +12,6 @@ namespace Elysium.Core.Services
         StorageKey Deserialize(string data);
         StorageKey<T> Deserialize<T>(string data);
         string Serialize(StorageKey storageKey);
+        string GetTypeString(StorageKey storageKey);
     }
 }

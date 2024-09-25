@@ -29,11 +29,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D532085B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Silo.Api", "Elysium.Silo.Api\Elysium.Silo.Api.csproj", "{D801420F-CCA9-4736-ACAD-060EC3A1F4E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.ActivityPub.Api", "Elysium.ActivityPub.Api\Elysium.ActivityPub.Api.csproj", "{53909D93-81A3-4276-B53F-89C801850046}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.ActivityPub.Api", "Elysium.ActivityPub.Api\Elysium.ActivityPub.Api.csproj", "{53909D93-81A3-4276-B53F-89C801850046}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Cryptography", "Elysium.Cryptography\Elysium.Cryptography.csproj", "{A64CCB3B-639E-41CD-AAA6-9CADDD9FA2D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Cryptography", "Elysium.Cryptography\Elysium.Cryptography.csproj", "{A64CCB3B-639E-41CD-AAA6-9CADDD9FA2D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Domain", "Elysium.Domain\Elysium.Domain.csproj", "{ADCD9E39-FB92-471B-ADEB-5FBCDA632EEF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Domain", "Elysium.Domain\Elysium.Domain.csproj", "{ADCD9E39-FB92-471B-ADEB-5FBCDA632EEF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Persistence.Tests", "Elysium.Persistence.Tests\Elysium.Persistence.Tests.csproj", "{BEFBB7D7-52B6-4144-B8EA-81A1EB4AFA01}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -101,9 +103,16 @@ Global
 		{ADCD9E39-FB92-471B-ADEB-5FBCDA632EEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ADCD9E39-FB92-471B-ADEB-5FBCDA632EEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ADCD9E39-FB92-471B-ADEB-5FBCDA632EEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEFBB7D7-52B6-4144-B8EA-81A1EB4AFA01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEFBB7D7-52B6-4144-B8EA-81A1EB4AFA01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEFBB7D7-52B6-4144-B8EA-81A1EB4AFA01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEFBB7D7-52B6-4144-B8EA-81A1EB4AFA01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BEFBB7D7-52B6-4144-B8EA-81A1EB4AFA01} = {D532085B-62CD-472A-92BE-A3EE083D48FB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D4BBC2A1-6F35-448E-A7C2-E478F4C6F65E}

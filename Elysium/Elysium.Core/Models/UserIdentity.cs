@@ -23,5 +23,11 @@ namespace Elysium.Core.Models
         [Id(5)]
         public string? NormalizedUsername { get; set; }
         public static StorageKey<UserIdentity> GetStorageKey(string username) => StorageKey<UserIdentity>.Create(username.ToLower().Trim());
+        public static StorageKey<NormalizedUsername> GetNormalizedUsernameStorageKey(string normalizedUsername) => StorageKey<NormalizedUsername>.Create(normalizedUsername);
+    }
+
+    public class NormalizedUsername
+    {
+        public static StorageKey<NormalizedUsername> GetStorageKey(string normalizedUsername) => StorageKey<NormalizedUsername>.Create(normalizedUsername);
     }
 }
