@@ -93,7 +93,7 @@ namespace Elysium.Persistence.Services
                 if (string.IsNullOrEmpty(tableName))
                     continue;
 
-                var columnQuery = $"PRAGMA table_info(\"{tableName}\")";
+                var columnQuery = $"PRAGMA table_info({SanitizeTableName(tableName)})";
                 using var columnCommand = new SqliteCommand(columnQuery, connection);
                 using var columnReader = columnCommand.ExecuteReader();
 
@@ -111,10 +111,11 @@ namespace Elysium.Persistence.Services
         }
 
         // todo: double check semaphore this b
-        private async Task<string> GetOrUpsertTableAsync(StorageKey storageKey, SqliteConnection connection, HashSet<string>? additionalColumns=null)
+        private async Task<(string TableName, string SanitizedTableName)> GetOrUpsertTableAsync(StorageKey storageKey, SqliteConnection connection, HashSet<string>? additionalColumns=null)
         {
             var tableName = SimpleTypeConverter.TypeToString(storageKey.Type);
-            tableName = SanitizeTableName(tableName);
+            var sanitizedTableName = SanitizeTableName(tableName);
+            //tableName = SanitizeTableName(tableName);
 
             HashSet<string>? columnsToAdd = null;
             var tableExists = _existingTables.ContainsKey(tableName);
@@ -133,20 +134,20 @@ namespace Elysium.Persistence.Services
             if (tableExists)
             {
                 if (columnsToAdd == null || columnsToAdd.Count == 0)
-                    return tableName;
+                    return (tableName, sanitizedTableName);
 
                 var tableDescriptor = _existingTables[tableName];
 
                 foreach (var column in columnsToAdd)
                 {
-                    var alterTableQuery = $"ALTER TABLE {tableName} ADD COLUMN {SanitizeTableName(column)} TEXT";
+                    var alterTableQuery = $"ALTER TABLE {sanitizedTableName} ADD COLUMN {SanitizeTableName(column)} TEXT";
                     using var command = connection.CreateCommand();
                     command.CommandText = alterTableQuery;
                     await command.ExecuteNonQueryAsync();
                     _existingTables[tableName].OrderedColumns = _existingTables[tableName].OrderedColumns.Concat(columnsToAdd).ToList();
                 }
 
-                return tableName; 
+                return (tableName, sanitizedTableName);
             }
             else
             {
@@ -165,7 +166,7 @@ namespace Elysium.Persistence.Services
 
 
                 var createTableQuery = $@"
-                    CREATE TABLE IF NOT EXISTS {tableName} (
+                    CREATE TABLE IF NOT EXISTS {sanitizedTableName} (
                         Key TEXT PRIMARY KEY,
                         KeyString TEXT NOT NULL,
                         Value TEXT NOT NULL{additionalColumnString}
@@ -180,7 +181,7 @@ namespace Elysium.Persistence.Services
                     OrderedColumns = columnList
                 };
 
-                return tableName;
+                return (tableName, sanitizedTableName);
             }
         }
 
@@ -191,7 +192,7 @@ namespace Elysium.Persistence.Services
             await connection.OpenAsync();
             await EnableWalModeAsync(connection);
             var table = await GetOrUpsertTableAsync(key, connection);
-            var query = $"SELECT Value FROM {table} WHERE Key = @key";
+            var query = $"SELECT Value FROM {table.SanitizedTableName} WHERE Key = @key";
             using var command = new SqliteCommand(query, connection);
             command.Parameters.AddWithValue("@key", keyString);
             var result = await command.ExecuteScalarAsync();
@@ -212,7 +213,7 @@ namespace Elysium.Persistence.Services
             await connection.OpenAsync();
             await EnableWalModeAsync(connection);
             var table = await GetOrUpsertTableAsync(key, connection);
-            string query = $"SELECT COUNT(1) FROM {table} WHERE Key = @key";
+            string query = $"SELECT COUNT(1) FROM {table.SanitizedTableName} WHERE Key = @key";
             using var command = new SqliteCommand(query, connection);
             command.Parameters.AddWithValue("@key", keyString);
             var count = await command.ExecuteScalarAsync();
@@ -233,7 +234,7 @@ namespace Elysium.Persistence.Services
             await connection.OpenAsync();
             await EnableWalModeAsync(connection);
             var table = await GetOrUpsertTableAsync(key, connection);
-            string query = $"DELETE FROM {table} WHERE Key = @key";
+            string query = $"DELETE FROM {table.SanitizedTableName} WHERE Key = @key";
             using var command = new SqliteCommand(query, connection);
             command.Parameters.AddWithValue("@key", keyString);
             var rowsAffected = await command.ExecuteNonQueryAsync();
@@ -319,7 +320,7 @@ namespace Elysium.Persistence.Services
 
             foreach(var (identity, setDetails) in valuesGroupedByKeyAndForeignKeys)
             {
-                var table = keyedTables[identity.PrimaryKey.Type];
+                var (table, sanitizedTable) = keyedTables[identity.PrimaryKey.Type];
                 var command = connection.CreateCommand();
                 var parameters = new Dictionary<string, (string, Func<SetDetails, string>)>
                 {
@@ -338,7 +339,7 @@ namespace Elysium.Persistence.Services
                     parameters.Add(foreignKeyColumn, ($"foreign_key_{j}", x => x.ForeignKeys[j].Parts[^1].Value));
                 }
 
-                command.CommandText = $"INSERT OR REPLACE INTO {table} ({string.Join(',', parameters.Keys)}) VALUES ({string.Join(',', parameters.Values.Select(v => $"@{v.Item1}"))})";
+                command.CommandText = $"INSERT OR REPLACE INTO {sanitizedTable} ({string.Join(',', parameters.Keys)}) VALUES ({string.Join(',', parameters.Values.Select(v => $"@{v.Item1}"))})";
 
 
                 var setParametersList = new List<Action<SetDetails>>();
@@ -431,7 +432,7 @@ namespace Elysium.Persistence.Services
             {
                 var keyString = _storageKeyConverter.Serialize(key);
                 var table = await GetOrUpsertTableAsync(key, connection);
-                var query = $"SELECT Value FROM {table} WHERE Key = @key";
+                var query = $"SELECT Value FROM {table.SanitizedTableName} WHERE Key = @key";
                 using var command = new SqliteCommand(query, connection);
                 command.Parameters.AddWithValue("@key", keyString);
                 var result = await command.ExecuteScalarAsync();
@@ -459,14 +460,14 @@ namespace Elysium.Persistence.Services
             await connection.OpenAsync();
             await EnableWalModeAsync(connection);
 
-            var table = await GetOrUpsertTableAsync(partialPrimaryKey, connection);
+            var (table, sanitizedTable) = await GetOrUpsertTableAsync(partialPrimaryKey, connection);
             var tableDescriptor = _existingTables[table];
             var foreignKeyString = _storageKeyConverter.GetTypeString(foreignKey);
             if (!tableDescriptor.Columns.Contains(foreignKeyString))
                 return [];
 
 
-            var query = $"SELECT Key, Value FROM {table} WHERE {SanitizeTableName(foreignKeyString)} = @foreignValue";
+            var query = $"SELECT Key, Value FROM {sanitizedTable} WHERE {SanitizeTableName(foreignKeyString)} = @foreignValue";
             using var command = new SqliteCommand(query, connection);
             command.Parameters.AddWithValue("@foreignValue", foreignKey.Parts[^1].Value);
             var reader = await command.ExecuteReaderAsync();
@@ -493,14 +494,14 @@ namespace Elysium.Persistence.Services
             await connection.OpenAsync();
             await EnableWalModeAsync(connection);
 
-            var table = await GetOrUpsertTableAsync(partialPrimaryKey, connection);
+            var (table, sanitizedTable) = await GetOrUpsertTableAsync(partialPrimaryKey, connection);
             var tableDescriptor = _existingTables[table];
             var foreignKeyString = _storageKeyConverter.GetTypeString(foreignKey);
 
             if (!tableDescriptor.Columns.Contains(foreignKeyString))
                 return new(StorageResultReason.NotFound);
 
-            var query = $"DELETE FROM {table} WHERE {SanitizeTableName(foreignKeyString)} = @foreignValue";
+            var query = $"DELETE FROM {sanitizedTable} WHERE {SanitizeTableName(foreignKeyString)} = @foreignValue";
             using var command = new SqliteCommand(query, connection);
             command.Parameters.AddWithValue("@foreignValue", foreignKey.Parts[^1].Value);
 

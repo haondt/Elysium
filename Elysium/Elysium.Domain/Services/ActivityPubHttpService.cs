@@ -169,9 +169,9 @@ namespace Elysium.Domain.Services
 
             var redirects = 0;
             HttpResponseMessage? response = null;
+            var message = await buildMessageAsync(method, data.Target.Iri, jsonLdPayload);
             do
             {
-                var message = await buildMessageAsync(method, data.Target.Iri, jsonLdPayload);
 
                 //var message = new HttpRequestMessage(HttpMethod.Get, data.Target.Iri);
 
@@ -201,7 +201,7 @@ namespace Elysium.Domain.Services
                         case System.Net.HttpStatusCode.PermanentRedirect:
                             redirects++;
                             if (redirects > settings.Value.MaxRedirects)
-                                throw new HttpServiceException(data.Target, data.Author, $"Too many redirects: exceeded {settings.Value.MaxRedirects} redirects while following {data.Target.iri}.");
+                                throw new HttpServiceException(data.Target, data.Author, $"Too many redirects: exceeded {settings.Value.MaxRedirects} redirects while following {data.Target.Iri}.");
 
                             if (response.Headers.Location == null)
                                 throw new InvalidOperationException("Redirect location header is missing.");
@@ -224,13 +224,10 @@ namespace Elysium.Domain.Services
                 }
                 catch (Exception ex)
                 {
+                    response?.Dispose();
                     if (ex is HttpServiceException)
                         throw;
                     throw new HttpServiceException(data.Target, data.Author, null, ex);
-                }
-                finally
-                {
-                    response?.Dispose();
                 }
             }
             while (true);
@@ -240,24 +237,32 @@ namespace Elysium.Domain.Services
         {
 
             var response = await SendAndFollowRedirectsAsync(HttpMethod.Get, data);
-            if (!response.IsSuccessful)
-                return new(response.Reason);
 
-
-
-            JToken? model;
             try
             {
-                model = JsonConvert.DeserializeObject<JToken>(await response.Value.Content.ReadAsStringAsync());
-            }
-            catch
-            {
-                throw new ActivityPubException($"Unable to deserialize data from {data.Target}");
-            }
-            if (model == null)
-                throw new ActivityPubException($"Unable to deserialize data from {data.Target}");
 
-            return new(model);
+                if (!response.IsSuccessful)
+                    return new(response.Reason);
+
+                JToken? model;
+                try
+                {
+                    model = JsonConvert.DeserializeObject<JToken>(await response.Value.Content.ReadAsStringAsync());
+                }
+                catch (Exception ex)
+                {
+                    throw new ActivityPubException($"Unable to deserialize data from {data.Target}", ex);
+                }
+                if (model == null)
+                    throw new ActivityPubException($"Unable to deserialize data from {data.Target}");
+
+                return new(model);
+            }
+            finally
+            {
+                if(response.IsSuccessful)
+                    response.Value.Dispose();
+            }
         }
 
         public async Task<Result<ElysiumWebReason>> PostAsync(HttpPostData data)
@@ -280,11 +285,20 @@ namespace Elysium.Domain.Services
             //    message.Headers.Add("Digest", digest);
             //    message.Headers.Add("Signature", signatureHeaderValue);
             //}
-            var response = await SendAndFollowRedirectsAsync(HttpMethod.Post, data, data.JsonLdPayload);
-            if (!response.IsSuccessful)
-                return new(response.Reason);
 
-            return new();
+            var response = await SendAndFollowRedirectsAsync(HttpMethod.Post, data, data.JsonLdPayload);
+            try
+            {
+                if (!response.IsSuccessful)
+                    return new(response.Reason);
+
+                return new();
+            }
+            finally
+            {
+                if(response.IsSuccessful)
+                    response.Value.Dispose();
+            }
         }
     }
 }
