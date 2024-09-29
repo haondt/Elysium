@@ -29,6 +29,12 @@ namespace Elysium.Domain.Extensions
             services.AddHttpClient<IActivityPubHttpService, ActivityPubHttpService>(client =>
             {
                 client.DefaultRequestHeaders.Add("Accept", "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"");
+            }).ConfigurePrimaryHttpMessageHandler(() =>
+            {
+                return new HttpClientHandler
+                {
+                    AllowAutoRedirect = false
+                };
             }).AddPolicyHandler(HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrTransientHttpStatusCode()

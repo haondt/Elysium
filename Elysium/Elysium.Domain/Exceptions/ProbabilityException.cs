@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace Elysium.Domain.Exceptions
 {
+
+    [GenerateSerializer]
     public class ProbabilityException : Exception
     {
         public ProbabilityException()

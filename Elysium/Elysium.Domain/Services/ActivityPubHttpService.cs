@@ -126,63 +126,129 @@ namespace Elysium.Domain.Services
 
             throw new NotImplementedException();
         }
-        private async Task<Optional<IHostIntegrityGrain>> ValidateHostAsync(RemoteIri target)
+        private async Task<(IHostIntegrityGrain, bool)> ValidateHostAsync(RemoteIri target)
         {
             var hostIntegrityGrain = uriGrainFactory.GetGrain<IHostIntegrityGrain>(target);
-            if (!await hostIntegrityGrain.ShouldSendRequest())
-                return new();
-            return new(hostIntegrityGrain);
+            return (hostIntegrityGrain, await hostIntegrityGrain.ShouldSendRequest());
+        }
+
+        private async Task<Result<HttpResponseMessage, ElysiumWebReason>> SendAndFollowRedirectsAsync(HttpMethod method, HttpRequestData data, string? jsonLdPayload = null)
+        {
+            async Task<HttpRequestMessage> buildMessageAsync(HttpMethod method, Uri location, string? jsonLdPayload = null)
+            {
+                var message = new HttpRequestMessage(method, location);
+                if (!string.IsNullOrEmpty(jsonLdPayload))
+                    message.Content = new StringContent(jsonLdPayload, Encoding.UTF8, "application/ld+json");
+
+                if (settings.Value.SignFetches && await data.Author.IsInASigningMoodAsync())
+                {
+                    var date = DateTimeOffset.UtcNow.ToString("r", CultureInfo.InvariantCulture);
+                    var stringToSign = $"(request-target): {method.ToString().ToLower()} {data.Target.Iri.ToString()}\nhost: {location.Host}\ndate: {date}";
+                    var digestHeaderPart = "";
+                    if (!string.IsNullOrEmpty(jsonLdPayload))
+                    {
+                        var digest = $"SHA-256={SHA256.HashData(Encoding.UTF8.GetBytes(jsonLdPayload))}";
+                        stringToSign += $"\ndigest {digest}";
+                        message.Headers.Add("Digest", digest);
+                        digestHeaderPart = " digest";
+                    }
+                    var signature = await data.Author.SignAsync(stringToSign);
+                    var signatureHeaderValue = $"keyId=\"{await data.Author.GetKeyIdAsync()}\",headers=\"(request-target) host date{digestHeaderPart}\",signature=\"{signature}\"";
+
+                    message.Headers.Add("Host", data.Target.Iri.Host);
+                    message.Headers.Add("Date", date);
+                    message.Headers.Add("Signature", signatureHeaderValue);
+                }
+
+                return message;
+            }
+
+            var (hostIntegrityGrain, isValid) = await ValidateHostAsync(data.Target);
+            if (!isValid)
+                return new(ElysiumWebReason.FaultyHost);
+
+            var redirects = 0;
+            HttpResponseMessage? response = null;
+            do
+            {
+                var message = await buildMessageAsync(method, data.Target.Iri, jsonLdPayload);
+
+                //var message = new HttpRequestMessage(HttpMethod.Get, data.Target.Iri);
+
+                try
+                {
+                    try
+                    {
+                        response = await httpClient.SendAsync(message);
+                        await hostIntegrityGrain.VoteFor();
+                    }
+                    catch
+                    {
+                        await hostIntegrityGrain.VoteAgainst();
+                        throw;
+                    }
+
+                    if (response.IsSuccessStatusCode)
+                        return new(response);
+
+                    switch (response.StatusCode)
+                    {
+                        case System.Net.HttpStatusCode.NotFound:
+                            return new(ElysiumWebReason.NotFound);
+                        case System.Net.HttpStatusCode.Redirect:
+                        case System.Net.HttpStatusCode.MovedPermanently:
+                        case System.Net.HttpStatusCode.TemporaryRedirect:
+                        case System.Net.HttpStatusCode.PermanentRedirect:
+                            redirects++;
+                            if (redirects > settings.Value.MaxRedirects)
+                                throw new HttpServiceException(data.Target, data.Author, $"Too many redirects: exceeded {settings.Value.MaxRedirects} redirects while following {data.Target.iri}.");
+
+                            if (response.Headers.Location == null)
+                                throw new InvalidOperationException("Redirect location header is missing.");
+
+                            var newUri = response.Headers.Location.IsAbsoluteUri
+                                ? response.Headers.Location
+                                : new Uri(message.RequestUri ?? throw new ArgumentNullException(nameof(message.RequestUri)), response.Headers.Location);
+
+                            message = await buildMessageAsync(method, newUri, jsonLdPayload);
+
+                            response.Dispose();
+                            continue;
+                        default:
+                            response.EnsureSuccessStatusCode(); // this will throw an exception
+                            throw new HttpRequestException($"Received an unsuccessful status code {response.StatusCode}"); // but just in case :)
+                    }
+
+                    // should never happen, but if it somehow does I don't want to spam someone with requests
+                    throw new InvalidOperationException($"response code was both successful and unsuccessful: {response.StatusCode}");
+                }
+                catch (Exception ex)
+                {
+                    if (ex is HttpServiceException)
+                        throw;
+                    throw new HttpServiceException(data.Target, data.Author, null, ex);
+                }
+                finally
+                {
+                    response?.Dispose();
+                }
+            }
+            while (true);
         }
 
         public async Task<Result<JToken, ElysiumWebReason>> GetAsync(HttpGetData data)
         {
-            var hostIntegrityGrain = await ValidateHostAsync(data.Target);
-            if (!hostIntegrityGrain.HasValue)
-                return new(ElysiumWebReason.FaultyHost);
 
-            //var x = await httpClient.GetAsync("https://w3id.org/security/v1");
-            //var y = await httpClient.GetAsync(data.Target.Iri);
+            var response = await SendAndFollowRedirectsAsync(HttpMethod.Get, data);
+            if (!response.IsSuccessful)
+                return new(response.Reason);
 
-            var message = new HttpRequestMessage(HttpMethod.Get, data.Target.Iri);
-
-            if (settings.Value.SignFetches && await data.Author.IsInASigningMoodAsync())
-            {
-                var date = DateTimeOffset.UtcNow.ToString("r", CultureInfo.InvariantCulture);
-                var stringToSign = $"(request-target): get {data.Target.Iri.ToString()}\nhost: {data.Target.Iri.Host}\ndate: {date}";
-                var signature = await data.Author.SignAsync(stringToSign);
-                var signatureHeaderValue = $"keyId=\"{await data.Author.GetKeyIdAsync()}\",headers=\"(request-target) host date\",signature=\"{signature}\"";
-
-                message.Headers.Add("Host", data.Target.Iri.Host);
-                message.Headers.Add("Date", date);
-                message.Headers.Add("Signature", signatureHeaderValue);
-            }
-
-            HttpResponseMessage response;
-            try
-            {
-                response = await httpClient.SendAsync(message);
-                if (!response.IsSuccessStatusCode)
-                {
-                    switch(response.StatusCode)
-                    {
-                        case System.Net.HttpStatusCode.NotFound:
-                            return new(ElysiumWebReason.NotFound);
-                    }
-                }
-            }
-            catch
-            {
-                await hostIntegrityGrain.Value.VoteAgainst();
-                throw;
-            }
-            await hostIntegrityGrain.Value.VoteFor();
-            response.EnsureSuccessStatusCode();
 
 
             JToken? model;
             try
             {
-                model = JsonConvert.DeserializeObject<JToken>(await response.Content.ReadAsStringAsync());
+                model = JsonConvert.DeserializeObject<JToken>(await response.Value.Content.ReadAsStringAsync());
             }
             catch
             {
@@ -196,49 +262,27 @@ namespace Elysium.Domain.Services
 
         public async Task<Result<ElysiumWebReason>> PostAsync(HttpPostData data)
         {
-            var hostIntegrityGrain = await ValidateHostAsync(data.Target);
-            if (!hostIntegrityGrain.HasValue)
-                return new (ElysiumWebReason.FaultyHost);
+            //var message = new HttpRequestMessage(HttpMethod.Post, data.Target.Iri)
+            //{
+            //    Content = new StringContent(data.JsonLdPayload, Encoding.UTF8, "application/ld+json"),
+            //};
 
-            var message = new HttpRequestMessage(HttpMethod.Post, data.Target.Iri)
-            {
-                Content = new StringContent(data.JsonLdPayload, Encoding.UTF8, "application/ld+json"),
-            };
+            //if (settings.Value.SignPushes && await data.Author.IsInASigningMoodAsync())
+            //{
+            //    var digest = $"SHA-256={SHA256.HashData(Encoding.UTF8.GetBytes(data.JsonLdPayload))}";
+            //    var date = DateTimeOffset.UtcNow.ToString("r", CultureInfo.InvariantCulture);
+            //    var stringToSign = $"(request-target): post {data.Target.Iri.ToString()}\nhost: {data.Target.Iri.Host}\ndate: {date}\ndigest: {digest}";
+            //    var signature = await data.Author.SignAsync(stringToSign);
+            //    var signatureHeaderValue = $"keyId=\"{await data.Author.GetKeyIdAsync()}\",headers=\"(request-target) host date digest\",signature=\"{signature}\"";
 
-            if (settings.Value.SignPushes && await data.Author.IsInASigningMoodAsync())
-            {
-                var digest = $"SHA-256={SHA256.HashData(Encoding.UTF8.GetBytes(data.JsonLdPayload))}";
-                var date = DateTimeOffset.UtcNow.ToString("r", CultureInfo.InvariantCulture);
-                var stringToSign = $"(request-target): post {data.Target.Iri.ToString()}\nhost: {data.Target.Iri.Host}\ndate: {date}\ndigest: {digest}";
-                var signature = await data.Author.SignAsync(stringToSign);
-                var signatureHeaderValue = $"keyId=\"{await data.Author.GetKeyIdAsync()}\",headers=\"(request-target) host date digest\",signature=\"{signature}\"";
-
-                message.Headers.Add("Host", data.Target.Iri.Host);
-                message.Headers.Add("Date", date);
-                message.Headers.Add("Digest", digest);
-                message.Headers.Add("Signature", signatureHeaderValue);
-            }
-
-            HttpResponseMessage response;
-            try
-            {
-                response = await httpClient.SendAsync(message);
-                if (!response.IsSuccessStatusCode)
-                {
-                    switch(response.StatusCode)
-                    {
-                        case System.Net.HttpStatusCode.NotFound:
-                            return new(ElysiumWebReason.NotFound);
-                    }
-                }
-            }
-            catch
-            {
-                await hostIntegrityGrain.Value.VoteAgainst();
-                throw;
-            }
-            await hostIntegrityGrain.Value.VoteFor();
-            response.EnsureSuccessStatusCode();
+            //    message.Headers.Add("Host", data.Target.Iri.Host);
+            //    message.Headers.Add("Date", date);
+            //    message.Headers.Add("Digest", digest);
+            //    message.Headers.Add("Signature", signatureHeaderValue);
+            //}
+            var response = await SendAndFollowRedirectsAsync(HttpMethod.Post, data, data.JsonLdPayload);
+            if (!response.IsSuccessful)
+                return new(response.Reason);
 
             return new();
         }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Elysium.Domain.Exceptions
 {
+    [GenerateSerializer]
     public class ActivityPubException : Exception
     {
         public ActivityPubException() : base() { }
