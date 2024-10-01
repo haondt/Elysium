@@ -56,7 +56,7 @@ namespace Elysium.Domain
         private readonly IAsyncStream<LocalActorOutgoingProcessingData> _outgoingStream;
         private readonly IAsyncStream<LocalActorIncomingProcessingData> _incomingStream;
 
-        private byte[]? _signingKey;
+        private PlaintextCryptographicActorData? _cryptographicActorData;
 
         public LocalActorGrain(
             [PersistentState(nameof(LocalActorState), GrainConstants.GrainStorage)] IPersistentState<LocalActorState> state,
@@ -92,9 +92,26 @@ namespace Elysium.Domain
 
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
-            await _state.ReadStateAsync();
             if (_state.State.IsInitialized)
-                _signingKey = _cryptoService.DecryptPrivateKey(_state.State.EncryptedSigningKey);
+            {
+                if (_cryptoService.ShouldUpdateMasterKeyVersion(_state.State.CryptographicActorData))
+                {
+                    var oldCryptographicData = _state.State.CryptographicActorData;
+                    _state.State.CryptographicActorData = _cryptoService.ReEncryptCryptographicActorData(_state.State.CryptographicActorData, _id);
+                    try
+                    {
+                        await _state.WriteStateAsync();
+                    }
+                    catch
+                    {
+                        _state.State.CryptographicActorData = oldCryptographicData;
+                        throw;
+                    }
+                }
+
+                _cryptographicActorData = _cryptoService.DecryptCryptographicActorData(_state.State.CryptographicActorData, _id);
+            }
+
             await base.OnActivateAsync(cancellationToken);
         }
 
@@ -104,24 +121,38 @@ namespace Elysium.Domain
             if (_state.State.IsInitialized)
                 throw new InvalidOperationException($"actor {_id} is already initialized");
 
-            var actorDocument = await GenerateDocumentAsync(registrationDetails.PublicKey, registrationDetails.EncryptedSigningKey);
+            var actorDocument = await GenerateDocumentAsync(registrationDetails.PublicKey, registrationDetails.Type);
 
+            var plaintextCryptographicData = new PlaintextCryptographicActorData
+            {
+                SigningKey = registrationDetails.PrivateKey
+            };
+            var cryptographicActorData = _cryptoService.EncryptCryptographicActorData(plaintextCryptographicData, _id);
+            var oldState = _state.State;
             _state.State = new LocalActorState
             {
-                EncryptedSigningKey = registrationDetails.EncryptedSigningKey,
+                CryptographicActorData = cryptographicActorData,
                 Id = _id,
                 IsInitialized = true,
                 PublicKey = registrationDetails.PublicKey,
                 Type = registrationDetails.Type,
             };
-            await _state.WriteStateAsync();
+
+            try
+            {
+                await _state.WriteStateAsync();
+            }
+            catch
+            {
+                _state.State = oldState;
+                throw;
+            }
 
             var result = await _documentService.CreateDocumentAsync(_id, _id, actorDocument, [], []);
             if (!result.IsSuccessful)
                 throw new Exception("todo: saga pattern would've saved ya here");
 
-
-            _signingKey = _cryptoService.DecryptPrivateKey(registrationDetails.EncryptedSigningKey);
+            _cryptographicActorData = plaintextCryptographicData;
         }
         private async Task<JObject> GenerateDocumentAsync(string publicKey, string type)
         {
@@ -358,12 +389,11 @@ namespace Elysium.Domain
             return Task.FromResult(_state.State);
         }
 
-        public Task<byte[]> GetSigningKeyAsync()
+        public Task<PlaintextCryptographicActorData> GetCryptographicDataAsync()
         {
             if (!_state.State.IsInitialized)
                 throw new InvalidOperationException($"actor {_id} is not initialized");
-            return Task.FromResult(_signingKey!);
+            return Task.FromResult(_cryptographicActorData!);
         }
-
     }
 }

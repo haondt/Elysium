@@ -478,7 +478,7 @@ namespace Elysium.Persistence.Services
             {
                 var key = reader.GetString(0);
                 var value = reader.GetString(1);
-                var obj = JsonConvert.DeserializeObject<TPrimary>(value)
+                var obj = JsonConvert.DeserializeObject<TPrimary>(value, _serializerSettings)
                     ?? throw new JsonException("unable to deserialize result");
                 var sk = _storageKeyConverter.Deserialize<TPrimary>(key)
                     ?? throw new JsonException("unable to deserialize key");

@@ -35,11 +35,11 @@ namespace Elysium.Silo.Api.Services
             var actorGrain = localGrainFactory.GetGrain<ILocalActorGrain>(actorIri);
             if (!(await actorGrain.IsInitializedAsync()))
             {
-                var (publicKey, encryptedPrivateKey) = cryptoService.GenerateKeyPair();
+                var (publicKey, privateKey) = cryptoService.GenerateKeyPair();
 
                 await actorGrain.InitializeAsync(new ActorRegistrationDetails
                 {
-                    EncryptedSigningKey = encryptedPrivateKey,
+                    PrivateKey = privateKey,
                     PublicKey = publicKey,
                     Type = payload.NewActorType ?? JsonLdTypes.PERSON
                 });

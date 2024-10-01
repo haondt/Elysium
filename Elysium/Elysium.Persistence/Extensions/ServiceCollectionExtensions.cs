@@ -1,4 +1,5 @@
-﻿using Elysium.Persistence.Services;
+﻿using Elysium.Core.Models;
+using Elysium.Persistence.Services;
 using Haondt.Core.Extensions;
 using Haondt.Persistence.Services;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +24,8 @@ namespace Elysium.Persistence.Extensions
                     services.AddSingleton<IStorage, ElysiumSqliteStorage>();
                     break;
             }
+
+            services.Configure<RedisSettings>(configuration.GetSection(nameof(RedisSettings)));
 
             return services;
         }

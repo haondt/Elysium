@@ -17,7 +17,7 @@ namespace Elysium.Domain
         private readonly LocalIri _id;
         private readonly ILocalActorGrain _mom;
         private readonly IUserCryptoService _cryptoService;
-        private byte[]? _signingKey;
+        private PlaintextCryptographicActorData? _cryptographicActorData;
 
         public LocalActorAuthorGrain(
             IUserCryptoService cryptoService,
@@ -30,7 +30,7 @@ namespace Elysium.Domain
 
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
-            _signingKey = await _mom.GetSigningKeyAsync();
+            _cryptographicActorData = await _mom.GetCryptographicDataAsync();
             await base.OnActivateAsync(cancellationToken);
         }
 
@@ -40,7 +40,7 @@ namespace Elysium.Domain
 
         public Task<string> SignAsync(string stringToSign)
         {
-            return Task.FromResult(_cryptoService.Sign(stringToSign, _signingKey!));
+            return Task.FromResult(_cryptoService.Sign(stringToSign, _cryptographicActorData!.SigningKey));
         }
 
         public Task<bool> IsInASigningMoodAsync() => Task.FromResult(true);

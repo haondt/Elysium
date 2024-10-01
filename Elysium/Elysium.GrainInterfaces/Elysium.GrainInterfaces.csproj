@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Elysium.ActivityPub\Elysium.ActivityPub.csproj" />
+    <ProjectReference Include="..\Elysium.Cryptography\Elysium.Cryptography.csproj" />
     <ProjectReference Include="..\Elysium.Hosting\Elysium.Hosting.csproj" />
   </ItemGroup>
 

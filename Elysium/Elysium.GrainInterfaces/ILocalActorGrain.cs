@@ -1,5 +1,6 @@
 ﻿using Elysium.ActivityPub.Models;
 using Elysium.Core.Models;
+using Elysium.Cryptography.Services;
 using Elysium.GrainInterfaces.Services;
 using Newtonsoft.Json.Linq;
 using Orleans;
@@ -60,6 +61,6 @@ namespace Elysium.GrainInterfaces
         Task<LocalActorState> GetStateAsync();
         Task InitializeAsync(ActorRegistrationDetails registrationDetails);
         [AlwaysInterleave]
-        Task<byte[]> GetSigningKeyAsync();
+        Task<PlaintextCryptographicActorData> GetCryptographicDataAsync();
     }
 }

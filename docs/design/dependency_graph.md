@@ -1,0 +1,34 @@
+https://mikhad.github.io/graph-builder/#2023
+
+Elysium.Persistence.Tests Elysium.Persistence 0
+Elysium Elysium.ActivityPub 0
+Elysium Elysium.Authentication 0
+Elysium Elysium.Client 0
+Elysium Elysium.Components 0
+Elysium Elysium.Domain 0
+Elysium Elysium.Hosting 0
+Elysium Elysium.Persistence 0
+Elysium.ActivityPub Elysium.Core 0
+Elysium.ActivityPub.Api Elysium.Grains 0
+Elysium.Authentication Elysium.Components 0
+Elysium.Authentication Elysium.Cryptography 0
+Elysium.Authentication Elysium.Persistence 0
+Elysium.Client Elysium.ActivityPub 0
+Elysium.Client Elysium.Authentication 0
+Elysium.Client Elysium.Domain 0
+Elysium.Client Elysium.GrainInterfaces 0
+Elysium.Domain Elysium.GrainInterfaces 0
+Elysium.GrainInterfaces Elysium.ActivityPub 0
+Elysium.GrainInterfaces Elysium.Hosting 0
+Elysium.Grains Elysium.Cryptography 0
+Elysium.Grains Elysium.Domain 0
+Elysium.Grains Elysium.GrainInterfaces 0
+Elysium.Grains Elysium.Persistence 0
+Elysium.Hosting Elysium.Core 0
+Elysium.Persistence Elysium.Core 0
+Elysium.Silo.Api Elysium.ActivityPub.Api 0
+Elysium.Silo.Api Elysium.GrainInterfaces 0
+Elysium.Silo.Api Elysium.Grains 0
+Elysium.Silo.Api Elysium.Hosting 0
+Elysium.Cryptography Elysium.Persistence 0
+Elysium.Cryptography Elysium.Core 0

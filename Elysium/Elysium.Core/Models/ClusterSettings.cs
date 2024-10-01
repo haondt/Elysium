@@ -1,5 +1,4 @@
-﻿using Elysiuim.Core.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,8 +10,8 @@ namespace Elysium.Core.Models
     {
         public string ClusterId { get; set; } = "default";
         public string ServiceId { get; set; } = "default";
-        public RedisSettings? RedisSettings { get; set; }
-
         public ClusteringStrategy ClusteringStrategy { get; set; } = ClusteringStrategy.Localhost;
+
+        public int RedisDatabase { get; set; } = 0;
     }
 }

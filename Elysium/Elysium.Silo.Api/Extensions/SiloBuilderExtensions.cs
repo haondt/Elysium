@@ -1,5 +1,5 @@
-﻿using Elysiuim.Core.Models;
-using Elysium.Core.Models;
+﻿using Elysium.Core.Models;
+using Elysium.Core.Extensions;
 using Haondt.Core.Extensions;
 using Orleans.Configuration;
 using StackExchange.Redis;
@@ -27,12 +27,13 @@ namespace Elysium.Silo.Extensions
                     builder.UseLocalhostClustering();
                     break;
                 case ClusteringStrategy.Redis:
-                    var redisSettings = clusterSettings.RedisSettings ?? throw new InvalidOperationException($"{nameof(ClusterSettings.RedisSettings)} is required for clustering strategy {ClusteringStrategy.Redis}.");
+                    var redisSettings = configuration.GetRequiredSection<RedisSettings>();
                     builder.UseRedisClustering(options =>
                     {
                         options.ConfigurationOptions = new ConfigurationOptions
                         {
-                            EndPoints = new EndPointCollection { redisSettings.Endpoint }
+                            EndPoints = new EndPointCollection { redisSettings.Endpoint },
+                            DefaultDatabase = clusterSettings.RedisDatabase
                         };
                     });
                     break;

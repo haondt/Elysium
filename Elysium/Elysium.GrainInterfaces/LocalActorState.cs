@@ -1,4 +1,5 @@
 ﻿using Elysium.Core.Models;
+using Elysium.Cryptography.Services;
 using Elysium.GrainInterfaces.Services;
 using Haondt.Identity.StorageKey;
 using System;
@@ -15,7 +16,7 @@ namespace Elysium.GrainInterfaces
         [Id(2)]
         public bool IsInitialized { get; set; } = false;
         [Id(3)]
-        public required string EncryptedSigningKey { get; set; }
+        public required EncryptedCryptographicActorData CryptographicActorData { get; set; }
         [Id(4)]
         public required string PublicKey { get; set; }
         [Id(5)]

@@ -35,14 +35,11 @@ namespace Elysium.Client.Services
 
         public async Task<Result<UserIdentity, List<string>>> RegisterUserAsync(string localizedUsername, string password)
         {
-            var (publicKey, encryptedPrivateKey) = cryptoService.GenerateKeyPair();
             var username = iriService.GetActornameFromLocalizedActorname(localizedUsername);
             var user = new UserIdentity
             {
                 Id = UserIdentity.GetStorageKey(username),
                 LocalizedUsername = localizedUsername,
-                PublicKey = publicKey,
-                EncryptedPrivateKey = encryptedPrivateKey
             };
             var result = await userManager.CreateAsync(user, password);
 
@@ -50,12 +47,18 @@ namespace Elysium.Client.Services
                 return new(result.Errors.Select(e => $"{e.Description}").ToList());
 
             var userIri = iriService.GetIriForLocalizedActorname(localizedUsername);
+            var (publicKey, privateKey) = cryptoService.GenerateKeyPair();
+            var cryptographicUserData = cryptoService.EncryptCryptographicActorData(new PlaintextCryptographicActorData
+            {
+                SigningKey = privateKey
+
+            }, userIri);
             try
             {
                 var grain = grainFactory.GetGrain<ILocalActorGrain>(userIri);
                 await grain.InitializeAsync(new ActorRegistrationDetails
                 {
-                    EncryptedSigningKey = encryptedPrivateKey,
+                    PrivateKey = privateKey,
                     PublicKey = publicKey,
                     Type = JsonLdTypes.PERSON
                 });

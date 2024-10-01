@@ -10,7 +10,7 @@ namespace Elysium.GrainInterfaces.Services
     public class ActorRegistrationDetails
     {
         [Id(0)]
-        public required string EncryptedSigningKey { get; set; }
+        public required byte[] PrivateKey { get; set; }
         [Id(1)]
         public required string PublicKey { get; set; }
         [Id(2)]

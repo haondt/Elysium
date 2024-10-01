@@ -1,4 +1,4 @@
-﻿using Elysium.Cryptography.Services;
+﻿using Elysium.Core.Models;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -6,31 +6,126 @@ using SimpleBase;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Elysium.Authentication.Services
+namespace Elysium.Cryptography.Services
 {
-    public class UserCryptoService(ICryptoService cryptoService,
-        IDataProtectionProvider dataProtector) : IUserCryptoService
+    public class UserCryptoService(ICryptoService cryptoService, IOptions<UserCryptoSettings> options) : IUserCryptoService
     {
-        private readonly IDataProtector _dataProtector = dataProtector.CreateProtector($"{nameof(UserCryptoService)}.v1");
-        public byte[] DecryptPrivateKey(string encryptedPrivateKey)
+        private readonly UserCryptoSettings _settings = options.Value;
+
+        public EncryptedCryptographicActorData ReEncryptCryptographicActorData(EncryptedCryptographicActorData data, LocalIri actorIri)
         {
-            return _dataProtector.Unprotect(Convert.FromBase64String(encryptedPrivateKey));
-            //return cryptoService.AesDecrypt(Convert.FromBase64String(encryptedPrivateKey), _encryptionKey, _iv);
+            if (!ShouldUpdateMasterKeyVersion(data))
+                return data;
+
+            var (derivedKey, _, _) = DeriveEncryptionKeyFromActorIri(actorIri, data.MasterKeyVersion);
+            var encryptionKey = cryptoService.AesDecrypt(
+                Convert.FromBase64String(data.EncryptedEncryptionKey),
+                derivedKey,
+                Convert.FromBase64String(data.EncryptedEncryptionKeyParameters.IV));
+
+            var (newDerivedKey, derivedKeyParameters, masterKeyVersion) = DeriveEncryptionKeyFromActorIri(actorIri);
+            var (encryptedEncryptionKey, encryptedEncryptionKeyIV) = cryptoService.AesEncrypt(encryptionKey, newDerivedKey);
+
+            return new EncryptedCryptographicActorData
+            {
+                MasterKeyVersion = masterKeyVersion,
+                DerivedKeyParameters = derivedKeyParameters,
+
+                EncryptedEncryptionKey = Convert.ToBase64String(encryptedEncryptionKey),
+                EncryptedEncryptionKeyParameters = new EncryptedDataParameters
+                {
+                    IV = Convert.ToBase64String(encryptedEncryptionKeyIV),
+                },
+
+                EncryptedSigningKey = data.EncryptedSigningKey,
+                EncryptedSigningKeyParameters = data.EncryptedSigningKeyParameters
+            };
         }
-        public (string PublicKey, string EncryptedPrivateKey) GenerateKeyPair()
+
+        public PlaintextCryptographicActorData DecryptCryptographicActorData(EncryptedCryptographicActorData data, LocalIri actorIri)
         {
+            var (derivedKey, _, _) = DeriveEncryptionKeyFromActorIri(actorIri, data.MasterKeyVersion);
+            var encryptionKey = cryptoService.AesDecrypt(
+                Convert.FromBase64String(data.EncryptedEncryptionKey),
+                derivedKey,
+                Convert.FromBase64String(data.EncryptedEncryptionKeyParameters.IV));
+            var signingKey = cryptoService.AesDecrypt(
+                Convert.FromBase64String(data.EncryptedSigningKey),
+                encryptionKey,
+                Convert.FromBase64String(data.EncryptedSigningKeyParameters.IV));
 
-            var (publicKey, privateKey) = cryptoService.GenerateKeyPair();
-            var encryptedPrivateKey = _dataProtector.Protect(publicKey);
+            return new PlaintextCryptographicActorData
+            {
+                SigningKey = signingKey
+            };
+        }
 
-            //var encryptedPrivateKey = cryptoService.AesEncrypt(privateKey, _encryptionKey, _iv);
+        public EncryptedCryptographicActorData EncryptCryptographicActorData(PlaintextCryptographicActorData data, LocalIri actorIri)
+        {
+            var (derivedKey, derivedKeyParameters, masterKeyVersion) = DeriveEncryptionKeyFromActorIri(actorIri);
 
-            return (Convert.ToBase64String(publicKey), Convert.ToBase64String(encryptedPrivateKey));
+            var encryptionKey = GenerateEncryptionKey();
+            var (encryptedEncryptionKey, encryptedEncryptionKeyIV) = cryptoService.AesEncrypt(encryptionKey, derivedKey);
+
+            var (encryptedSigningKey, encryptedSigningKeyIV) = cryptoService.AesEncrypt(data.SigningKey, encryptionKey);
+
+            return new EncryptedCryptographicActorData
+            {
+                MasterKeyVersion = masterKeyVersion,
+                DerivedKeyParameters = derivedKeyParameters,
+
+                EncryptedEncryptionKey = Convert.ToBase64String(encryptedEncryptionKey),
+                EncryptedEncryptionKeyParameters = new EncryptedDataParameters
+                {
+                    IV = Convert.ToBase64String(encryptedEncryptionKeyIV),
+                },
+
+                EncryptedSigningKey = Convert.ToBase64String(encryptedSigningKey),
+                EncryptedSigningKeyParameters = new EncryptedDataParameters
+                {
+                    IV = Convert.ToBase64String(encryptedSigningKeyIV)
+                }
+            };
+        }
+
+        public bool ShouldUpdateMasterKeyVersion(EncryptedCryptographicActorData data)
+        {
+            return data.MasterKeyVersion != _settings.ActorDataEncryptionKeySettings.CurrentVersion;
+        }
+
+        private (byte[] EncryptionKey, DerivedEncryptionKeyParameters Parameters, int MasterKeyVersion) DeriveEncryptionKeyFromActorIri(LocalIri actorIri, int? preferredMasterKeyVersion = null)
+        {
+            var masterKeyVersion = preferredMasterKeyVersion ?? _settings.ActorDataEncryptionKeySettings.CurrentVersion;
+            var masterKey = Convert.FromBase64String(_settings.ActorDataEncryptionKeySettings.Keys[masterKeyVersion]);
+
+            var salt = Encoding.UTF8.GetBytes(actorIri.ToString());
+            var parameters = new DerivedEncryptionKeyParameters
+            {
+                Salt = Convert.ToBase64String(salt),
+                Iterations = _settings.DefaultPbkdf2Iterations,
+                HashAlgorithmName = _settings.DefaultPbkdf2HashAlgorithm,
+                SizeInBits = _settings.DefaultEncryptionKeySizeInBits,
+            };
+            return (cryptoService.DerivePbkdf2EncryptionKey(
+                masterKey,
+                salt,
+                parameters.Iterations,
+                new HashAlgorithmName(parameters.HashAlgorithmName),
+                parameters.SizeInBits), parameters, masterKeyVersion);
+        }
+
+
+        private byte[] GenerateEncryptionKey() => cryptoService.GenerateAesEncryptionKey(_settings.DefaultEncryptionKeySizeInBits);
+
+        public (string PublicKey, byte[] PrivateKey) GenerateKeyPair()
+        {
+            var (publicKey, privateKey) = cryptoService.GenerateRSAKeyPair(_settings.DefaultRSAKeySizeInBits);
+            return (Convert.ToBase64String(publicKey), privateKey);
         }
 
         public string Sign(string data, byte[] privateKey)
         {
-            var signatureBytes = cryptoService.Sign(Encoding.UTF8.GetBytes(data), privateKey);
+            var signatureBytes = cryptoService.CreateRSASignature(Encoding.UTF8.GetBytes(data), privateKey);
             return Convert.ToBase64String(signatureBytes);
         }
 
@@ -38,7 +133,7 @@ namespace Elysium.Authentication.Services
         {
             try
             {
-                return cryptoService.VerifySignature(
+                return cryptoService.VerifyRSASignature(
                     Convert.FromBase64String(data),
                     Convert.FromBase64String(signature),
                     Convert.FromBase64String(publicKey));
@@ -52,7 +147,7 @@ namespace Elysium.Authentication.Services
         // generate a random 64 bit object id, encoded as a url-safe base64 string
         public string GenerateDocumentId()
         {
-            var bytes = cryptoService.GenerateRandomBytes(8);
+            var bytes = cryptoService.GenerateRandomBytes(_settings.DefaultDocumentIdSizeInBytes);
             return Base64UrlEncoder.Encode(bytes);
         }
 
@@ -73,7 +168,7 @@ namespace Elysium.Authentication.Services
             {
                 // base-64-url-no-pad
                 input = input.Substring(1).Replace('-', '+').Replace('_', '/');
-                switch(input.Length % 4)
+                switch (input.Length % 4)
                 {
                     case 2: input += "=="; break;
                     case 3: input += "="; break;

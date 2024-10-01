@@ -36,7 +36,7 @@ builder.Host
             .AddElysiumSiloServices()
             .AddElysiumGrainServices(context.Configuration)
             .AddElysiumDomainServices(context.Configuration)
-            .AddElysiumCryptoServices()
+            .AddElysiumCryptoServices(context.Configuration)
             .AddElysiumHostingServices(context.Configuration)
             .AddElysiumPersistenceServices(context.Configuration);
     });

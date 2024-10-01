@@ -1,4 +1,6 @@
-﻿using SimpleBase;
+﻿using Elysium.Core.Models;
+using Microsoft.Extensions.Options;
+using SimpleBase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,21 +10,22 @@ using System.Threading.Tasks;
 
 namespace Elysium.Cryptography.Services
 {
-    public class CryptoService : ICryptoService
+    public class CryptoService() : ICryptoService
     {
-        public byte[] AesEncrypt(byte[] data, byte[] encryptionKey, byte[] iv)
+
+        public (byte[] EncryptedData, byte[] IV)  AesEncrypt(byte[] data, byte[] encryptionKey)
         {
             using Aes aes = Aes.Create();
             aes.Key = encryptionKey;
-            aes.IV = iv;
+            aes.GenerateIV();
 
             var encryptor = aes.CreateEncryptor();
             using var ms = new MemoryStream();
             using var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write);
-            using var sw = new StreamWriter(cs);
+            cs.Write(data, 0, data.Length);
+            cs.FlushFinalBlock();
 
-            sw.Write(data);
-            return ms.ToArray();
+            return (ms.ToArray(), aes.IV);
         }
 
         public byte[] AesDecrypt(byte[] data, byte[] encryptionKey, byte[] iv)
@@ -33,22 +36,40 @@ namespace Elysium.Cryptography.Services
 
             var decryptor = aes.CreateDecryptor();
             using var ms = new MemoryStream();
-            using var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read);
-            using var sw = new StreamWriter(cs);
+            using var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Write);
+            cs.Write(data, 0, data.Length);
+            cs.FlushFinalBlock();
 
-            sw.Write(data);
             return ms.ToArray();
         }
 
-        public (byte[] PublicKey, byte[] PrivateKey) GenerateKeyPair()
+        public (byte[] PublicKey, byte[] PrivateKey) GenerateRSAKeyPair(int keySizeInBits)
         {
-            using var rsa = RSA.Create(2048);
+            using var rsa = RSA.Create(keySizeInBits);
             var publicKey = rsa.ExportRSAPublicKey();
             var privateKey = rsa.ExportRSAPrivateKey();
             return (publicKey, privateKey);
         }
 
-        public byte[] Sign(byte[] data, byte[] privateKey)
+        public byte[] GenerateAesEncryptionKey(int keySizeInBits)
+        {
+            using var aes = Aes.Create();
+            aes.KeySize = keySizeInBits;
+            aes.GenerateKey();
+            return aes.Key;
+        }
+
+        public byte[] DerivePbkdf2EncryptionKey(
+            byte[] sourceBytes,
+            byte[] salt,
+            int iterations,
+            HashAlgorithmName hashAlgorithmName,
+            int encryptionKeySizeInBits)
+        {
+            return Rfc2898DeriveBytes.Pbkdf2(sourceBytes, salt, iterations, hashAlgorithmName, encryptionKeySizeInBits / 8);
+        }
+
+        public byte[] CreateRSASignature(byte[] data, byte[] privateKey)
         {
             using var rsa = RSA.Create();
             return rsa.SignData(data, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
@@ -59,7 +80,7 @@ namespace Elysium.Cryptography.Services
             return RandomNumberGenerator.GetBytes(num);
         }
 
-        public bool VerifySignature(byte[] data, byte[] signature, byte[] publicKey)
+        public bool VerifyRSASignature(byte[] data, byte[] signature, byte[] publicKey)
         {
             using var rsa = RSA.Create();
             return rsa.VerifyData(data, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);

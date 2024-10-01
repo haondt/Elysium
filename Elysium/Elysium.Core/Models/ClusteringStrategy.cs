@@ -1,4 +1,4 @@
-﻿namespace Elysiuim.Core.Models
+﻿namespace Elysium.Core.Models
 {
     public enum ClusteringStrategy
     {
