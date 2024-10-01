@@ -46,6 +46,7 @@
 - seperate out localizedUsername, display name and iris - the mapping should be done by webfinger i think?
 - instanceActorAuthorGrain can be made into a static class
 - replace orleans streams with durable queue based on redis
+- replace sqlite with either postgres or mongodb
 
 ## currently doing
 - get message sending successfully
