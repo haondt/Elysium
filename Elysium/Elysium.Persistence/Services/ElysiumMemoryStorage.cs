@@ -1,4 +1,5 @@
-﻿using Haondt.Core.Models;
+﻿using Elysium.Core.Converters;
+using Haondt.Core.Models;
 using Haondt.Identity.StorageKey;
 using Haondt.Persistence.Services;
 
@@ -6,7 +7,7 @@ namespace Elysium.Persistence.Services
 {
     public class MemoryEntry
     {
-        public required object Value { get; set; }
+        public required object? Value { get; set; }
         public HashSet<StorageKey> ForeignKeys { get; set; } = [];
     }
 
@@ -41,7 +42,7 @@ namespace Elysium.Persistence.Services
         public Task<Result<T, StorageResultReason>> Get<T>(StorageKey<T> key)
         {
             if (_storage.TryGetValue(key, out var value))
-                return Task.FromResult(new Result<T, StorageResultReason>((T)value.Value));
+                return Task.FromResult(new Result<T, StorageResultReason>(TypeCoercer.Coerce<T>(value.Value)));
             return Task.FromResult(new Result<T, StorageResultReason>(StorageResultReason.NotFound));
         }
 
@@ -49,7 +50,7 @@ namespace Elysium.Persistence.Services
         {
             return Task.FromResult(_storage
                 .Where(kvp => kvp.Value.ForeignKeys.Contains(foreignKey))
-                .Select(kvp => (kvp.Key.As<T>(), (T)kvp.Value.Value))
+                .Select(kvp => (kvp.Key.As<T>(), TypeCoercer.Coerce<T>(kvp.Value.Value)))
                 .ToList());
         }
 
@@ -60,18 +61,18 @@ namespace Elysium.Persistence.Services
             return results.Select(r =>
             {
                 if (r.IsSuccessful)
-                    return new((T)r.Value);
+                    return new(TypeCoercer.Coerce<T>(r.Value));
                 return new Result<T, StorageResultReason>(r.Reason);
             }).ToList();
         }
 
-        public Task<List<Result<object, StorageResultReason>>> GetMany(List<StorageKey> keys)
+        public Task<List<Result<object?, StorageResultReason>>> GetMany(List<StorageKey> keys)
         {
             return Task.FromResult(keys.Select(k =>
             {
-                if (_storage.TryGetValue(k, out var value) && value.Value.GetType() == k.Type)
+                if (_storage.TryGetValue(k, out var value))
                     return new(value.Value);
-                return new Result<object, StorageResultReason>(StorageResultReason.NotFound);
+                return new Result<object?, StorageResultReason>(StorageResultReason.NotFound);
             }).ToList());
         }
 
@@ -92,7 +93,7 @@ namespace Elysium.Persistence.Services
 
         public Task Set<T>(StorageKey<T> key, T value) => Set(key, value, []);
 
-        public Task SetMany(List<(StorageKey Key, object Value)> values)
+        public Task SetMany(List<(StorageKey Key, object? Value)> values)
         {
             foreach (var (key, value) in values)
                 _storage[key] = new MemoryEntry { Value = value };

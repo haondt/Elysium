@@ -6,8 +6,8 @@ namespace Elysium.Persistence.Services
 {
     public interface IElysiumStorage : IStorage
     {
-        Task SetMany(List<(StorageKey Key, object Value)> values);
-        Task<List<Result<object, StorageResultReason>>> GetMany(List<StorageKey> keys);
+        Task SetMany(List<(StorageKey Key, object? Value)> values);
+        Task<List<Result<object?, StorageResultReason>>> GetMany(List<StorageKey> keys);
         Task<List<Result<T, StorageResultReason>>> GetMany<T>(List<StorageKey<T>> keys);
 
         Task Set<T>(StorageKey<T> key, T value, List<StorageKey<T>> foreignKeys);

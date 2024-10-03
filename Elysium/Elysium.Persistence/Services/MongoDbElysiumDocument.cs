@@ -7,7 +7,7 @@ namespace Elysium.Persistence.Services
     public class MongoDbElysiumDocument
     {
         public required StorageKey PrimaryKey { get; set; }
-        public List<string> ForeignKeys { get; set; } = [];
+        public List<StorageKey> ForeignKeys { get; set; } = [];
         public required object? Value { get; set; }
     }
 }

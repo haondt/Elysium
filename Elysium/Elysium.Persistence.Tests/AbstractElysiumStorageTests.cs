@@ -125,7 +125,7 @@ namespace Elysium.Persistence.Tests
             var ids = Enumerable.Range(0, 10)
                 .Select(_ => Guid.NewGuid().ToString());
             var keys = ids.Select(StorageKey<Car>.Create);
-            var pairs = keys.Select((key, i) => ((StorageKey)key, (object)new Car { Color = $"color_{i}" })).ToList();
+            var pairs = keys.Select((key, i) => ((StorageKey)key, (object?)new Car { Color = $"color_{i}" })).ToList();
             await elysiumStorage.SetMany(pairs);
 
             for (int i = 0; i < pairs.Count; i++)

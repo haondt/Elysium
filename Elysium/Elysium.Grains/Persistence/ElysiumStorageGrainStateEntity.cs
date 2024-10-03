@@ -15,7 +15,7 @@ namespace Elysium.Domain.Persistence
             return StorageKey<ElysiumStorageGrainStateEntity<T>>.Create($"{keyString}");
         }
 
-        public string StateName { get; set; } = default!;
-        public T Value { get; set; } = default!;
+        public required string StateName { get; set; }
+        public required T Value { get; set; }
     }
 }

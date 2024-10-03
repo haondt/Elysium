@@ -1,4 +1,5 @@
-﻿using Elysium.Core.Exceptions;
+﻿using Elysium.Core.Converters;
+using Elysium.Core.Exceptions;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics.CodeAnalysis;
 
@@ -10,8 +11,7 @@ namespace Elysium.Core.Extensions
         public static T Get<T>(this JObject jObject, string name) where T : JToken
         {
             var result = jObject[name];
-            if (result is not T castedValue) throw new InvalidCastException($"Cannot cast object of type {result?.GetType()} to {typeof(T)}");
-            return castedValue;
+            return TypeCoercer.Coerce<T>(result);
         }
         public static bool Is<T>(this JToken jtoken) where T : JToken
         {
@@ -31,14 +31,12 @@ namespace Elysium.Core.Extensions
 
         public static T As<T>(this JToken jtoken) where T : JToken
         {
-            if (jtoken is not T tValue) throw new InvalidCastException($"Cannot cast object of type {jtoken.GetType()} to {typeof(T)}");
-            return tValue;
+            return TypeCoercer.Coerce<T>(jtoken);
         }
 
         public static TResult As<TToken, TResult>(this TToken jtoken) where TToken : JToken where TResult : JToken
         {
-            if (jtoken is not TResult tValue) throw new InvalidCastException($"Cannot cast object of type {jtoken.GetType()} to {nameof(TResult)}");
-            return tValue;
+            return TypeCoercer.Coerce<TResult>(jtoken);
         }
 
         public static string AsString(this JToken jtoken)
@@ -52,8 +50,7 @@ namespace Elysium.Core.Extensions
         {
             if (!target.ContainsKey(key))
                 target[key] = defaultValueFactory();
-            if (target[key] is not T castedValue) throw new InvalidCastException($"existing value has type {target[key]?.GetType()} but was expecting {typeof(T)}");
-            return castedValue;
+            return TypeCoercer.Coerce<T>(target[key]);
         }
 
         public static TValue SetDefault<TFiller, TValue>(this JArray target, int index, Func<TFiller> fillerValueFactory, Func<TValue> defaultValueFactory)
@@ -64,8 +61,7 @@ namespace Elysium.Core.Extensions
                 target.Add(fillerValueFactory());
             if (target.Count == index)
                 target.Add(defaultValueFactory());
-            if (target[index] is not TValue castedValue) throw new InvalidCastException($"existing value has type {target[index]?.GetType()} but was expecting {typeof(TValue)}");
-            return castedValue;
+            return TypeCoercer.Coerce<TValue>(target[index]);
         }
     }
 

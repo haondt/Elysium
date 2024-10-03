@@ -1,4 +1,5 @@
-﻿using Haondt.Core.Models;
+﻿using Elysium.Core.Converters;
+using Haondt.Core.Models;
 using Haondt.Identity.StorageKey;
 using Haondt.Persistence.Services;
 using Microsoft.Extensions.Options;
@@ -24,7 +25,6 @@ namespace Elysium.Persistence.Services
 
         public Task<bool> ContainsKey(StorageKey key)
         {
-            var keyString = StorageKeyConvert.Serialize(key);
             return _queryableCollection
                 .Where(q => q.PrimaryKey == key)
                 .AnyAsync();
@@ -36,39 +36,69 @@ namespace Elysium.Persistence.Services
             return result.DeletedCount == 0 ? new(StorageResultReason.NotFound) : new();
         }
 
-        public Task<Result<int, StorageResultReason>> DeleteMany<T>(StorageKey<T> foreignKey)
+        public async Task<Result<int, StorageResultReason>> DeleteMany<T>(StorageKey<T> foreignKey)
         {
-            throw new NotImplementedException();
+            var result = await _collection.DeleteManyAsync(q => q.ForeignKeys.Any(fk => fk == foreignKey ));
+            return result.DeletedCount == 0 ? new(StorageResultReason.NotFound) : new(checked((int)result.DeletedCount));
         }
 
-        public Task<Result<T, StorageResultReason>> Get<T>(StorageKey<T> key)
+        public async Task<Result<T, StorageResultReason>> Get<T>(StorageKey<T> key)
         {
-            throw new NotImplementedException();
+            var result = await _queryableCollection.Where(q => q.PrimaryKey == key)
+                .ToListAsync();
+            if (result.Count == 0)
+                return new (StorageResultReason.NotFound);
+            return new(TypeCoercer.Coerce<T>(result.First().Value));
         }
 
-        public Task<List<Result<object, StorageResultReason>>> GetMany(List<StorageKey> keys)
+        public async Task<List<Result<object?, StorageResultReason>>> GetMany(List<StorageKey> keys)
         {
-            throw new NotImplementedException();
+            var foundItems = await _queryableCollection.Where(q => keys.Contains(q.PrimaryKey)).ToListAsync();
+            var foundItemsDict = foundItems.ToDictionary(d => d.PrimaryKey, d => d);
+            return keys.Select(key =>
+            {
+                if (!foundItemsDict.TryGetValue(key, out var result))
+                    return new Result<object?, StorageResultReason>(StorageResultReason.NotFound);
+                return new(result.Value);
+            }).ToList();
         }
 
-        public Task<List<Result<T, StorageResultReason>>> GetMany<T>(List<StorageKey<T>> keys)
+        public async Task<List<Result<T, StorageResultReason>>> GetMany<T>(List<StorageKey<T>> keys)
         {
-            throw new NotImplementedException();
+            var foundItems = await _queryableCollection.Where(q => keys.Contains(q.PrimaryKey)).ToListAsync();
+            var foundItemsDict = foundItems.ToDictionary(d => d.PrimaryKey.As<T>(), d => d);
+            return keys.Select(key =>
+            {
+                if (!foundItemsDict.TryGetValue(key, out var result))
+                    return new Result<T, StorageResultReason>(StorageResultReason.NotFound);
+                return new(TypeCoercer.Coerce<T>(result.Value));
+            }).ToList();
         }
 
-        public Task<List<(StorageKey<T> Key, T Value)>> GetMany<T>(StorageKey<T> foreignKey)
+        public async Task<List<(StorageKey<T> Key, T Value)>> GetMany<T>(StorageKey<T> foreignKey)
         {
-            throw new NotImplementedException();
+            var result = await _queryableCollection.Where(q => q.ForeignKeys.Any(fk => fk == foreignKey))
+                .ToListAsync();
+            return result
+                .Select(q => (q.PrimaryKey.As<T>(), TypeCoercer.Coerce<T>(q.Value)))
+                .ToList();
         }
 
         public Task Set<T>(StorageKey<T> key, T value, List<StorageKey<T>> foreignKeys)
         {
-            throw new NotImplementedException();
+            return _collection.FindOneAndReplaceAsync<MongoDbElysiumDocument>(d => d.PrimaryKey == key, new MongoDbElysiumDocument
+            {
+                PrimaryKey = key,
+                ForeignKeys = foreignKeys.Cast<StorageKey>().ToList(),
+                Value = value
+            }, new FindOneAndReplaceOptions<MongoDbElysiumDocument, MongoDbElysiumDocument>
+            {
+                IsUpsert = true
+            });
         }
 
         public Task Set<T>(StorageKey<T> key, T value)
         {
-            var keyString = StorageKeyConvert.Serialize(key);
             return _collection.FindOneAndReplaceAsync<MongoDbElysiumDocument>(d => d.PrimaryKey == key, new MongoDbElysiumDocument
             {
                 PrimaryKey = key,
@@ -79,20 +109,30 @@ namespace Elysium.Persistence.Services
             });
         }
 
-        public Task SetMany(List<(StorageKey Key, object Value)> values)
+        public Task SetMany(List<(StorageKey Key, object? Value)> values)
         {
-            throw new NotImplementedException();
+            if (values.Count == 0)
+                return Task.CompletedTask;
+
+            var bulkOps = new List<WriteModel<MongoDbElysiumDocument>>();
+
+            foreach (var (key, value) in values)
+            {
+                var filter = Builders<MongoDbElysiumDocument>.Filter.Eq(d => d.PrimaryKey, key);
+                var replaceOneModel = new ReplaceOneModel<MongoDbElysiumDocument>(filter, new MongoDbElysiumDocument
+                {
+                    PrimaryKey = key,
+                    Value = value
+                })
+                {
+                    IsUpsert = true
+                };
+
+                bulkOps.Add(replaceOneModel);
+            }
+
+            return _collection.BulkWriteAsync(bulkOps);
         }
 
-        //public async Task<List<Result<T, StorageResultReason>>> GetMany<T>(List<StorageKey<T>> keys)
-        //{
-        //    var results = await GetMany(keys.Cast<StorageKey>().ToList());
-        //    return results.Select(r =>
-        //    {
-        //        if (r.IsSuccessful)
-        //            return new((T)r.Value);
-        //        return new Result<T, StorageResultReason>(r.Reason);
-        //    }).ToList();
-        //}
     }
 }

@@ -34,11 +34,9 @@ namespace Elysium.Domain.Persistence
             var key = ElysiumStorageGrainStateEntity<T>.GetStorageKey(clusterOptions.Value.ServiceId, grainId);
             try
             {
-
                 var result = await elysiumStorage.Get(key);
                 if (!result.IsSuccessful)
                 {
-
                     if (result.Reason == Haondt.Persistence.Services.StorageResultReason.NotFound)
                     {
                         grainState.State = ActivatorUtilities.CreateInstance<T>(serviceProvider);

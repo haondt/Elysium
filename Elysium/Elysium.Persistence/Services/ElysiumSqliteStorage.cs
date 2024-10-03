@@ -1,4 +1,5 @@
-﻿using Elysium.Persistence.Converters;
+﻿using Elysium.Core.Converters;
+using Elysium.Persistence.Converters;
 using Haondt.Core.Models;
 using Haondt.Identity.StorageKey;
 using Haondt.Persistence.Services;
@@ -219,7 +220,7 @@ namespace Elysium.Persistence.Services
             return Task.FromResult(new Result<StorageResultReason>());
         }
 
-        public Task SetMany(List<(StorageKey Key, object Value)> values)
+        public Task SetMany(List<(StorageKey Key, object? Value)> values)
         {
             InternalSetMany(values.Select(v => (v.Key, v.Value, new List<StorageKey>())));
             return Task.CompletedTask;
@@ -257,7 +258,7 @@ namespace Elysium.Persistence.Services
         //    }
         //}
 
-        private void InternalSetMany(IEnumerable<(StorageKey Key, object Value, List<StorageKey> ForeignKeys)> values)
+        private void InternalSetMany(IEnumerable<(StorageKey Key, object? Value, List<StorageKey> ForeignKeys)> values)
         {
             WithTransaction((connection, transaction) =>
             {
@@ -270,7 +271,7 @@ namespace Elysium.Persistence.Services
                 //else
                 //    primaryKeyInsertCommand.CommandText = $"INSERT OR REPLACE INTO {_primaryTableName} (Key, Value) VALUES (@key, @value)";
 
-                var primaryTableInsertParameters = new List<(string Column, string ParameterName, Func<StorageKey, object, List<StorageKey>, string> ParameterRetriever)>
+                var primaryTableInsertParameters = new List<(string Column, string ParameterName, Func<StorageKey, object?, List<StorageKey>, string> ParameterRetriever)>
                 {
                     ("PrimaryKey", "primaryKey", (k, v, fk) => StorageKeyConvert.Serialize(k)),
                     ("Value", "value", (k, v, fk) => JsonConvert.SerializeObject(v, _serializerSettings))
@@ -278,7 +279,7 @@ namespace Elysium.Persistence.Services
                 if (_settings.StoreKeyStrings)
                     primaryTableInsertParameters.Add(("KeyString", "keyString", (k, v, fk) => k.ToString()));
 
-                var setPrimaryTableInsertCommandParameters = new List<Action<StorageKey, object, List<StorageKey>>>();
+                var setPrimaryTableInsertCommandParameters = new List<Action<StorageKey, object?, List<StorageKey>>>();
                 foreach (var (column, parameterName, parameterRetriever) in primaryTableInsertParameters)
                 {
                     var parameter = primaryTableInsertCommand.CreateParameter();
@@ -528,12 +529,12 @@ namespace Elysium.Persistence.Services
             return results.Select(r =>
             {
                 if (r.IsSuccessful)
-                    return new((T)r.Value);
+                    return new(TypeCoercer.Coerce<T>(r.Value));
                 return new Result<T, StorageResultReason>(r.Reason);
             }).ToList();
         }
 
-        public Task<List<Result<object, StorageResultReason>>> GetMany(List<StorageKey> keys)
+        public Task<List<Result<object?, StorageResultReason>>> GetMany(List<StorageKey> keys)
         {
             var results = WithConnection(connection =>
             {
@@ -547,7 +548,7 @@ namespace Elysium.Persistence.Services
                 parameter.ParameterName = "@key";
                 command.Parameters.Add(parameter);
 
-                var results = new List<Result<object, StorageResultReason>>();
+                var results = new List<Result<object?, StorageResultReason>>();
                 foreach (var key in keys)
                 {
                     var keyString = StorageKeyConvert.Serialize(key);
