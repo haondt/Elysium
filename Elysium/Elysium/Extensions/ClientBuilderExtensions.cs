@@ -1,15 +1,7 @@
 ﻿using Elysium.Core.Models;
-using Elysium.Extensions;
 using Haondt.Core.Extensions;
-using Microsoft.Extensions.Configuration;
 using Orleans.Configuration;
 using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Elysium.Core.Extensions;
 
 namespace Elysium.Extensions
 {

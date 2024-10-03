@@ -1,6 +1,4 @@
-﻿using Elysium.ActivityPub.Helpers;
-using Elysium.ActivityPub.Helpers.ActivityCompositor;
-using Elysium.ActivityPub.Models;
+﻿using Elysium.ActivityPub.Models;
 using Elysium.Core.Extensions;
 using Newtonsoft.Json.Linq;
 
@@ -34,7 +32,7 @@ namespace Elysium.ActivityPub.Helpers.ActivityCompositor
                         .Build();
             }
 
-            return new (new InvalidOperationException($"Unkown object details type {details.GetType()}"));
+            return new(new InvalidOperationException($"Unkown object details type {details.GetType()}"));
         }
 
         public static JArray Composit(PrePublishActivityDetails details)
@@ -62,7 +60,7 @@ namespace Elysium.ActivityPub.Helpers.ActivityCompositor
                 activityObjectMainObjectCloneResult.Remove(JsonLdTypes.BTO);
 
             // dereference activity object
-            activityMainObjectCloneResult[JsonLdTypes.OBJECT] =  activityObjectClone;
+            activityMainObjectCloneResult[JsonLdTypes.OBJECT] = activityObjectClone;
 
             return activityClone.As<JArray>();
         }

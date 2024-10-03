@@ -1,23 +1,8 @@
 ﻿using Elysium.Core.Models;
-using Elysium.GrainInterfaces.Services;
-using Elysium.Domain;
 using Elysium.Domain.Persistence;
-using Elysium.Domain.Services;
-using Elysium.Hosting.Services;
-using Elysium.Server.Services;
+using Elysium.GrainInterfaces.Services;
 using Elysium.Silo.Api.Services;
-using Haondt.Identity.StorageKey;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Orleans.Runtime.Hosting;
-using Orleans.Storage;
-using Polly;
-using Polly.Extensions.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Silo.Extensions
 {

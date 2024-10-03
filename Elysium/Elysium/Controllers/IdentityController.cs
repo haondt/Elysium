@@ -1,5 +1,4 @@
-﻿using Elysium.Client.Hubs;
-using Elysium.Components.Components;
+﻿using Elysium.Components.Components;
 using Haondt.Web.Core.Controllers;
 using Haondt.Web.Core.Extensions;
 using Haondt.Web.Services;
@@ -15,6 +14,6 @@ namespace Elysium.Controllers
         {
             var result = await pageFactory.GetComponent<LoginModel>();
             return result.CreateView(this);
-        } 
+        }
     }
 }

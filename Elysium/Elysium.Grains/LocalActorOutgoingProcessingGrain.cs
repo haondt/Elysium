@@ -1,20 +1,13 @@
 ﻿using Elysium.ActivityPub.Helpers;
 using Elysium.ActivityPub.Models;
 using Elysium.Core.Models;
+using Elysium.Domain.Services;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Domain.Services;
 using Elysium.Hosting.Services;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Orleans.Concurrency;
 using Orleans.Streams;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Domain
 {
@@ -98,21 +91,21 @@ namespace Elysium.Domain
         }
 
         public async Task OnNextAsyncInternal(LocalActorOutgoingProcessingData data, StreamSequenceToken? token)
-        { 
+        {
             // create list of inboxes
             List<LocalIri> localRecipientIris = [];
             List<RemoteIri> remoteRecipientInboxes = [];
             List<Func<Task>> sendTasks = [];
             ConcurrentBag<(Iri Target, string Reason)> failures = [];
 
-                // old todo: for each recepient, look them up
-                // the lookup should be done by the instance actor
-                // then retrieve the inbox(es)
-                // if the inbox is a collection, recursively resolve it
-                // but limit the recursion depth
-                // also remove me from the final list of inboxes
-                // this will be handled by a worker grain? or a dispatcher grain maybe... it will have both local and remote targets
-            foreach(var recipient in data.Recipients)
+            // old todo: for each recepient, look them up
+            // the lookup should be done by the instance actor
+            // then retrieve the inbox(es)
+            // if the inbox is a collection, recursively resolve it
+            // but limit the recursion depth
+            // also remove me from the final list of inboxes
+            // this will be handled by a worker grain? or a dispatcher grain maybe... it will have both local and remote targets
+            foreach (var recipient in data.Recipients)
             {
                 // https://www.w3.org/TR/activitypub/#delivery
                 // we need to 1) lookup the recepient (using instance actor)

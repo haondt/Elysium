@@ -1,6 +1,4 @@
-﻿using System.Runtime.Serialization;
-
-namespace Elysium.Exceptions
+﻿namespace Elysium.Exceptions
 {
     public class ComponentException : Exception
     {

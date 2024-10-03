@@ -1,27 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Haondt.Identity.StorageKey;
-using Haondt.Web;
+﻿using Elysium.Client.Services;
+using Elysium.Components.Components;
+using Elysium.Core.Models;
+using Elysium.Hosting.Services;
+using Haondt.Core.Models;
+using Haondt.Web.Components;
 using Haondt.Web.Core.Components;
-using Haondt.Web.Core.Http;
 using Haondt.Web.Core.Extensions;
+using Haondt.Web.Core.Http;
+using Haondt.Web.Core.Services;
 using Haondt.Web.Services;
 using Microsoft.AspNetCore.Identity;
-using Elysium.Authentication.Exceptions;
-using Elysium.Core.Models;
-using Elysium.Components.Components;
-using Haondt.Web.Components;
-using Haondt.Web.Core.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Primitives;
-using System.Diagnostics.CodeAnalysis;
-using System.Collections;
-using Haondt.Core.Models;
-using Elysium.Client.Services;
-using Elysium.Hosting.Services;
 
 namespace Elysium.Authentication.Services
 {
@@ -60,7 +48,7 @@ namespace Elysium.Authentication.Services
                 var registrationResult = await elysiumService.RegisterUserAsync(
                     localizedUsernameResult.Value,
                     passwordResult.Value);
-                if(!registrationResult.IsSuccessful)
+                if (!registrationResult.IsSuccessful)
                     return new(await GetRegisterComponentAsync(new RegisterModalModel
                     {
                         ExistingLocalizedUsername = localizedUsernameResult.Value,
@@ -101,7 +89,7 @@ namespace Elysium.Authentication.Services
 
                 if (!result.Succeeded)
                     return new(await GetLoginComponentAsync(new LoginModel
-                    { 
+                    {
                         Host = hostingService.Host,
                         ExistingLocalizedUsername = localizedUsernameResult.Value,
                         Errors = ["Incorrect username or password."]
@@ -113,7 +101,7 @@ namespace Elysium.Authentication.Services
             return new();
         }
 
-        public  async Task<IComponent> GetHomeLoaderComponentAsync()
+        public async Task<IComponent> GetHomeLoaderComponentAsync()
         {
             var closeModalComponent = await componentFactory.GetPlainComponent<CloseModalModel>();
             var loaderComponent = await componentFactory.GetPlainComponent(new LoaderModel
@@ -135,14 +123,14 @@ namespace Elysium.Authentication.Services
             return appendComponent;
         }
 
-        public  async Task<IComponent> GetLoginComponentAsync(LoginModel model, int? statusCode = 401)
+        public async Task<IComponent> GetLoginComponentAsync(LoginModel model, int? statusCode = 401)
         {
             if (statusCode.HasValue)
                 return await componentFactory.GetPlainComponent(model, configureResponse: m => m.SetStatusCode = statusCode.Value);
             return await componentFactory.GetPlainComponent(model);
         }
 
-        public  async Task<IComponent> GetRegisterComponentAsync(RegisterModalModel model, int? statusCode = 400)
+        public async Task<IComponent> GetRegisterComponentAsync(RegisterModalModel model, int? statusCode = 400)
         {
             if (statusCode.HasValue)
                 return await componentFactory.GetPlainComponent(model, configureResponse: m => m.SetStatusCode = statusCode.Value);

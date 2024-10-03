@@ -1,11 +1,8 @@
-﻿using Elysium.ActivityPub;
-using Elysium.ActivityPub.Helpers.ActivityCompositor;
+﻿using Elysium.ActivityPub.Helpers.ActivityCompositor;
 using Elysium.ActivityPub.Models;
 using Elysium.Authentication.Services;
 using Elysium.Client.Services;
 using Elysium.Components.Components;
-using Elysium.Core.Models;
-using Elysium.Hosting.Services;
 using Haondt.Core.Models;
 using Haondt.Web.Core.Components;
 using Haondt.Web.Core.Extensions;

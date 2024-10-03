@@ -1,5 +1,4 @@
-﻿using Elysium.ActivityPub.Helpers.ActivityCompositor;
-using Elysium.ActivityPub.Models;
+﻿using Elysium.ActivityPub.Models;
 using Elysium.Core.Models;
 
 namespace Elysium.ActivityPub.Helpers.ActivityCompositor

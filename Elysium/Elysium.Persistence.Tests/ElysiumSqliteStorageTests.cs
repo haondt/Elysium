@@ -1,11 +1,6 @@
-﻿using Elysium.Core.Services;
-using Elysium.Persistence.Services;
+﻿using Elysium.Persistence.Services;
+using Haondt.Identity.StorageKey;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Persistence.Tests
 {
@@ -19,8 +14,13 @@ namespace Elysium.Persistence.Tests
                 DatabasePath = "./testing.db",
                 StoreKeyStrings = true
             }
-        }), new ElysiumStorageKeyConverter()))
+        })))
         {
+            StorageKeyConvert.DefaultSerializerSettings = new StorageKeySerializerSettings
+            {
+                TypeNameStrategy = TypeNameStrategy.SimpleTypeConverter,
+                KeyEncodingStrategy = KeyEncodingStrategy.String
+            };
         }
 
     }

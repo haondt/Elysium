@@ -3,15 +3,11 @@ using Elysium.ActivityPub.Models;
 using Elysium.Authentication.Services;
 using Elysium.Client.Hubs;
 using Elysium.Components.Components;
-using Elysium.Components.Services;
 using Elysium.Core.Extensions;
 using Elysium.Core.Models;
 using Elysium.GrainInterfaces.Client;
-using Elysium.Hosting.Services;
 using Haondt.Identity.StorageKey;
 using Haondt.Web.Core.Components;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -21,13 +17,6 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Mvc.ViewFeatures.Infrastructure;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Client.Services
 {

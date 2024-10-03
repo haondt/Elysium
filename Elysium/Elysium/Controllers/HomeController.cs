@@ -13,20 +13,20 @@ namespace Elysium.Controllers
         public IActionResult Get()
         {
             return Redirect("/home");
-        } 
+        }
 
         [HttpGet("home")]
         public async Task<IActionResult> Home()
         {
             var result = await pageFactory.GetComponent<HomePageModel>();
             return result.CreateView(this);
-        } 
+        }
 
         [HttpGet("messages")]
         public async Task<IActionResult> Messages()
         {
             var result = await pageFactory.GetComponent<TemporaryMessageComponentLayoutModel>();
             return result.CreateView(this);
-        } 
+        }
     }
 }

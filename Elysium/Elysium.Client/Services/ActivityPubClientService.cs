@@ -6,11 +6,6 @@ using Elysium.Hosting.Services;
 using Haondt.Identity.StorageKey;
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Client.Services
 {

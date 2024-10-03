@@ -1,13 +1,7 @@
 ﻿using Elysium.Core.Models;
-using Elysium.Core.Extensions;
 using Haondt.Core.Extensions;
 using Orleans.Configuration;
 using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Silo.Extensions
 {

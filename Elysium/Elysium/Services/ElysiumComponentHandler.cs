@@ -1,6 +1,5 @@
 ﻿using Elysium.Components.Components;
 using Haondt.Web.Core.Components;
-using Haondt.Web.Core.Services;
 using Haondt.Web.Services;
 
 namespace Elysium.Services

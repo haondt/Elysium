@@ -1,11 +1,9 @@
-﻿using Elysium.Core.Services;
-using Haondt.Identity.StorageKey;
+﻿using Haondt.Identity.StorageKey;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Elysium.Persistence.Converters
 {
-    public class GenericStorageKeyJsonConverter(IElysiumStorageKeyConverter converter) : JsonConverter
+    public class GenericStorageKeyJsonConverter : JsonConverter
     {
         public override bool CanConvert(Type objectType)
         {
@@ -21,7 +19,7 @@ namespace Elysium.Persistence.Converters
                 || keyString == null)
                 throw new JsonSerializationException("Unable to deserialize storage key: input string is null");
 
-            return converter.Deserialize(keyString).AsGeneric();
+            return StorageKeyConvert.Deserialize(keyString).AsGeneric();
         }
 
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
@@ -35,7 +33,7 @@ namespace Elysium.Persistence.Converters
             if (value is not StorageKey storageKey)
                 throw new JsonSerializationException($"Unexpected value when trying to serialize StorageKey. Expected StorageKey, got {value.GetType().FullName}");
 
-            var serializedKey = converter.Serialize(storageKey);
+            var serializedKey = StorageKeyConvert.Serialize(storageKey);
             writer.WriteValue(serializedKey);
         }
     }

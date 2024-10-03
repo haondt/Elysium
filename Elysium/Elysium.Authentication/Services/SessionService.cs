@@ -3,15 +3,9 @@ using Haondt.Core.Models;
 using Haondt.Identity.StorageKey;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using Haondt.Web.Core.Extensions;
 using Newtonsoft.Json;
+using System.Diagnostics.CodeAnalysis;
+using System.Security.Claims;
 
 namespace Elysium.Authentication.Services
 {
@@ -67,13 +61,13 @@ namespace Elysium.Authentication.Services
             try
             {
                 var result = JsonConvert.DeserializeObject<T>(value);
-                if (result is null) 
+                if (result is null)
                     return new();
                 return new(result);
             }
-            catch 
-            {  
-                return new(); 
+            catch
+            {
+                return new();
             }
         }
 

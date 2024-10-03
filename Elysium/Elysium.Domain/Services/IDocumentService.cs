@@ -3,11 +3,6 @@ using Elysium.GrainInterfaces.Reasons;
 using Elysium.GrainInterfaces.Services;
 using Haondt.Core.Models;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Domain.Services
 {
@@ -27,8 +22,8 @@ namespace Elysium.Domain.Services
         /// <param name="bcc">may be an empty list</param>
         /// <returns></returns>
         Task<Result<DocumentReason>> CreateDocumentAsync(
-            LocalIri actor, 
-            LocalIri objectUri, 
+            LocalIri actor,
+            LocalIri objectUri,
             JToken document,
             List<Iri> bto,
             List<Iri> bcc);

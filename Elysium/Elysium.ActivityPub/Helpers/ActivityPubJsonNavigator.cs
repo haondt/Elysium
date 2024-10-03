@@ -1,14 +1,8 @@
 ﻿using Elysium.ActivityPub.Models;
-using Elysium.Core.Exceptions;
 using Elysium.Core.Extensions;
 using Elysium.Core.Models;
 using Haondt.Core.Models;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.ActivityPub.Helpers
 {
@@ -53,7 +47,7 @@ namespace Elysium.ActivityPub.Helpers
 
         public static bool IsActor(JArray actor)
         {
-            var mainObject =  actor[0].As<JObject>();
+            var mainObject = actor[0].As<JObject>();
             return mainObject.ContainsKey(JsonLdTypes.INBOX)
                 && mainObject.ContainsKey(JsonLdTypes.OUTBOX)
                 && mainObject.ContainsKey(JsonLdTypes.FOLLOWERS)

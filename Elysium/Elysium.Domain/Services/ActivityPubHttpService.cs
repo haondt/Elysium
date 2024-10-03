@@ -1,26 +1,21 @@
 ﻿using Elysium.Core.Models;
+using Elysium.Domain.Exceptions;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Reasons;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Domain.Exceptions;
-using Elysium.Hosting.Services;
 using Haondt.Core.Models;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Domain.Services
 {
     public class ActivityPubHttpService(
         IOptions<ActivityPubHttpSettings> settings,
-        IGrainFactory<RemoteIri> uriGrainFactory, 
+        IGrainFactory<RemoteIri> uriGrainFactory,
         HttpClient httpClient) : IActivityPubHttpService
     {
 
@@ -260,7 +255,7 @@ namespace Elysium.Domain.Services
             }
             finally
             {
-                if(response.IsSuccessful)
+                if (response.IsSuccessful)
                     response.Value.Dispose();
             }
         }
@@ -296,7 +291,7 @@ namespace Elysium.Domain.Services
             }
             finally
             {
-                if(response.IsSuccessful)
+                if (response.IsSuccessful)
                     response.Value.Dispose();
             }
         }

@@ -2,11 +2,6 @@
 using FluentAssertions;
 using Haondt.Identity.StorageKey;
 using Haondt.Persistence.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Persistence.Tests
 {
@@ -133,10 +128,10 @@ namespace Elysium.Persistence.Tests
             var pairs = keys.Select((key, i) => ((StorageKey)key, (object)new Car { Color = $"color_{i}" })).ToList();
             await elysiumStorage.SetMany(pairs);
 
-            for(int i=0; i<pairs.Count; i++)
+            for (int i = 0; i < pairs.Count; i++)
             {
                 var (key, value) = pairs[i];
-                var result = await elysiumStorage.Get(key.As<Car>()); 
+                var result = await elysiumStorage.Get(key.As<Car>());
                 result.IsSuccessful.Should().BeTrue();
                 result.Value.Color.Should().Be($"color_{i}");
             }
@@ -162,8 +157,31 @@ namespace Elysium.Persistence.Tests
             {
                 var result = results[i];
                 result.IsSuccessful.Should().BeTrue();
-                result.Value.Key.As<Car>().Should().BeEquivalentTo(keys[i]);
-                result.Value.Value.As<Car>().Color.Should().Be($"color_{i}");
+                result.Value.As<Car>().Color.Should().Be($"color_{i}");
+            }
+        }
+
+        [Fact]
+        public async Task WillGetManyTyped()
+        {
+            var ids = Enumerable.Range(0, 10)
+                .Select(_ => Guid.NewGuid().ToString());
+            var keys = ids.Select(StorageKey<Car>.Create).ToList();
+
+            for (int i = 0; i < 10; i++)
+            {
+                var key = keys[i];
+                await elysiumStorage.Set(key, new Car { Color = $"color_{i}" });
+            }
+
+            var results = await elysiumStorage.GetMany(keys);
+            results.Count.Should().Be(10);
+
+            for (int i = 0; i < 10; i++)
+            {
+                var result = results[i];
+                result.IsSuccessful.Should().BeTrue();
+                result.Value.Color.Should().Be($"color_{i}");
             }
         }
 
@@ -171,16 +189,16 @@ namespace Elysium.Persistence.Tests
         public async Task WillGetAndSetForeignKeys()
         {
             var carKey = StorageKey<Car>.Create(Guid.NewGuid().ToString());
-            var carKey2 = StorageKey<Car>.Create(Guid.NewGuid().ToString());
+            StorageKey<Car>? carKey2 = StorageKey<Car>.Create(Guid.NewGuid().ToString());
             var tireKey = carKey.Extend<Tire>("FL");
             var manufacturerKey = StorageKey<Manufacturer>.Create(Guid.NewGuid().ToString());
 
-            await elysiumStorage.Set(carKey, new Car { Color = "red" }, [manufacturerKey]);
-            await elysiumStorage.Set(carKey2, new Car { Color = "blue" }, [manufacturerKey]);
-            await elysiumStorage.Set(tireKey, new Tire { Diameter = 10 }, [manufacturerKey]);
+            await elysiumStorage.Set(carKey, new Car { Color = "red" }, [manufacturerKey.Extend<Car>()]);
+            await elysiumStorage.Set(carKey2, new Car { Color = "blue" }, [manufacturerKey.Extend<Car>()]);
+            await elysiumStorage.Set(tireKey, new Tire { Diameter = 10 }, [manufacturerKey.Extend<Tire>()]);
 
-            var cars = await elysiumStorage.Get(StorageKey<Car>.Empty, manufacturerKey);
-            var tires = await elysiumStorage.Get(StorageKey<Car>.Empty.Extend<Tire>(""), manufacturerKey);
+            var cars = await elysiumStorage.GetMany(manufacturerKey.Extend<Car>());
+            var tires = await elysiumStorage.GetMany(manufacturerKey.Extend<Tire>());
 
             cars.Count.Should().Be(2);
             cars[0].Value.Color.Should().Be("red");
@@ -196,10 +214,10 @@ namespace Elysium.Persistence.Tests
             var carKey2 = StorageKey<Car>.Create(Guid.NewGuid().ToString());
             var manufacturerKey = StorageKey<Manufacturer>.Create(Guid.NewGuid().ToString());
 
-            await elysiumStorage.Set(carKey, new Car { Color = "red" }, [manufacturerKey]);
+            await elysiumStorage.Set(carKey, new Car { Color = "red" }, [manufacturerKey.Extend<Car>()]);
             await elysiumStorage.Set(carKey2, new Car { Color = "blue" });
 
-            var result = await elysiumStorage.DeleteMany(StorageKey<Car>.Empty, manufacturerKey);
+            var result = await elysiumStorage.DeleteMany(manufacturerKey.Extend<Car>());
             result.IsSuccessful.Should().BeTrue();
             result.Value.Should().Be(1);
 

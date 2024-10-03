@@ -2,6 +2,7 @@
 using Elysium.ActivityPub.Models;
 using Elysium.Components.Components;
 using Elysium.Core.Converters;
+using Elysium.Core.Extensions;
 using Elysium.Core.Models;
 using Elysium.Cryptography.Services;
 using Elysium.Domain.Services;
@@ -10,13 +11,6 @@ using Elysium.GrainInterfaces.Services;
 using Elysium.Hosting.Services;
 using Haondt.Core.Models;
 using Microsoft.AspNetCore.Identity;
-using Newtonsoft.Json;
-using Elysium.Core.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Client.Services
 {
@@ -130,7 +124,7 @@ namespace Elysium.Client.Services
             throw new NotImplementedException();
         }
 
-        public async Task<(IEnumerable<MediaModel> Creations, string Last )> GetPublicCreations(string? before = null)
+        public async Task<(IEnumerable<MediaModel> Creations, string Last)> GetPublicCreations(string? before = null)
         {
             // todo: appsettings
             var count = 50;
@@ -149,7 +143,7 @@ namespace Elysium.Client.Services
                 var objectObject = ActivityPubJsonNavigator.GetObject(document.Value);
                 var objectId = ActivityPubJsonNavigator.GetId(objectObject);
                 var objectDocument = await documentService.GetExpandedDocumentAsync(_instanceAuthor, Iri.FromUnencodedString(objectId));
-                if(!objectDocument.IsSuccessful)
+                if (!objectDocument.IsSuccessful)
                     return new Optional<MediaModel>();
 
                 var model = new MediaModel

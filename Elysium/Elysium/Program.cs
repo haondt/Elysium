@@ -1,18 +1,16 @@
 using Elysium.Authentication.Extensions;
-using Haondt.Web.BulmaCSS.Extensions;
-using Haondt.Web.Core.Extensions;
-using Haondt.Web.Extensions;
-using Elysium.Persistence.Extensions;
-using Elysium.Hosting.Extensions;
-using Elysium.Extensions;
-using Haondt.Web.Core.Middleware;
-using Elysium.Middlewares;
 using Elysium.Client.Extensions;
-using Orleans.Configuration;
 using Elysium.Client.Hubs;
 using Elysium.Components.Extensions;
 using Elysium.Core.Extensions;
 using Elysium.Domain.Extensions;
+using Elysium.Extensions;
+using Elysium.Hosting.Extensions;
+using Elysium.Middlewares;
+using Elysium.Persistence.Extensions;
+using Haondt.Web.Core.Extensions;
+using Haondt.Web.Core.Middleware;
+using Haondt.Web.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +27,7 @@ builder.Services
     .AddElysiumComponentServices() // must come before AddElysiumServices so bulma css overrides get loaded in correct order
     .AddElysiumServices(builder.Configuration)
     .AddElysiumComponents()
-    .AddElysiumStorageKeyConverter()
+    .ConfigureStorageKeyConvert()
     .AddElysiumAssetSources()
     .AddElysiumClientServices()
     .AddElysiumDomainServices(builder.Configuration)

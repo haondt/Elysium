@@ -1,21 +1,15 @@
-﻿using Elysium.Authentication.Services;
+﻿using Elysium.Authentication.Components;
+using Elysium.Authentication.Services;
+using Elysium.Client.Services;
 using Elysium.Components.Components;
+using Elysium.Exceptions;
+using Elysium.Hosting.Services;
 using Elysium.Services;
 using Haondt.Web.Assets;
 using Haondt.Web.Core.Components;
-using Haondt.Web.Core.Http;
+using Haondt.Web.Core.Extensions;
 using Haondt.Web.Core.Services;
 using Haondt.Web.Services;
-using Haondt.Web.Core.Extensions;
-using Haondt.Web.Components;
-using Elysium.Authentication.Components;
-using Elysium.Hosting.Services;
-using Elysium.Components.Services;
-using Elysium.Client.Services;
-using Elysium.Exceptions;
-using Elysium.Core.Models;
-using Elysium.GrainInterfaces;
-using Elysium.Domain.Services;
 
 namespace Elysium.Extensions
 {
@@ -24,7 +18,7 @@ namespace Elysium.Extensions
         public static IServiceCollection AddElysiumServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<ErrorSettings>(configuration.GetSection(nameof(ErrorSettings)));
-            services.AddScoped<IEventHandler, ElysiumPublishActivityEventHandler>(); 
+            services.AddScoped<IEventHandler, ElysiumPublishActivityEventHandler>();
             services.AddSingleton<ISingletonPageComponentFactory, SingletonPageComponentFactory>();
             services.AddScoped<IEventHandler, AuthenticationEventHandler>();
             services.AddSingleton<IExceptionActionResultFactory, ElysiumExceptionActionResultFactory>();
@@ -100,7 +94,7 @@ namespace Elysium.Extensions
                 };
 
                 var elysiumService = sp.GetRequiredService<IElysiumService>();
-                foreach ( var shade in shades.Value)
+                foreach (var shade in shades.Value)
                 {
                     model.ShadeSelections.Add(new ShadeSelection
                     {

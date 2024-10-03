@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace Elysium.Core.Models
 {
@@ -26,7 +21,7 @@ namespace Elysium.Core.Models
                 throw new ArgumentException($"Scheme {scheme} is not supported. Must be one of http, https.");
             Path = PathSepRegex().Replace(path.Trim('/'), "/");
             Fragment = fragment;
-            Query = query;  
+            Query = query;
         }
 
         public static Iri FromUri(Uri uri)
@@ -105,17 +100,17 @@ namespace Elysium.Core.Models
 
         public override bool Equals(object? obj)
         {
-            return obj is not null && obj is Iri iri && iri.Host == Host && iri.Scheme == Scheme && iri.Path == Path;   
+            return obj is not null && obj is Iri iri && iri.Host == Host && iri.Scheme == Scheme && iri.Path == Path;
         }
 
-        public static bool operator ==(Iri left,  Iri right)
+        public static bool operator ==(Iri left, Iri right)
         {
             if (ReferenceEquals(left, null))
                 return ReferenceEquals(right, null);
             return left.Equals(right);
         }
 
-        public static bool operator !=(Iri left,  Iri right)
+        public static bool operator !=(Iri left, Iri right)
         {
             return !(left == right);
         }

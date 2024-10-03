@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Elysium.Core.Extensions
+﻿namespace Elysium.Core.Extensions
 {
     public static class DateTimeExtensions
     {

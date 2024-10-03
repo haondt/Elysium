@@ -4,17 +4,8 @@ using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Client;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Hosting.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Client.Hubs
 {
@@ -62,7 +53,7 @@ namespace Elysium.Client.Hubs
         private async Task TryUnlinkDeliveryGrainAsync()
         {
             var result = registry.UnregisterObserver(Context.ConnectionId);
-            if(!result.HasValue)
+            if (!result.HasValue)
                 return;
 
             var deliveryGrain = localGrainFactory.GetGrain<IClientActorActivityDeliveryGrain>(result.Value.Iri);

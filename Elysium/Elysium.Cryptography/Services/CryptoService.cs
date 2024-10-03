@@ -1,19 +1,11 @@
-﻿using Elysium.Core.Models;
-using Microsoft.Extensions.Options;
-using SimpleBase;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Security.Cryptography;
 
 namespace Elysium.Cryptography.Services
 {
     public class CryptoService() : ICryptoService
     {
 
-        public (byte[] EncryptedData, byte[] IV)  AesEncrypt(byte[] data, byte[] encryptionKey)
+        public (byte[] EncryptedData, byte[] IV) AesEncrypt(byte[] data, byte[] encryptionKey)
         {
             using Aes aes = Aes.Create();
             aes.Key = encryptionKey;

@@ -1,12 +1,6 @@
-﻿using Elysium.Core.Extensions;
-using Elysium.Core.Models;
-using Elysium.Cryptography.Services;
-using Haondt.Core.Extensions;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
+﻿using Elysium.Cryptography.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using StackExchange.Redis;
 
 namespace Elysium.Cryptography.Extensions
 {

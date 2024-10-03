@@ -1,9 +1,4 @@
 ﻿using Elysium.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.GrainInterfaces.Surrogates
 {
@@ -32,13 +27,13 @@ namespace Elysium.GrainInterfaces.Surrogates
 
         public IriSurrogate ConvertToSurrogate(in Iri value)
         {
-            return new IriSurrogate 
-            { 
+            return new IriSurrogate
+            {
                 Host = value.Host,
                 Path = value.Path,
                 Scheme = value.Scheme,
                 Fragment = value.Fragment,
-                Query = value.Query 
+                Query = value.Query
             };
         }
     }

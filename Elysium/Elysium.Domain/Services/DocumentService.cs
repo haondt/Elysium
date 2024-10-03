@@ -1,18 +1,12 @@
-﻿using Elysium.GrainInterfaces;
+﻿using Elysium.Core.Models;
+using Elysium.Domain.Exceptions;
+using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Reasons;
 using Elysium.GrainInterfaces.Services;
-using Haondt.Core.Models;
-using Haondt.Identity.StorageKey;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Haondt.Persistence.Services;
-using Elysium.Core.Models;
 using Elysium.Hosting.Services;
-using Elysium.Domain.Exceptions;
+using Haondt.Core.Models;
+using Haondt.Persistence.Services;
+using Newtonsoft.Json.Linq;
 
 namespace Elysium.Domain.Services
 {
@@ -54,8 +48,8 @@ namespace Elysium.Domain.Services
         //    return localDocumentGrain.GetValueAsync(requester);
         //}
         public async Task<Result<DocumentReason>> CreateDocumentAsync(
-            LocalIri actor, 
-            LocalIri documentIri, 
+            LocalIri actor,
+            LocalIri documentIri,
             JToken document, // does not contain bto/bcc items
             List<Iri> bto,
             List<Iri> bcc)
@@ -104,7 +98,7 @@ namespace Elysium.Domain.Services
         public async Task<LocalIri> ReserveDocumentIriAsync(LocalIri actor, Func<LocalIri> iriFactory, int maxAttempts)
         {
             var currentIriGenerationAttempt = 1;
-            while(currentIriGenerationAttempt < maxAttempts)
+            while (currentIriGenerationAttempt < maxAttempts)
             {
                 var iri = iriFactory();
                 var objectIdReserved = await ReserveDocumentIriAsync(actor, iri);
@@ -228,7 +222,7 @@ namespace Elysium.Domain.Services
             // todo: populate the bto/bcc based on the requesters identity
             // this would mean using the document facade to expand the document, then setting the info, then (optionally) compacting it back down
 
-            if(iri.Iri == _iriService.InstanceActorIri.Iri)
+            if (iri.Iri == _iriService.InstanceActorIri.Iri)
             {
                 var documentResult = await fetcher(_iriService.InstanceActorIri.Iri);
                 if (documentResult.IsSuccessful)

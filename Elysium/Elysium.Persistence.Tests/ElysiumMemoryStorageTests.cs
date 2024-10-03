@@ -1,4 +1,3 @@
-using Elysium.Persistence;
 using Elysium.Persistence.Services;
 namespace Elysium.Persistence.Tests
 {

@@ -1,18 +1,16 @@
-﻿using Elysium.Core.Services;
+﻿using Haondt.Identity.StorageKey;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Core.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddElysiumStorageKeyConverter(this IServiceCollection services)
+        public static IServiceCollection ConfigureStorageKeyConvert(this IServiceCollection services)
         {
-            services.AddSingleton<IElysiumStorageKeyConverter, ElysiumStorageKeyConverter>();
+            StorageKeyConvert.DefaultSerializerSettings = new StorageKeySerializerSettings
+            {
+                TypeNameStrategy = TypeNameStrategy.SimpleTypeConverter
+            };
             return services;
         }
     }

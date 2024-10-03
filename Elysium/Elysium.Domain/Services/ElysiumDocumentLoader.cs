@@ -2,18 +2,12 @@
 using Elysium.GrainInterfaces.Services;
 using Elysium.Hosting.Services;
 using JsonLD.Core;
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Domain.Services
 {
     public class ElysiumDocumentLoader(
         IDocumentService documentResolver,
-        IHttpMessageAuthor author, 
+        IHttpMessageAuthor author,
         IHostingService hostingService) : DocumentLoader
     {
         public override async Task<RemoteDocument> LoadDocumentAsync(string url)

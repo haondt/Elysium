@@ -3,11 +3,6 @@ using Elysium.ActivityPub.Models;
 using Elysium.Core.Extensions;
 using Elysium.Core.Models;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.ActivityPub.Helpers
 {
@@ -23,7 +18,7 @@ namespace Elysium.ActivityPub.Helpers
                 ["@type"] = new JArray { type };
             return this;
         }
-        
+
         public ActivityPubJsonBuilder Id(Iri id)
         {
             _state.SetDefault(0, JObjectFactory, JObjectFactory)

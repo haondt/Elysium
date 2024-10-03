@@ -1,7 +1,6 @@
 ﻿using Elysium.Components.Components;
 using Elysium.Components.Services;
 using Haondt.Web.Components;
-using Haondt.Web.Core.Components;
 using Haondt.Web.Core.Exceptions;
 using Haondt.Web.Core.Extensions;
 using Haondt.Web.Core.Services;
@@ -13,7 +12,7 @@ namespace Elysium.Services
     public class ElysiumExceptionActionResultFactory(ISingletonComponentFactory componentFactoryFactory, IOptions<ErrorSettings> errorOptions) : IExceptionActionResultFactory
     {
         public async Task<IActionResult> CreateAsync(Exception exception, HttpContext context)
-       {
+        {
             var result = exception switch
             {
                 KeyNotFoundException => new ErrorModel { ErrorCode = 404, Message = "Not Found" },
@@ -26,7 +25,7 @@ namespace Elysium.Services
                 result.Details = exception.ToString();
 
             var componentFactory = componentFactoryFactory.CreateComponentFactory();
-            
+
             var errorComponent = await componentFactory.GetPlainComponent(result, configureResponse: m => m.SetStatusCode = result.ErrorCode);
             var closeModalComponent = await componentFactory.GetPlainComponent<CloseModalModel>();
 

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Haondt.Persistence" Version="0.0.3" />
+    <PackageReference Include="Haondt.Persistence" Version="0.0.4-alpha-20241002200525" />
     <PackageReference Include="json-ld.net" Version="2.0.1" />
     <PackageReference Include="Microsoft.Orleans.Core.Abstractions" Version="8.2.0" />
     <PackageReference Include="Microsoft.Orleans.Sdk" Version="8.2.0" />

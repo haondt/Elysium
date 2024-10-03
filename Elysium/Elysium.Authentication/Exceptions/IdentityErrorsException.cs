@@ -1,9 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Authentication.Exceptions
 {
@@ -13,6 +8,6 @@ namespace Elysium.Authentication.Exceptions
         {
             var stringifiedErrors = errors.Select(e => $"[{e.Code}] {e.Description}");
             return string.Join(";", stringifiedErrors);
-        } 
+        }
     }
 }

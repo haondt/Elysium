@@ -7,11 +7,6 @@ using Elysium.Hosting.Services;
 using Elysium.Persistence.Exceptions;
 using Haondt.Core.Models;
 using Haondt.Persistence.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Client.Services
 {
@@ -56,13 +51,13 @@ namespace Elysium.Client.Services
         public async Task<Result<LocalIri, ElysiumWebReason>> GetIriAsync()
         {
             if (!_sessionService.IsAuthenticated())
-                return new (ElysiumWebReason.Unauthorized);
+                return new(ElysiumWebReason.Unauthorized);
 
             var userIdentity = await _sessionService.GetUserKeyAsync();
             if (!userIdentity.HasValue)
-                return new (ElysiumWebReason.Unauthorized);
+                return new(ElysiumWebReason.Unauthorized);
 
-            return new (await _activityPubClientService.GetLocalIriFromUserIdentityAsync(userIdentity.Value));
+            return new(await _activityPubClientService.GetLocalIriFromUserIdentityAsync(userIdentity.Value));
         }
 
         public async Task<Result<string, ElysiumWebReason>> GetLocalizedUsernameAsync()

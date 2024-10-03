@@ -3,13 +3,7 @@ using Elysium.Core.Extensions;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Hosting.Services;
 using JsonLD.Core;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Domain.Services
 {
@@ -33,8 +27,8 @@ namespace Elysium.Domain.Services
                     contexts.Add(jv.AsString());
             }
 
-            foreach(var node in flattened.Get<JArray>("@graph"))
-                foreach(var prop in node.As<JObject>().Properties())
+            foreach (var node in flattened.Get<JArray>("@graph"))
+                foreach (var prop in node.As<JObject>().Properties())
                 {
                     if (JsonLdContextMappings.TryGetContext(prop.Name, out var propContext))
                         contexts.Add(propContext);

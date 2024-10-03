@@ -9,14 +9,6 @@ using Haondt.Identity.StorageKey;
 using Haondt.Persistence.Services;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using Orleans.EventSourcing;
-using Orleans.EventSourcing.CustomStorage;
-using Orleans.Providers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Grains
 {
@@ -112,11 +104,11 @@ namespace Elysium.Grains
                 }
 
             var missingLookup = await _elysiumStorage
-                .GetMany(missing.Select(i => (StorageKey)_baseKey.Extend<CollectionDocumentReference>(LongConverter.EncodeLong(i))).ToList());
+                .GetMany(missing.Select(i => _baseKey.Extend<CollectionDocumentReference>(LongConverter.EncodeLong(i))).ToList());
 
             foreach (var (i, lookup) in missing.Zip(missingLookup))
-                if (lookup.IsSuccessful && lookup.Value.Value is CollectionDocumentReference reference)
-                    found[(int)(start - i)] = reference.Iri;
+                if (lookup.IsSuccessful)
+                    found[(int)(start - i)] = lookup.Value.Iri;
 
             var references = found.Where(r => !string.IsNullOrEmpty(r))
                 .Cast<string>()
@@ -129,13 +121,13 @@ namespace Elysium.Grains
         /// </summary>
         /// <param name="count"></param>
         /// <returns></returns>
-        public Task<CollectionResult> GetReferencesAsync(ActivityType activityType, int count) => 
+        public Task<CollectionResult> GetReferencesAsync(ActivityType activityType, int count) =>
             GetReferencesAsync(activityType, _state.Lasts.TryGetValue(activityType, out var last) ? last + 1 : 0, count);
     }
 
     public class PublicCollectionState
     {
         public static StorageKey<PublicCollectionState> GetStorageKey(Guid id) => StorageKey<PublicCollectionState>.Create(id.ToString());
-        public Dictionary<ActivityType, long> Lasts = []; 
+        public Dictionary<ActivityType, long> Lasts = [];
     }
 }

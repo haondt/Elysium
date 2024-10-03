@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-using Elysium.Core.Models;
+﻿using Elysium.Core.Models;
 using Elysium.Domain.Services;
 using Elysium.GrainInterfaces.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Elysium.ActivityPub.Api.Controllers
 {

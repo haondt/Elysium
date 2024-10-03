@@ -1,21 +1,16 @@
 ﻿using Elysium.Core.Models;
+using Elysium.Domain.Services;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Domain.Services;
 using Microsoft.Extensions.Logging;
 using Orleans.Streams;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Domain
 {
     [ImplicitStreamSubscription(GrainConstants.DispatchRemoteActivityStream)]
     public class DispatchRemoteActivityWorkerGrain(
-        IGrainFactory<LocalIri> uriGrainFactory, 
-        IGrainFactory grainFactory, 
+        IGrainFactory<LocalIri> uriGrainFactory,
+        IGrainFactory grainFactory,
         ILogger<DispatchRemoteActivityWorkerGrain> logger,
         IActivityPubHttpService httpService) : Grain, IDispatchRemoteActivityWorkerGrain
     {

@@ -2,12 +2,11 @@
 using Elysium.Core.Extensions;
 using Elysium.Core.Models;
 using Elysium.Cryptography.Services;
+using Elysium.Domain.Services;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
-using Elysium.Domain.Services;
 using Elysium.Hosting.Services;
 using Newtonsoft.Json.Linq;
-using Haondt.Core.Models;
 
 namespace Elysium.Silo.Api.Services
 {
@@ -45,7 +44,7 @@ namespace Elysium.Silo.Api.Services
                 });
             }
 
-            var instanceActor = grainFactory.GetGrain<IInstanceActorAuthorGrain>(Guid.Empty);   
+            var instanceActor = grainFactory.GetGrain<IInstanceActorAuthorGrain>(Guid.Empty);
             var expanded = await jsonLdService.ExpandAsync(instanceActor, payload.SubjectObject!);
             expanded.SetDefault(0, JObjectFactory, JObjectFactory)
                 [JsonLdTypes.ATTRIBUTED_TO] = new JArray { new JObject { { "@id", actorIri.ToString() } } };

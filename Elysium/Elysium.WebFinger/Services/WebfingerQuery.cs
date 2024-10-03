@@ -6,6 +6,6 @@ namespace Elysium.WebFinger.Services
     {
         [Required]
         public required string Resource { get; set; }
-        public List<string>? Rel { get; set; } 
+        public List<string>? Rel { get; set; }
     }
 }

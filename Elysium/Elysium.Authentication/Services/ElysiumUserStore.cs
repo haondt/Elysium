@@ -1,25 +1,16 @@
 ﻿using Elysium.Core.Models;
-using Elysium.Core.Services;
 using Elysium.Persistence.Services;
 using Haondt.Identity.StorageKey;
-using Haondt.Persistence.Services;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elysium.Authentication.Services
 {
     // todo: use storagekeygrain instead of storage
-    public class ElysiumUserStore(IElysiumStorage storage, IElysiumStorageKeyConverter converter) : ElysiumStorageKeyIdModelStore<UserIdentity>(storage, converter), IUserStore<UserIdentity>, IUserPasswordStore<UserIdentity>
+    public class ElysiumUserStore(IElysiumStorage storage) : ElysiumStorageKeyIdModelStore<UserIdentity>(storage), IUserStore<UserIdentity>, IUserPasswordStore<UserIdentity>
     {
-        private readonly IElysiumStorageKeyConverter _converter = converter;
-
         public async Task<UserIdentity?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
-            var result = await _storage.Get(UserIdentity.GetStorageKey(""), NormalizedUsername.GetStorageKey(normalizedUserName));
+            var result = await _storage.GetMany(NormalizedUsername.GetStorageKey(normalizedUserName).Extend<UserIdentity>());
             if (result.Count == 1)
                 return result.First().Value;
             return null;
@@ -31,7 +22,7 @@ namespace Elysium.Authentication.Services
             if (hasUser)
                 return IdentityResult.Failed(new IdentityError { Code = "0", Description = "User already exists" });
             if (!string.IsNullOrEmpty(user.NormalizedUsername))
-                await _storage.Set(user.Id, user, [NormalizedUsername.GetStorageKey(user.NormalizedUsername)]);
+                await _storage.Set(user.Id, user, [NormalizedUsername.GetStorageKey(user.NormalizedUsername).Extend<UserIdentity>()]);
             else
                 await _storage.Set(user.Id, user);
             return IdentityResult.Success;
@@ -43,7 +34,7 @@ namespace Elysium.Authentication.Services
             if (!hasUser)
                 return IdentityResult.Failed(new IdentityError { Code = "1", Description = "User does not exist" });
             if (!string.IsNullOrEmpty(user.NormalizedUsername))
-                await _storage.Set(user.Id, user, [NormalizedUsername.GetStorageKey(user.NormalizedUsername)]);
+                await _storage.Set(user.Id, user, [NormalizedUsername.GetStorageKey(user.NormalizedUsername).Extend<UserIdentity>()]);
             else
                 await _storage.Set(user.Id, user);
             return IdentityResult.Success;
@@ -61,7 +52,7 @@ namespace Elysium.Authentication.Services
 
         public Task<string> GetUserIdAsync(UserIdentity user, CancellationToken cancellationToken)
         {
-            return Task.FromResult(_converter.Serialize(user.Id));
+            return Task.FromResult(StorageKeyConvert.Serialize(user.Id));
         }
 
         public Task<string?> GetUserNameAsync(UserIdentity user, CancellationToken cancellationToken)

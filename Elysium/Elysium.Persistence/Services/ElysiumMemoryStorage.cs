@@ -1,5 +1,4 @@
-﻿using Elysium.Core.Models;
-using Haondt.Core.Models;
+﻿using Haondt.Core.Models;
 using Haondt.Identity.StorageKey;
 using Haondt.Persistence.Services;
 
@@ -24,25 +23,12 @@ namespace Elysium.Persistence.Services
             return Task.FromResult(new Result<StorageResultReason>(StorageResultReason.NotFound));
         }
 
-        public Task<List<Result<StorageResultReason>>> DeleteMany<TPrimary, TForegin>(StorageKey<TForegin> foreignKey)
-        {
-            return Task.FromResult(_storage.Select(kvp =>
-            {
-                if (kvp.Value.ForeignKeys.Contains(foreignKey))
-                {
-                    _storage.Remove(kvp.Key);
-                    return new Result<StorageResultReason>();
-                }
-                return new Result<StorageResultReason>(StorageResultReason.NotFound);
-            }).ToList());
-        }
-
-        public Task<Result<int, StorageResultReason>> DeleteMany<TPrimary, TForegin>(StorageKey<TPrimary> partialPrimaryKey, StorageKey<TForegin> foreignKey)
+        public Task<Result<int, StorageResultReason>> DeleteMany<T>(StorageKey<T> foreignKey)
         {
             var keysToRemove = _storage.Where(kvp => kvp.Value.ForeignKeys.Contains(foreignKey))
                 .Select(kvp => kvp.Key);
             var removed = 0;
-            foreach(var key in keysToRemove)
+            foreach (var key in keysToRemove)
             {
                 _storage.Remove(key);
                 removed++;
@@ -59,27 +45,37 @@ namespace Elysium.Persistence.Services
             return Task.FromResult(new Result<T, StorageResultReason>(StorageResultReason.NotFound));
         }
 
-        public Task<List<(StorageKey<TPrimary> Key, TPrimary Value)>> Get<TPrimary, TForeign>(StorageKey<TPrimary> partialPrimaryKey, StorageKey<TForeign> foreignKey)
+        public Task<List<(StorageKey<T> Key, T Value)>> GetMany<T>(StorageKey<T> foreignKey)
         {
             return Task.FromResult(_storage
-                .Where(kvp => kvp.Key.Type == typeof(TPrimary))
                 .Where(kvp => kvp.Value.ForeignKeys.Contains(foreignKey))
-                .Select(kvp => (kvp.Key.As<TPrimary>(), (TPrimary)kvp.Value.Value))
+                .Select(kvp => (kvp.Key.As<T>(), (T)kvp.Value.Value))
                 .ToList());
         }
 
-        public Task<List<Result<(StorageKey Key, object Value), StorageResultReason>>> GetMany(List<StorageKey> keys)
+
+        public async Task<List<Result<T, StorageResultReason>>> GetMany<T>(List<StorageKey<T>> keys)
+        {
+            var results = await GetMany(keys.Cast<StorageKey>().ToList());
+            return results.Select(r =>
+            {
+                if (r.IsSuccessful)
+                    return new((T)r.Value);
+                return new Result<T, StorageResultReason>(r.Reason);
+            }).ToList();
+        }
+
+        public Task<List<Result<object, StorageResultReason>>> GetMany(List<StorageKey> keys)
         {
             return Task.FromResult(keys.Select(k =>
             {
                 if (_storage.TryGetValue(k, out var value) && value.Value.GetType() == k.Type)
-                    return new((k, value.Value));
-                return new Result<(StorageKey, object), StorageResultReason>(StorageResultReason.NotFound);
+                    return new(value.Value);
+                return new Result<object, StorageResultReason>(StorageResultReason.NotFound);
             }).ToList());
         }
 
-
-        public Task Set<T>(StorageKey<T> key, T value, List<StorageKey> foreignKeys)
+        public Task Set<T>(StorageKey<T> key, T value, List<StorageKey<T>> foreignKeys)
         {
             if (value == null)
             {
@@ -89,7 +85,7 @@ namespace Elysium.Persistence.Services
             _storage[key] = new MemoryEntry
             {
                 Value = value,
-                ForeignKeys = foreignKeys.ToHashSet()
+                ForeignKeys = foreignKeys.Cast<StorageKey>().ToHashSet()
             };
             return Task.CompletedTask;
         }

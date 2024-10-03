@@ -91,7 +91,7 @@ namespace Elysium.Cryptography.Tests
             }
             catch { }
 
-            if (failedPlaintextData != null) 
+            if (failedPlaintextData != null)
                 failedPlaintextData.SigningKey.Should().NotBeEquivalentTo(signingKeyBytes);
 
 
