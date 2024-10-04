@@ -4,7 +4,7 @@ services:
       - 80085
     build:
       context: ../Elysium
-      dockerfile: ../Elysium/Dockerfile
+      dockerfile: ../Elysium/Elysium/Dockerfile
     container_name: elysium
     environment:
       ErrorSettings__ShowErrorInfo: true
@@ -25,7 +25,7 @@ services:
     ports:
       - 9000:8080
     volumes:
-      - elysium-data:/data
+      - elysium-sqlite-data:/data
   elysium-silo:
     group_add:
       - 80085
@@ -47,7 +47,7 @@ services:
         condition: service_completed_successfully
     build:
       context: ../Elysium
-      dockerfile: ../Elysium.Silo.Api/Dockerfile
+      dockerfile: ../Elysium/Elysium.Silo.Api/Dockerfile
     networks:
       - elysium
     image: elysium-silo
@@ -56,15 +56,7 @@ services:
     ports:
       - 9001:8080
     volumes:
-      - elysium-data:/data
-  elysium-sqlite-init:
-    group_add:
-      - 80085
-    volumes:
-      - elysium-data:/data
-    user: root
-    image: alpine
-    command: [sh, -cx, "chgrp -R 80085 /data && chmod -R 775 /data"]
+      - elysium-sqlite-data:/data
 
   redis:
     container_name: redis
@@ -72,6 +64,7 @@ services:
       - elysium
     image: redis
 
+  # only needed for mongodb driver
   mongo:
     container_name: mongo
     networks:
@@ -86,8 +79,18 @@ services:
     ports:
       - 27017:27017
 
+  # only needed for sqlite driver
+  elysium-sqlite-init:
+    group_add:
+      - 80085
+    volumes:
+      - elysium-sqlite-data:/data
+    user: root
+    image: alpine
+    command: [sh, -cx, "chgrp -R 80085 /data && chmod -R 775 /data"]
+
 networks:
   elysium:
 
 volumes:
-  elysium-data:
+  elysium-sqlite-data:

@@ -17,9 +17,9 @@ namespace Elysium.Persistence.Services
             IOptions<ElysiumPersistenceSettings> options,
             IMongoClient client)
         {
-            var settings = options.Value;
-            _collection = client.GetDatabase(settings.MongoDbStorageSettings.Database)
-                .GetCollection<MongoDbElysiumDocument>(settings.MongoDbStorageSettings.Collection);
+            var settings = options.Value.MongoDbStorageSettings ?? throw new ArgumentNullException(nameof(ElysiumPersistenceSettings.MongoDbStorageSettings));
+            _collection = client.GetDatabase(settings.Database)
+                .GetCollection<MongoDbElysiumDocument>(settings.Collection);
             _queryableCollection = _collection.AsQueryable();
         }
 

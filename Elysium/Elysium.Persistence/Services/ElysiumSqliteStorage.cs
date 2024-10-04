@@ -9,22 +9,6 @@ using Newtonsoft.Json;
 
 namespace Elysium.Persistence.Services
 {
-    //public class TableDescriptor
-    //{
-    //    //private HashSet<string> _columns = [];
-    //    //private List<string> _orderedColumns = [];
-    //    //public HashSet<string> Columns { get { return _columns; } }
-    //    //public List<string> OrderedColumns
-    //    //{
-    //    //    get {  return _orderedColumns; }
-    //    //    set
-    //    //    {
-    //    //        _orderedColumns = value;
-    //    //        _columns = new (value);
-    //    //    }
-    //    //}
-    //}
-
     public class ElysiumSqliteStorage : IElysiumStorage
     {
         private readonly ElysiumSqliteStorageSettings _settings;
@@ -37,7 +21,7 @@ namespace Elysium.Persistence.Services
 
         public ElysiumSqliteStorage(IOptions<ElysiumPersistenceSettings> options)
         {
-            _settings = options.Value.SqliteStorageSettings;
+            _settings = options.Value.SqliteStorageSettings ?? throw new ArgumentNullException(nameof(ElysiumPersistenceSettings.SqliteStorageSettings));
             _serializerSettings = new JsonSerializerSettings();
             _connectionString = new SqliteConnectionStringBuilder()
             {
@@ -46,7 +30,6 @@ namespace Elysium.Persistence.Services
                 Cache = SqliteCacheMode.Private
             }.ToString();
             ConfigureSerializerSettings(_serializerSettings);
-            //LoadExistingTables();
             _primaryTableName = SanitizeTableName(_settings.PrimaryTableName);
             _foreignKeyTableName = SanitizeTableName(_settings.ForeignKeyTableName);
             InitializeDb();
@@ -226,38 +209,6 @@ namespace Elysium.Persistence.Services
             return Task.CompletedTask;
         }
 
-        //public class KeyAndForeignKeyIdentity : IEquatable<KeyAndForeignKeyIdentity>
-        //{
-        //    public required StorageKey PrimaryKey { get; set; }
-        //    public required List<StorageKey> ForeignKeys { get; set; }
-
-
-        //    public bool Equals(KeyAndForeignKeyIdentity? other)
-        //    {
-        //        if (other == null)
-        //            return false;
-        //        return PrimaryKey == other.PrimaryKey && ForeignKeys.SequenceEqual(other.ForeignKeys);
-        //    }
-
-        //    public override int GetHashCode()
-        //    {
-        //        HashCode hashCode = default(HashCode);
-        //        hashCode.Add(PrimaryKey.GetHashCode());
-
-        //        foreach (var foreignKey in ForeignKeys)
-        //            hashCode.Add(foreignKey.GetHashCode());
-
-        //        return hashCode.ToHashCode();
-        //    }
-
-        //    public override bool Equals(object? obj)
-        //    {
-        //        if (obj is KeyAndForeignKeyIdentity id)
-        //            return Equals(id);
-        //        return false;
-        //    }
-        //}
-
         private void InternalSetMany(IEnumerable<(StorageKey Key, object? Value, List<StorageKey> ForeignKeys)> values)
         {
             WithTransaction((connection, transaction) =>
@@ -266,10 +217,6 @@ namespace Elysium.Persistence.Services
                 primaryTableInsertCommand.Transaction = transaction;
                 SqliteCommand? foreignKeyTableInsertCommand = null;
                 var setForeignKeyTableInsertCommandParameters = new List<Action<StorageKey, StorageKey>>();
-                //if (_settings.StoreKeyStrings)
-                //    primaryKeyInsertCommand.CommandText = $"INSERT OR REPLACE INTO {_primaryTableName} (Key, KeyString, Value) VALUES (@key, @keyString, @value)";
-                //else
-                //    primaryKeyInsertCommand.CommandText = $"INSERT OR REPLACE INTO {_primaryTableName} (Key, Value) VALUES (@key, @value)";
 
                 var primaryTableInsertParameters = new List<(string Column, string ParameterName, Func<StorageKey, object?, List<StorageKey>, string> ParameterRetriever)>
                 {
@@ -331,130 +278,7 @@ namespace Elysium.Persistence.Services
                 }
             });
 
-            //var foreignKeys = values.SelectMany(v => v.ForeignKeys)
-            //    .Select(fk => fk.)
-
-            //var details = values.Select(v => new SetDetails
-            //{
-            //    ForeignKeys = v.ForeignKeys?.Distinct().Order().ToList() ?? [],
-            //    PrimaryKey = v.Key,
-            //    Value = v.Value
-            //});
-            //var foreignKeysGroupedByTable = details.GroupBy(d => d.PrimaryKey.Type)
-            //    .ToDictionary(grp => grp.First().PrimaryKey, grp => grp.SelectMany(x => x.ForeignKeys));
-            //var tables = await Task.WhenAll(foreignKeysGroupedByTable.Select(kvp => GetOrUpsertTableAsync(connection, kvp.Value.Select(k => StorageKeyConvert.Serialize(k.WithoutFinalValue())).ToHashSet())));
-            //var keyedTables = foreignKeysGroupedByTable.Zip(tables).ToDictionary(x => x.First.Key.Type, x => x.Second);
-
-            //var valuesGroupedByKeyAndForeignKeys = details.Select(d => new KeyValuePair<KeyAndForeignKeyIdentity, SetDetails>(new KeyAndForeignKeyIdentity
-            //{
-            //    PrimaryKey = d.PrimaryKey,
-            //    ForeignKeys = d.ForeignKeys
-            //}, d)).GroupBy(kvp => kvp.Key).ToDictionary(grp => grp.Key, grp => grp.Select(x => x.Value).ToList());
-
-
-            //foreach(var (identity, setDetails) in valuesGroupedByKeyAndForeignKeys)
-            //{
-            //    var (table, sanitizedTable) = keyedTables[identity.PrimaryKey.Type];
-            //    var command = connection.CreateCommand();
-            //    var parameters = new Dictionary<string, (string, Func<SetDetails, string>)>
-            //    {
-            //        { "Key", ("key", x => StorageKeyConvert.Serialize(x.PrimaryKey)) },
-            //        { "Value", ("value", x => JsonConvert.SerializeObject(x.Value, _serializerSettings)) }
-            //    };
-
-            //    if (_settings.StoreKeyStrings)
-            //        parameters.Add("KeyString", ("keyString", x => x.PrimaryKey.ToString()));
-
-            //    for(int i=0; i < identity.ForeignKeys.Count; i++)
-            //    {
-            //        var foreignKey = identity.ForeignKeys[i];
-            //        var foreignKeyColumn = SanitizeTableName(StorageKeyConvert.Serialize(foreignKey.WithoutFinalValue()));
-            //        var j = i; // this is necessary, something something functions
-            //        parameters.Add(foreignKeyColumn, ($"foreign_key_{j}", x => x.ForeignKeys[j].Parts[^1].Value));
-            //    }
-
-            //    command.CommandText = $"INSERT OR REPLACE INTO {sanitizedTable} ({string.Join(',', parameters.Keys)}) VALUES ({string.Join(',', parameters.Values.Select(v => $"@{v.Item1}"))})";
-
-
-            //    var setParametersList = new List<Action<SetDetails>>();
-            //    foreach (var set in parameters.Values)
-            //    {
-            //        var sqliteParameter = command.CreateParameter();
-            //        sqliteParameter.ParameterName = $"@{set.Item1}";
-            //        command.Parameters.Add(sqliteParameter);
-            //        setParametersList.Add(vals => sqliteParameter.Value = set.Item2(vals));
-            //    }
-
-            //    foreach(var set in setDetails)
-            //    {
-            //        foreach (var func in setParametersList)
-            //            func(set);
-            //        await command.ExecuteNonQueryAsync();
-            //    }
-
         }
-
-
-        //var commands = new Dictionary<Type, (SqliteCommand Command, Action<StorageKey, object> SetParameters)>();
-        //async Task<(SqliteCommand Command, Action<StorageKey,  object> SetParameters)> PreparedCommandAsync(StorageKey storageKey, List<StorageKey>? foreignKeys)
-        //{
-        //    var table = await GetOrUpsertTableAsync(storageKey,connection, foreignKeys?.Select(ElysiumStorageKeyConvert.SerializeWithoutLastValue).ToHashSet());
-
-        //    var setParametersList = new List<Action<StorageKey,  object>>();
-
-        //    var command = connection.CreateCommand();
-        //    if (_settings.StoreKeyStrings)
-        //       command.CommandText = $"INSERT OR REPLACE INTO {table} (Key, KeyString, Value) VALUES (@key, @keyString, @value)";
-        //    else
-        //       command.CommandText = $"INSERT OR REPLACE INTO {table} (Key, Value) VALUES (@key, @value)";
-
-        //    var keyParameter = command.CreateParameter();
-        //    keyParameter.ParameterName = "@key";
-        //    command.Parameters.Add(keyParameter);
-        //    setParametersList.Add((key, _) =>
-        //    {
-        //        keyParameter.Value = StorageKeyConvert.Serialize(key);
-        //    });
-        //    if (_settings.StoreKeyStrings)
-        //    {
-        //        var keyStringParameter = command.CreateParameter();
-        //        keyStringParameter.ParameterName = "@keyString";
-        //        command.Parameters.Add(keyStringParameter);
-        //        setParametersList.Add((key, _) =>
-        //        {
-        //            keyStringParameter.Value = key.ToString();
-        //        });
-        //    }
-        //    var valueParameter = command.CreateParameter();
-        //    valueParameter.ParameterName = "@value";
-        //    command.Parameters.Add(valueParameter);
-        //    setParametersList.Add((_, value) =>
-        //    {
-        //        valueParameter.Value = JsonConvert.SerializeObject(value, _serializerSettings);
-        //    });
-
-        //    return (command, (key, value) =>
-        //    {
-        //        foreach (var action in setParametersList)
-        //            action(key, value);
-        //    });
-        //}
-
-        //foreach(var (key, value, foreignKeys) in values)
-        //{
-        //    var keyString = StorageKeyConvert.Serialize(key);
-        //    var valueString = JsonConvert.SerializeObject(value, _serializerSettings);
-
-        //    if (!commands.ContainsKey(key.Type))
-        //        commands[key.Type] = await PreparedCommandAsync(key, foreignKeys);
-
-        //    var (command, setParameters) = commands[key.Type];
-        //    setParameters(key, value);
-        //    await command.ExecuteNonQueryAsync();
-        //}
-
-        //    await transaction.CommitAsync();
-        //}
 
         public Task<List<(StorageKey<T> Key, T Value)>> GetMany<T>(StorageKey<T> foreignKey)
         {

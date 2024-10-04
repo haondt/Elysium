@@ -17,7 +17,6 @@ namespace Elysium.Persistence.Tests
             BsonSerializer.RegisterSerializer(new ObjectSerializer(type => true));
             BsonSerializer.RegisterGenericSerializerDefinition(typeof(StorageKey<>), typeof(StorageKeyBsonConverter<>));
             BsonSerializer.RegisterSerializer(typeof(StorageKey), new StorageKeyBsonConverter());
-
         }
 
         private static MongoClientSettings MongoClientSettings { get
@@ -44,7 +43,8 @@ namespace Elysium.Persistence.Tests
                     MongoDbStorageSettings = new ElysiumMongoDbStorageSettings
                     {
                         Collection = "test",
-                        StoreKeyStrings = true
+                        StoreKeyStrings = true,
+                        ConnectionString = "",
                     }
                 }), new MongoClient(MongoClientSettings)))
         {

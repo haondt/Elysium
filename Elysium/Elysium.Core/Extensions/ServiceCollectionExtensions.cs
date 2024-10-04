@@ -9,7 +9,8 @@ namespace Elysium.Core.Extensions
         {
             StorageKeyConvert.DefaultSerializerSettings = new StorageKeySerializerSettings
             {
-                TypeNameStrategy = TypeNameStrategy.SimpleTypeConverter
+                TypeNameStrategy = TypeNameStrategy.SimpleTypeConverter,
+                KeyEncodingStrategy = KeyEncodingStrategy.String
             };
             return services;
         }
