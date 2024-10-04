@@ -5,5 +5,6 @@
         Memory,
         Sqlite,
         MongoDb,
+        Postgres
     }
 }

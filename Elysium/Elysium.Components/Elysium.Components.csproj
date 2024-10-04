@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Haondt.Web.BulmaCSS" Version="0.0.4-alpha-20241002200525" />
-    <PackageReference Include="Haondt.Web.Core" Version="0.0.4-alpha-20241002200525" />
+    <PackageReference Include="Haondt.Web.BulmaCSS" Version="0.0.5" />
+    <PackageReference Include="Haondt.Web.Core" Version="0.0.5" />
   </ItemGroup>
 
 </Project>

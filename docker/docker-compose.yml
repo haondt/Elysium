@@ -89,8 +89,24 @@ services:
     image: alpine
     command: [sh, -cx, "chgrp -R 80085 /data && chmod -R 775 /data"]
 
+  postgres:
+    container_name: postgres
+    networks:
+      - elysium
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: elysium
+      POSTGRES_PASSWORD: elysium
+      PGDATA: /data/pgdata
+    ports:
+      - 5432:5432
+    volumes:
+      - elysium-postgres-data:/data
+      - ./postgresql-init.sql:/docker-entrypoint-initdb.d/postgresql-init.sql
+
 networks:
   elysium:
 
 volumes:
   elysium-sqlite-data:
+  elysium-postgres-data:

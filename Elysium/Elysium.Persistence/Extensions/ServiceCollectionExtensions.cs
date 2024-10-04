@@ -32,6 +32,9 @@ namespace Elysium.Persistence.Extensions
                 case ElysiumPersistenceDrivers.Sqlite:
                     services.AddSingleton<IElysiumStorage, ElysiumSqliteStorage>();
                     break;
+                case ElysiumPersistenceDrivers.Postgres:
+                    services.AddSingleton<IElysiumStorage, ElysiumPostgresqlStorage>();
+                    break;
                 case ElysiumPersistenceDrivers.MongoDb:
                     var mongoDbSettings = persistenceSettings.MongoDbStorageSettings ?? throw new ArgumentNullException(nameof(ElysiumPersistenceSettings.MongoDbStorageSettings));
                     services.AddMongoDb(new MongoDbSettings
