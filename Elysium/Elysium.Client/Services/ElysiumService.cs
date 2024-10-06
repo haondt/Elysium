@@ -10,6 +10,7 @@ using Elysium.Domain.Services;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Hosting.Services;
+using Elysium.Persistence.Services;
 using Haondt.Core.Models;
 using Microsoft.AspNetCore.Identity;
 
@@ -21,6 +22,7 @@ namespace Elysium.Client.Services
         IUserCryptoService cryptoService,
         IGrainFactory<LocalIri> grainFactory,
         IGrainFactory baseGrainFactory,
+        IElysiumStorage storage,
         IDocumentService documentService,
         UserManager<UserIdentity> userManager
         ) : IElysiumService
@@ -205,9 +207,12 @@ namespace Elysium.Client.Services
             return (documents, LongConverter.EncodeLong(result.Last));
         }
 
-        public Task<string> GenerateInviteLinkAsync()
+        public async Task<string> GenerateInviteLinkAsync()
         {
-            throw new NotImplementedException();
+            var (id, link) = InviteLinkDetails.Create();
+            var iri = iriService.GetIriForInviteLink(id);
+            await storage.Set(InviteLinkDetails.GetStorageKey(id), link);
+            return iri.ToString();
         }
     }
 }

@@ -7,6 +7,7 @@ namespace Elysium.Hosting.Services
         LocalIri InstanceActorIri { get; }
         LocalActorIriCollection GetLocalActorIris(LocalIri iri);
         LocalIri GetIriForLocalizedActorname(string localizedUsername);
+        LocalIri GetIriForInviteLink(string id);
         string GetActornameFromLocalizedActorname(string localizedUsername);
         LocalIri GetActorScopedObjectIri(LocalIri user, string id);
         LocalIri GetAnonymousObjectIri(string id);

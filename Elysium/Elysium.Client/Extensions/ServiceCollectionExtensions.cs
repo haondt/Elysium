@@ -2,13 +2,14 @@
 using Elysium.Client.Services;
 using Elysium.Core.Models;
 using Elysium.GrainInterfaces.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Elysium.Client.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddElysiumClientServices(this IServiceCollection services)
+        public static IServiceCollection AddElysiumClientServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IActivityPubClientService, ActivityPubClientService>();
             services.AddScoped<IElysiumService, ElysiumService>();

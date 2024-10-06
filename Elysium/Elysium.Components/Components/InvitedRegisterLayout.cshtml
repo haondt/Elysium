@@ -1,0 +1,61 @@
+﻿@model Elysium.Components.Components.InvitedRegisterLayoutModel
+<div id="fill-content" hx-swap-oob="true"></div>
+<title hx-swap-oob="outerHTML;title">Elysium - Sign up</title>
+
+<div id="content" hx-swap-oob="true" hx-swap="innerHTML"
+    class="is-flex is-flex-direction-row is-justify-content-center is-align-items-center" style="margin-top:50px;">
+  <div class="columns pr-6 pl-6">
+        <div class="column is-flex is-flex-direction-row is-justify-content-center is-align-items-center">
+            <div class="is-flex is-flex-direction-column is-align-items-flex-start">
+                <img style="height:50px;" src="@Url.Content("~/_asset/Elysium.wwwroot.logo.svg")" />
+                <h2 class="subtitle is-4">A poorly cobbled together social network.</h2>
+            </div>
+        </div>
+        <div class="column is-flex-grow-0" style="height:75px;width:0px;"></div>
+        <div class="column is-flex is-flex-direction-row is-justify-content-center is-align-items-center">
+            <div class="card" style="width:400px;">
+                <div class="card-content is-flex is-flex-direction-column is-align-items-center">
+                    <form id="registerUserForm" style="width:100%;" hx-post="/_event/InvitedRegisterUser">
+                        <input style="display:none;" value="@Model.InviteId" name="inviteId"/>
+                        <div class="field">
+                            <div class="control is-flex is-align-items-center" style="gap:10px;">
+                                <input 
+                                    class="input 
+                                        @if(Model.DangerUsername) { <text>is-danger</text> }
+                                    "
+                                    type="text" 
+                                    placeholder="username" name="localizedUsername" 
+                                    autocomplete="username" 
+                                    @if(!string.IsNullOrEmpty(Model.ExistingLocalizedUsername)){ <text>value=@Model.ExistingLocalizedUsername</text> }
+                                /> <span class="tag is-medium">@@@Model.Host</span>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="control">
+                                <input class="input
+                                        @if(Model.DangerPassword) { <text>is-danger</text> }
+                                    "
+                                    type="password" placeholder="password" name="password" autocomplete="new-password"
+                                />
+                            </div>
+                            @if(Model.Errors.Count > 0)
+                            {
+                                <div class="is-flex is-flex-direction-column" style="width:100%;">
+                                @foreach(var error in Model.Errors)
+                                {
+                                    <p class="help is-danger">@error</p>
+                                }
+                                </div>
+                            }
+                        </div>
+                        <div class="is-flex is-justify-content-center">
+                            <input class="button  is-info" type="submit" value="Register" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>

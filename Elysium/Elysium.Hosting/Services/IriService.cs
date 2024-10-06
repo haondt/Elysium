@@ -132,5 +132,18 @@ namespace Elysium.Hosting.Services
                 PublicKey = new LocalIri { Iri = Iri.FromUnencodedString($"{iri}#main-key") }
             };
         }
+
+        public LocalIri GetIriForInviteLink(string id)
+        {
+            return new LocalIri
+            {
+                Iri = new IriBuilder
+                {
+                    Host = hostingService.Host,
+                    Scheme = Uri.UriSchemeHttps,
+                    Path = $"/invite/{id}"
+                }.Iri
+            };
+        }
     }
 }

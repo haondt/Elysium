@@ -30,7 +30,7 @@ builder.Services
     .AddElysiumComponents()
     .ConfigureStorageKeyConvert()
     .AddElysiumAssetSources()
-    .AddElysiumClientServices()
+    .AddElysiumClientServices(builder.Configuration)
     .AddElysiumDomainServices(builder.Configuration)
     .AddElysiumHostingServices(builder.Configuration)
     .AddElysiumPersistenceServices(builder.Configuration)

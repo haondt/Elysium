@@ -26,6 +26,7 @@ namespace Elysium.Extensions
             services.Configure<AdminSettings>(configuration.GetSection(nameof(AdminSettings)));
             services.AddScoped<IClientStartupParticipant, RoleRegisterer>();
             services.AddScoped<IClientStartupParticipant, DefaultAdminAccountRegisterer>();
+            services.Configure<RegistrationSettings>(configuration.GetSection(nameof(RegistrationSettings)));
 
             var assemblyPrefix = typeof(ServiceCollectionExtensions).Assembly.GetName().Name;
             services.AddScoped<IHeadEntryDescriptor>(sp => new IconDescriptor
@@ -243,6 +244,23 @@ namespace Elysium.Extensions
                 ConfigureResponse = new(m => m.ConfigureHeadersAction = new HxHeaderBuilder()
                 .ReSwap("none")
                 .Build())
+            });
+
+            services.AddScoped<IComponentDescriptor>(sp => new ComponentDescriptor<InvitedRegisterLayoutModel>((cf, rd) =>
+            {
+                var hostingService = sp.GetRequiredService<IHostingService>();
+                var host = hostingService.Host;
+
+                var inviteId = rd.Query.TryGetValue<string>("inviteId");
+
+                return new InvitedRegisterLayoutModel
+                {
+                    Host = host,
+                    InviteId = inviteId.HasValue ? inviteId.Value : ""
+                };
+            })
+            {
+                ViewPath = "~/Components/InvitedRegisterLayout.cshtml",
             });
 
             services.AddAdminComponents();
