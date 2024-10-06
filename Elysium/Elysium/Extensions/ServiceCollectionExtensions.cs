@@ -1,5 +1,4 @@
 ﻿using Elysium.Authentication.Components;
-using Elysium.Authentication.Services;
 using Elysium.Client.Services;
 using Elysium.Components.Components;
 using Elysium.Components.Components.Admin;
@@ -275,6 +274,17 @@ namespace Elysium.Extensions
             {
                 ViewPath = "~/Components/Admin/AdminPanelLanding.cshtml",
                 AuthorizationChecks = [ComponentAuthorizationCheck.IsAdministrator],
+            });
+
+            services.AddScoped<IComponentDescriptor>(_ => new NeedsAuthorizationComponentDescriptor<GenerateInviteModel>(new GenerateInviteModel())
+            {
+                ViewPath = "~/Components/Admin/GenerateInvite.cshtml",
+                AuthorizationChecks = [ComponentAuthorizationCheck.IsAdministrator],
+                ConfigureResponse = new(m => m.ConfigureHeadersAction = new HxHeaderBuilder()
+                    .ReTarget("#admin-panel-page")
+                    .ReSwap("innerHTML")
+                    .Build())
+
             });
 
             return services;

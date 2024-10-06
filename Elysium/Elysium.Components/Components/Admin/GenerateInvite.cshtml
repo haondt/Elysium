@@ -1,1 +1,38 @@
-﻿@model Elysium.Components.Components.Admin.GenerateInviteModel
+﻿@using Haondt.Web.Core.Components
+@model Elysium.Components.Components.Admin.GenerateInviteModel
+<h1 class="title">Generate Invite Link</h1>
+
+
+<div class="box is-flex is-flex-direction-column is-align-items-center is-justify-content-center">
+
+    <div class="field" style="width:100%;">
+      <div class="control">
+        <input 
+            class="input"
+             type="text"
+             placeholder="Click &quot;Generate&quot; to generate a new link"
+            value="@(!string.IsNullOrEmpty(Model.InviteLink) ? @Model.InviteLink : "")"
+        >
+      </div>
+    </div>
+
+    <div class="field is-flex is-flex-direction-row is-justify-content-center" style="width:100%;">
+        <button class="button is-link is-info" style="width:100%;"
+            _="
+                on click 
+                    writeText('@Model.InviteLink') into the navigator's clipboard
+                    set my innerHTML to 'Copied!'
+                        then wait 1.3s
+                        then set my innerHTML to 'Copy Link to Clipboard'
+            "
+        >Copy Link to Clipboard</button>
+    </div>
+
+    <div class="field is-flex is-flex-direction-row is-justify-content-center" style="width:100%;">
+        <button
+            class="button is-link"
+            hx-post="/_event/GenerateInvite"
+        >Generate</button>
+    </div>
+
+</div>

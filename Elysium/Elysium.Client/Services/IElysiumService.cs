@@ -6,6 +6,7 @@ namespace Elysium.Client.Services
 {
     public interface IElysiumService
     {
+        Task<string> GenerateInviteLinkAsync();
         string GetFediverseUsername(string username, string host);
         Task<Result<Iri, string>> GetIriForFediverseUsernameAsync(string fediverseUsername);
         Task<(IEnumerable<MediaModel> Creations, string Last)> GetPublicCreations(string? before = null);

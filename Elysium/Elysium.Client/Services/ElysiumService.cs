@@ -204,5 +204,10 @@ namespace Elysium.Client.Services
 
             return (documents, LongConverter.EncodeLong(result.Last));
         }
+
+        public Task<string> GenerateInviteLinkAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

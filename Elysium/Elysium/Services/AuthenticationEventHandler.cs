@@ -1,5 +1,8 @@
-﻿using Elysium.Client.Services;
+﻿using Elysium.Authentication.Exceptions;
+using Elysium.Authentication.Services;
+using Elysium.Client.Services;
 using Elysium.Components.Components;
+using Elysium.Components.Components.Admin;
 using Elysium.Core.Models;
 using Elysium.Hosting.Services;
 using Haondt.Core.Models;
@@ -11,16 +14,18 @@ using Haondt.Web.Core.Services;
 using Haondt.Web.Services;
 using Microsoft.AspNetCore.Identity;
 
-namespace Elysium.Authentication.Services
+namespace Elysium.Services
 {
     public class AuthenticationEventHandler(
         SignInManager<UserIdentity> signInManager,
         IComponentFactory componentFactory,
         IElysiumService elysiumService,
+        ISessionService sessionService,
         IHostingService hostingService) : IEventHandler
     {
         public const string REGISTER_USER_EVENT = "RegisterUser";
         public const string LOGIN_USER_EVENT = "LoginUser";
+        public const string GENERATE_INVITE_LINK_EVENT = "GenerateInvite";
         public async Task<Optional<IComponent>> HandleAsync(string eventName, IRequestData requestData)
         {
             if (REGISTER_USER_EVENT.Equals(eventName))
@@ -96,6 +101,18 @@ namespace Elysium.Authentication.Services
                     }));
 
                 return new(await GetHomeLoaderComponentAsync());
+            }
+
+            if (GENERATE_INVITE_LINK_EVENT.Equals(eventName))
+            {
+                if (!sessionService.IsAdministrator())
+                    throw new NeedsAuthorizationException();
+
+                var link = await elysiumService.GenerateInviteLinkAsync();
+                return new Optional<IComponent>(await componentFactory.GetPlainComponent(new GenerateInviteModel
+                {
+                    InviteLink = link
+                }));
             }
 
             return new();

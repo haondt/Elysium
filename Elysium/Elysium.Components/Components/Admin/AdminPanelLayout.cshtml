@@ -18,7 +18,12 @@
                         @foreach(var child in menuItem.Children)
                         {
                             <li>
-                                <a class="@(child.IsActive ? "is-active" : "")">
+                                <a class="menu-item-child @(child.IsActive ? "is-active" : "")"
+                                    hx-get="/_component/@child.ComponentIdentity"
+                                    hx-target="#admin-panel-page"
+                                    hx-swap="innerHTML"
+                                    _="on click add .is-active to me"
+                                >
                                     @child.Name
                                 </a>
                             </li>
@@ -34,7 +39,7 @@
             style="width:100%;"
         >
             <!-- nav bar-->
-            <div class="is-flex is-flex-direction-row is-align-items-flex-end is-justify-content-space-between"
+            <div class="is-flex is-flex-direction-column is-align-items-flex-end is-justify-content-center"
                 style="height:75px;"
             >
 
@@ -43,7 +48,9 @@
             </div>
 
             <!-- content -->
-            @await Html.PartialAsync(Model.ActivePage)
+            <div id="admin-panel-page">
+                @await Html.PartialAsync(Model.ActivePage)
+            </div>
         </div>
 
 
