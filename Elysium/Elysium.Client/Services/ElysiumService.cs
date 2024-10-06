@@ -1,5 +1,6 @@
 ﻿using Elysium.ActivityPub.Helpers;
 using Elysium.ActivityPub.Models;
+using Elysium.Authentication.Constants;
 using Elysium.Components.Components;
 using Elysium.Core.Converters;
 using Elysium.Core.Extensions;
@@ -26,6 +27,21 @@ namespace Elysium.Client.Services
     {
         IPublicCollectionGrain _publicCollectionGrain = baseGrainFactory.GetGrain<IPublicCollectionGrain>(Guid.Empty);
         IInstanceActorAuthorGrain _instanceAuthor = baseGrainFactory.GetGrain<IInstanceActorAuthorGrain>(Guid.Empty);
+
+        public async Task<Result<UserIdentity, List<string>>> RegisterAdministratorAsync(string localizedUsername, string password)
+        {
+            var user = await RegisterUserAsync(localizedUsername, password);
+            if (!user.IsSuccessful)
+                return user;
+
+            var result = await userManager.AddToRoleAsync(user.Value, AuthenticationConstants.ADMINISTRATOR_ROLE);
+            if (!result.Succeeded)
+                return new(result.Errors.Select(e => $"{e.Description}").ToList());
+
+            // todo: saga pattern here too
+
+            return new(user.Value);
+        }
 
         public async Task<Result<UserIdentity, List<string>>> RegisterUserAsync(string localizedUsername, string password)
         {

@@ -7,6 +7,7 @@ namespace Elysium.Authentication.Services
     public interface ISessionService
     {
         public bool IsAuthenticated();
+        public bool IsAdministrator();
         public Task<Optional<StorageKey<UserIdentity>>> GetUserKeyAsync();
         public void ClearCache();
         Optional<T> GetFromCookie<T>(string key);

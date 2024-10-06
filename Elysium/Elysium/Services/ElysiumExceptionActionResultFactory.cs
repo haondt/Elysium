@@ -1,4 +1,5 @@
-﻿using Elysium.Components.Components;
+﻿using Elysium.Authentication.Exceptions;
+using Elysium.Components.Components;
 using Elysium.Components.Services;
 using Haondt.Web.Components;
 using Haondt.Web.Core.Exceptions;
@@ -18,6 +19,7 @@ namespace Elysium.Services
                 KeyNotFoundException => new ErrorModel { ErrorCode = 404, Message = "Not Found" },
                 MissingComponentException => new ErrorModel { ErrorCode = 404, Message = "Not Found" },
                 BadHttpRequestException => new ErrorModel { ErrorCode = 400, Message = "Bad Request" },
+                NeedsAuthorizationException => new ErrorModel { ErrorCode = 403, Message = "Forbidden" },
                 _ => new ErrorModel { ErrorCode = 500, Message = "Elysium ran into an unrecoverable error." }
             };
 

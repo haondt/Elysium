@@ -7,14 +7,39 @@ namespace Elysium.Authentication.Services
 {
     public class ElysiumRoleStore(IElysiumStorage storage) : ElysiumStorageKeyIdModelStore<RoleIdentity>(storage), IRoleStore<RoleIdentity>
     {
-        public Task<RoleIdentity?> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
+        public async Task<RoleIdentity?> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
-            throw new NotSupportedException();
+            var result = await _storage.GetMany(NormalizedRoleName.GetStorageKey(normalizedRoleName).Extend<RoleIdentity>());
+            if (result.Count == 1)
+                return result.First().Value;
+            return null;
+        }
+
+        public override async Task<IdentityResult> CreateAsync(RoleIdentity role, CancellationToken cancellationToken)
+        {
+            if (await _storage.ContainsKey(role.Id))
+                return IdentityResult.Failed(new IdentityError { Code = "0", Description = "Role already exists" });
+            if (!string.IsNullOrEmpty(role.NormalizedName))
+                await _storage.Set(role.Id, role, [NormalizedRoleName.GetStorageKey(role.NormalizedName).Extend<RoleIdentity>()]);
+            else
+                await _storage.Set(role.Id, role);
+            return IdentityResult.Success;
+        }
+
+        public override async Task<IdentityResult> UpdateAsync(RoleIdentity role, CancellationToken cancellationToken)
+        {
+            if (!await _storage.ContainsKey(role.Id))
+                return IdentityResult.Failed(new IdentityError { Code = "0", Description = "Role does not exist" });
+            if (!string.IsNullOrEmpty(role.NormalizedName))
+                await _storage.Set(role.Id, role, [NormalizedRoleName.GetStorageKey(role.NormalizedName).Extend<RoleIdentity>()]);
+            else
+                await _storage.Set(role.Id, role);
+            return IdentityResult.Success;
         }
 
         public Task<string?> GetNormalizedRoleNameAsync(RoleIdentity role, CancellationToken cancellationToken)
         {
-            throw new NotSupportedException();
+            return Task.FromResult(role.NormalizedName);
         }
 
         public Task<string> GetRoleIdAsync(RoleIdentity role, CancellationToken cancellationToken)
@@ -24,17 +49,19 @@ namespace Elysium.Authentication.Services
 
         public Task<string?> GetRoleNameAsync(RoleIdentity role, CancellationToken cancellationToken)
         {
-            throw new NotSupportedException();
+            return Task.FromResult(role.Name);
         }
 
         public Task SetNormalizedRoleNameAsync(RoleIdentity role, string? normalizedName, CancellationToken cancellationToken)
         {
-            throw new NotSupportedException();
+            role.NormalizedName = normalizedName;
+            return Task.CompletedTask;
         }
 
         public Task SetRoleNameAsync(RoleIdentity role, string? roleName, CancellationToken cancellationToken)
         {
-            throw new NotSupportedException();
+            role.Name = roleName;
+            return Task.CompletedTask;
         }
     }
 }

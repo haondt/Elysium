@@ -29,7 +29,7 @@ namespace Elysium.Authentication.Extensions
                     sp, sp.GetRequiredService<SessionService>()));
             services.AddScoped<ComponentFactory>();
             services.AddScoped<IComponentFactory>(sp =>
-                ActivatorUtilities.CreateInstance<VerifiesAuthenticationComponentFactory>(
+                ActivatorUtilities.CreateInstance<VerifiesAuthorizationComponentFactory>(
                     sp, sp.GetRequiredService<ComponentFactory>()));
             services.AddElysiumCryptoServices(configuration);
 

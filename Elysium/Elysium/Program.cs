@@ -1,6 +1,7 @@
 using Elysium.Authentication.Extensions;
 using Elysium.Client.Extensions;
 using Elysium.Client.Hubs;
+using Elysium.Client.Services;
 using Elysium.Components.Extensions;
 using Elysium.Core.Extensions;
 using Elysium.Domain.Extensions;
@@ -51,6 +52,15 @@ app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseMiddleware<UnmappedRouteHandlerMiddleware>();
 app.MapHub<ElysiumHub>("/elysiumHub");
 //app.UseAuthentication();
-app.Run();
+await app.StartAsync();
+//app.Run();
+var client = app.Services.GetRequiredService<IClusterClient>();
+using (var scope = client.ServiceProvider.CreateScope())
+{
+    var startupService = scope.ServiceProvider.GetRequiredService<IClientStartupService>();
+    await startupService.OnStartupAsync();
+}
 
 //TODO: sharedInbox
+
+await app.WaitForShutdownAsync();

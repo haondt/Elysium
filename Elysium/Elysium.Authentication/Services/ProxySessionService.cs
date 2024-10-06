@@ -12,6 +12,9 @@ namespace Elysium.Authentication.Services
         public Optional<T> GetFromCookie<T>(string key) => SessionService.GetFromCookie<T>(key);
 
         public Task<Optional<StorageKey<UserIdentity>>> GetUserKeyAsync() => SessionService.GetUserKeyAsync();
+
+        public bool IsAdministrator() => SessionService.IsAdministrator();
+
         public bool IsAuthenticated() => SessionService.IsAuthenticated();
 
         public void SetCookie<T>(string key, T value) => SessionService.SetCookie<T>(key, value);

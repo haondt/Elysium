@@ -2,6 +2,7 @@
 using Elysium.Authentication.Services;
 using Elysium.Client.Services;
 using Elysium.Components.Components;
+using Elysium.Components.Components.Admin;
 using Elysium.Exceptions;
 using Elysium.Hosting.Services;
 using Elysium.Services;
@@ -23,6 +24,9 @@ namespace Elysium.Extensions
             services.AddScoped<IEventHandler, AuthenticationEventHandler>();
             services.AddSingleton<IExceptionActionResultFactory, ElysiumExceptionActionResultFactory>();
             services.AddScoped<IComponentHandler, ElysiumComponentHandler>();
+            services.Configure<AdminSettings>(configuration.GetSection(nameof(AdminSettings)));
+            services.AddScoped<IClientStartupParticipant, RoleRegisterer>();
+            services.AddScoped<IClientStartupParticipant, DefaultAdminAccountRegisterer>();
 
             var assemblyPrefix = typeof(ServiceCollectionExtensions).Assembly.GetName().Name;
             services.AddScoped<IHeadEntryDescriptor>(sp => new IconDescriptor
@@ -65,7 +69,7 @@ namespace Elysium.Extensions
 
         public static IServiceCollection AddElysiumComponents(this IServiceCollection services)
         {
-            services.AddScoped<IComponentDescriptor>(sp => new NeedsAuthenticationComponentDescriptor<ShadeSelectorModel>(async (cf, rd) =>
+            services.AddScoped<IComponentDescriptor>(sp => new NeedsAuthorizationComponentDescriptor<ShadeSelectorModel>(async (cf, rd) =>
             {
                 var session = sp.GetRequiredService<IUserSessionService>();
                 var username = await session.GetLocalizedUsernameAsync();
@@ -108,8 +112,10 @@ namespace Elysium.Extensions
             })
             {
                 ViewPath = "~/Components/ShadeSelector.cshtml",
+                AuthorizationChecks = [ComponentAuthorizationCheck.IsAuthenticated]
             });
-            services.AddScoped<IComponentDescriptor>(sp => new NeedsAuthenticationComponentDescriptor<HomePageModel>(async (cf) =>
+
+            services.AddScoped<IComponentDescriptor>(sp => new NeedsAuthorizationComponentDescriptor<HomePageModel>(async (cf) =>
             {
                 var feed = await cf.GetComponent<FeedModel>();
                 var shadeSelector = await cf.GetComponent<ShadeSelectorModel>();
@@ -121,7 +127,9 @@ namespace Elysium.Extensions
             })
             {
                 ViewPath = "~/Components/HomePage.cshtml",
+                AuthorizationChecks = [ComponentAuthorizationCheck.IsAuthenticated]
             });
+
             services.AddScoped<IComponentDescriptor>(sp => new ComponentDescriptor<FeedModel>(async cf =>
             {
                 var elysiumService = sp.GetRequiredService<IElysiumService>();
@@ -142,6 +150,7 @@ namespace Elysium.Extensions
             {
                 ViewPath = $"~/Components/Media.cshtml",
             });
+
             services.AddScoped<IComponentDescriptor>(_ => new ComponentDescriptor<ErrorModel>((componentFactory, requestData) =>
             {
                 var errorCode = requestData.Query.GetValue<int>("errorCode");
@@ -208,30 +217,64 @@ namespace Elysium.Extensions
 
 
             // temporary message model
-            services.AddScoped<IComponentDescriptor>(sp => new NeedsAuthenticationComponentDescriptor<TemporaryMessageComponentLayoutModel>(() => new TemporaryMessageComponentLayoutModel
+            services.AddScoped<IComponentDescriptor>(sp => new NeedsAuthorizationComponentDescriptor<TemporaryMessageComponentLayoutModel>(() => new TemporaryMessageComponentLayoutModel
             {
                 Messages = []
             })
             {
                 ViewPath = "~/Components/TemporaryMessageComponentLayout.cshtml",
+                AuthorizationChecks = [ComponentAuthorizationCheck.IsAuthenticated],
                 ConfigureResponse = new(m => m.ConfigureHeadersAction = new HxHeaderBuilder()
                     .ReTarget("#fill-content")
                     .ReSwap("innerHTML")
                     .PushUrl("/messages")
                     .Build())
             });
-            services.AddScoped<IComponentDescriptor>(_ => new NeedsAuthenticationComponentDescriptor<TemporaryMessageComponentUpdateModel>()
+            services.AddScoped<IComponentDescriptor>(_ => new NeedsAuthorizationComponentDescriptor<TemporaryMessageComponentUpdateModel>()
             {
                 ViewPath = "~/Components/TemporaryMessageComponentUpdate.cshtml",
+                AuthorizationChecks = [ComponentAuthorizationCheck.IsAuthenticated],
             });
             // end temporary message model
 
-            services.AddScoped<IComponentDescriptor>(sp => new NeedsAuthenticationComponentDescriptor<CreatePostModalModel>(() => new())
+            services.AddScoped<IComponentDescriptor>(sp => new NeedsAuthorizationComponentDescriptor<CreatePostModalModel>(() => new())
             {
                 ViewPath = "~/Components/CreatePostModal.cshtml",
+                AuthorizationChecks = [ComponentAuthorizationCheck.IsAuthenticated],
                 ConfigureResponse = new(m => m.ConfigureHeadersAction = new HxHeaderBuilder()
                 .ReSwap("none")
                 .Build())
+            });
+
+            services.AddAdminComponents();
+
+            return services;
+        }
+
+        public static IServiceCollection AddAdminComponents(this IServiceCollection services)
+        {
+
+            services.AddScoped<IComponentDescriptor>(_ => new NeedsAuthorizationComponentDescriptor<AdminPanelLayoutModel>(async (componentFactory, requestData) =>
+            {
+                return new AdminPanelLayoutModel
+                {
+                    ActivePage = await componentFactory.GetPlainComponent<AdminPanelLandingModel>(),
+                };
+            })
+            {
+                ViewPath = "~/Components/Admin/AdminPanelLayout.cshtml",
+                AuthorizationChecks = [ComponentAuthorizationCheck.IsAdministrator],
+                ConfigureResponse = new(m => m.ConfigureHeadersAction = new HxHeaderBuilder()
+                    .ReTarget("#content")
+                    .ReSwap("innerHTML")
+                    .PushUrl("/admin")
+                    .Build())
+            });
+
+            services.AddScoped<IComponentDescriptor>(_ => new NeedsAuthorizationComponentDescriptor<AdminPanelLandingModel>(new AdminPanelLandingModel())
+            {
+                ViewPath = "~/Components/Admin/AdminPanelLanding.cshtml",
+                AuthorizationChecks = [ComponentAuthorizationCheck.IsAdministrator],
             });
 
             return services;

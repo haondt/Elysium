@@ -15,6 +15,7 @@ namespace Elysium.Client.Extensions
             services.AddSingleton<IClientActorActivityDeliveryObserverRegistry, ClientActorActivityDeliveryObserverRegistry>();
             services.AddScoped<IUserSessionService, UserSessionService>();
             services.AddElysiumClientGrainFactories();
+            services.AddScoped<IClientStartupService, ClientStartupService>();
             return services;
         }
 

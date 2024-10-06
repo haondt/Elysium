@@ -13,7 +13,7 @@ namespace Elysium.Authentication.Services
         {
             var hasUser = await _storage.ContainsKey(user.Id);
             if (hasUser)
-                return IdentityResult.Failed(new IdentityError { Code = "0", Description = "User already exists" });
+                return IdentityResult.Failed(new IdentityError { Code = "0", Description = "entity already exists" });
             await _storage.Set(user.Id, user);
             return IdentityResult.Success;
         }
@@ -42,7 +42,7 @@ namespace Elysium.Authentication.Services
         {
             var hasUser = await _storage.ContainsKey(user.Id);
             if (!hasUser)
-                return IdentityResult.Failed(new IdentityError { Code = "1", Description = "User does not exist" });
+                return IdentityResult.Failed(new IdentityError { Code = "1", Description = "entity does not exist" });
             await _storage.Set(user.Id, user);
             return IdentityResult.Success;
         }

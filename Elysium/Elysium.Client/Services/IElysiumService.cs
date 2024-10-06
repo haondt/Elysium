@@ -10,6 +10,7 @@ namespace Elysium.Client.Services
         Task<Result<Iri, string>> GetIriForFediverseUsernameAsync(string fediverseUsername);
         Task<(IEnumerable<MediaModel> Creations, string Last)> GetPublicCreations(string? before = null);
         string GetShadeNameFromLocalIri(LocalIri userIri, LocalIri shadeIri);
+        Task<Result<UserIdentity, List<string>>> RegisterAdministratorAsync(string localizedUsername, string password);
         Task<Result<UserIdentity, List<string>>> RegisterUserAsync(string localizedUsername, string password);
     }
 }

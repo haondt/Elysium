@@ -15,6 +15,8 @@ namespace Elysium.Authentication.Services
 
         public Task<Optional<StorageKey<UserIdentity>>> GetUserKeyAsync() => Task.FromResult(identity);
 
+        public bool IsAdministrator() => false;
+
         public bool IsAuthenticated() => identity.HasValue;
 
         public void SetCookie<T>(string key, T value)

@@ -1,4 +1,5 @@
-﻿using Elysium.Components.Components;
+﻿using Elysium.Authentication.Exceptions;
+using Elysium.Components.Components;
 using Haondt.Web.Core.Components;
 using Haondt.Web.Services;
 
@@ -10,10 +11,9 @@ namespace Elysium.Services
         {
             try
             {
-                var component = await componentFactory.GetComponent(componentIdentity);
-                return component;
+                return await componentFactory.GetComponent(componentIdentity);
             }
-            catch (UnauthorizedAccessException)
+            catch (NeedsAuthenticationException)
             {
                 return await componentFactory.GetPlainComponent<LoginModel>();
             }

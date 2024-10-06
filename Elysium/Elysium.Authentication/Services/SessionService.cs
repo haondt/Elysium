@@ -1,4 +1,5 @@
-﻿using Elysium.Core.Models;
+﻿using Elysium.Authentication.Constants;
+using Elysium.Core.Models;
 using Haondt.Core.Models;
 using Haondt.Identity.StorageKey;
 using Microsoft.AspNetCore.Http;
@@ -13,13 +14,15 @@ namespace Elysium.Authentication.Services
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<UserIdentity> _userManager;
+        private readonly string _normalizedAdministratorRole;
         private Lazy<Task<Optional<StorageKey<UserIdentity>>>> _storageKeyLazy;
         private readonly Dictionary<string, string> _updatedCookies = [];
 
-        public SessionService(IHttpContextAccessor httpContextAccessor, UserManager<UserIdentity> userManager)
+        public SessionService(IHttpContextAccessor httpContextAccessor, UserManager<UserIdentity> userManager, RoleManager<RoleIdentity> roleManager)
         {
             _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
+            _normalizedAdministratorRole = roleManager.NormalizeKey(AuthenticationConstants.ADMINISTRATOR_ROLE);
             ClearCache();
         }
 
@@ -47,6 +50,16 @@ namespace Elysium.Authentication.Services
         public bool IsAuthenticated()
         {
             return _httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated == true;
+        }
+
+        public bool IsAdministrator()
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext == null || !IsAuthenticated())
+                return false;
+
+            var user = httpContext.User;
+            return user.IsInRole(_normalizedAdministratorRole);
         }
 
         public Optional<T> GetFromCookie<T>(string key)

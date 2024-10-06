@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 namespace Elysium.Authentication.Services
 {
     // todo: use storagekeygrain instead of storage
-    public class ElysiumUserStore(IElysiumStorage storage) : ElysiumStorageKeyIdModelStore<UserIdentity>(storage), IUserStore<UserIdentity>, IUserPasswordStore<UserIdentity>
+    public class ElysiumUserStore(IElysiumStorage storage) : ElysiumStorageKeyIdModelStore<UserIdentity>(storage), IUserStore<UserIdentity>, IUserPasswordStore<UserIdentity>, IUserRoleStore<UserIdentity>
     {
         public async Task<UserIdentity?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
@@ -81,6 +81,42 @@ namespace Elysium.Authentication.Services
         {
             user.LocalizedUsername = userName;
             return Task.CompletedTask;
+        }
+
+        public Task AddToRoleAsync(UserIdentity user, string roleName, CancellationToken cancellationToken)
+        {
+            return _storage.Set(UserRoleMapping.GetStorageKey(user.Id, roleName), new UserRoleMapping
+            {
+                User = user.Id,
+                RoleName = roleName,
+            }, [UserRoleMapping.GetForeignKey(user.Id), UserRoleMapping.GetForeignKey(roleName)]);
+        }
+
+        public Task RemoveFromRoleAsync(UserIdentity user, string roleName, CancellationToken cancellationToken)
+        {
+            return _storage.Delete(UserRoleMapping.GetStorageKey(user.Id, roleName));
+        }
+
+        public async Task<IList<string>> GetRolesAsync(UserIdentity user, CancellationToken cancellationToken)
+        {
+            var roles = await _storage.GetMany(UserRoleMapping.GetForeignKey(user.Id));
+            return roles.Select(q => q.Value.RoleName).ToList();
+        }
+
+        public Task<bool> IsInRoleAsync(UserIdentity user, string roleName, CancellationToken cancellationToken)
+        {
+            return _storage.ContainsKey(UserRoleMapping.GetStorageKey(user.Id, roleName));
+        }
+
+        public async Task<IList<UserIdentity>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
+        {
+            var roles = await _storage.GetMany(UserRoleMapping.GetForeignKey(roleName));
+            var userKeys = roles.Select(q => q.Value.User);
+            var userIdentities = await _storage.GetMany(userKeys.ToList());
+
+            return userIdentities.Where(q => q.IsSuccessful)
+                .Select(q => q.Value)
+                .ToList();
         }
     }
 }

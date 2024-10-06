@@ -1,0 +1,51 @@
+﻿@using Haondt.Web.Core.Extensions
+@model Elysium.Components.Components.Admin.AdminPanelLayoutModel
+<div class = "container">
+    <div class="is-flex is-flex-direction-row" style="gap:40px;">
+        <!-- Left column -->
+        <div class="is-flex is-flex-direction-column" style="width:250px;">
+            <!-- logo -->
+            <div style="width:100%;height:75px;" class="pl-1 is-flex is-align-items-center">
+                <img src="/_asset/Elysium.wwwroot.logo.svg" style="height:25px;"/>
+            </div>
+
+            <!-- menu -->
+            <aside class="menu">
+                @foreach(var menuItem in Model.MenuItems)
+                {
+                    <p class="menu-label">@menuItem.Name</p>
+                    <ul class="menu-list">
+                        @foreach(var child in menuItem.Children)
+                        {
+                            <li>
+                                <a class="@(child.IsActive ? "is-active" : "")">
+                                    @child.Name
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                }
+            </aside>
+        </div>
+
+        <!-- Right Column -->
+        <div
+            class="is-flex is-flex-direction-column"
+            style="width:100%;"
+        >
+            <!-- nav bar-->
+            <div class="is-flex is-flex-direction-row is-align-items-flex-end is-justify-content-space-between"
+                style="height:75px;"
+            >
+
+                <!-- right section-->
+                    <button class="button is-ghost">leave admin panel</button>
+            </div>
+
+            <!-- content -->
+            @await Html.PartialAsync(Model.ActivePage)
+        </div>
+
+
+    </div>
+</div>
