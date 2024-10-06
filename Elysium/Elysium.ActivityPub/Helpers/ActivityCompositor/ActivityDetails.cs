@@ -2,16 +2,31 @@
 
 namespace Elysium.ActivityPub.Helpers.ActivityCompositor
 {
-    public abstract class ActivityDetails : ICompositionDetails
+    public abstract class ActivityDetails : AbstractCompositionDetails
     {
-        public required Iri Id { get; set; }
-        public abstract string Type { get; }
-        public required Iri Actor { get; set; }
-        public List<Iri>? Cc { get; set; }
-        public List<Iri>? To { get; set; }
-        public List<Iri>? Bto { get; set; }
-        public List<Iri>? Bcc { get; set; }
-        public required Iri AttributedTo { get; set; }
+        public required IdentityCompositionDetail Identity { get; set; }
+        public required AddressingCompositionDetail Addressing { get; set; }
+        public required OwnershipCompositionDetail Ownership { get; set; }
+
+        // activity things
         public required Iri Object { get; set; }
+        public required Iri Actor { get; set; }
+
+        protected override List<ICompositionDetail> AggregateDetails()
+        {
+            return
+            [
+                Identity,
+                Addressing,
+                Ownership
+            ];
+        }
+
+        protected override ActivityPubJsonBuilder AdditionalConfiguration(ActivityPubJsonBuilder builder)
+        {
+            return builder
+                .Actor(Actor)
+                .Object(Object);
+        }
     }
 }

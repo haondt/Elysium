@@ -1,0 +1,75 @@
+﻿@model Elysium.Components.Components.CreatePostModalModel
+<div id="modal" class="modal is-active is-justify-content-flex-start" hx-swap-oob="true" style="padding-top:150px;">
+    <div class="modal-background" 
+        _="
+            on click 
+                remove .is-active from #modal
+                set <#modal />'s innerHTML to ''
+            end 
+            on keydown from elsewhere
+                if the event's key is 'Escape'
+                    remove .is-active from #modal
+                    set <#modal />'s innerHTML to ''
+                end
+            end"></div>
+    <div class="modal-content" style="width:auto;">
+        <div class="card" style="width:400px;--bulma-card-shadow:none;">
+            <div class="card-content is-flex is-flex-direction-column is-align-items-center">
+                <form id="registerUserForm" style="width:100%;" hx-post="/_event/CreatePost">
+                    <div class="field">
+                        <div class="control">
+                            <input
+                                @*todo: check if this needs to be escaped*@
+                                @if(!string.IsNullOrEmpty(Model.ExistingTitle)){ <text>value=@Model.ExistingTitle</text> }
+                                class="
+                                    input
+                                    @(Model.HasEmptyContent ? "is-danger" : "")
+                                "
+                                type="text" placeholder="Title (optional)" name="title"
+                            />
+                        </div>
+                        @if (Model.HasEmptyContent)
+                        {
+                            <p class="help is-danger">At least one of text and title must be non-empty.</p>
+                        }
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            <textarea
+                                class="
+                                    @(Model.HasEmptyContent ? "is-danger" : "")
+                                    textarea
+                                "
+                                placeholder="Text (optional)" name="text"
+                            >@if(!string.IsNullOrEmpty(Model.ExistingText)){ <text>@Model.ExistingText</text> }</textarea>
+                        </div>
+                        @if (Model.HasEmptyContent)
+                        {
+                            <p class="help is-danger">At least one of text and title must be non-empty.</p>
+                        }
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            <input
+                                @if(!string.IsNullOrEmpty(Model.ExistingAudience)){ <text>value=@Model.ExistingAudience</text> }
+                                class="
+                                    input
+                                    @(!string.IsNullOrEmpty(Model.AudienceError) ? "is-danger" : "")
+                                "
+                                type="text" placeholder="Audience" name="audience"
+                            />
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.AudienceError))
+                        {
+                            <p class="help is-danger">@Model.AudienceError</p>
+                        }
+                    </div>
+                    <div class="is-flex is-flex-direction-row">
+                        <div class="is-flex is-justify-content-center"><input class="button  is-primary" type="submit" value="Post" /></div>
+                        <div class="is-flex is-justify-content-center"><input class="button  is-ghost" type="submit" value="Save to Drafts" /></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

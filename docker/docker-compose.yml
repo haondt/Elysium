@@ -89,6 +89,7 @@ services:
     image: alpine
     command: [sh, -cx, "chgrp -R 80085 /data && chmod -R 775 /data"]
 
+  # only needed for postgres driver
   postgres:
     container_name: postgres
     networks:

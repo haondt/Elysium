@@ -80,9 +80,9 @@ namespace Elysium.Client.Services
                 if (user == null)
                     return new($"Unable to find user {fediverseUsername}");
                 var localizedUsername = user.LocalizedUsername ?? user.Id.Parts[^1].Value;
-                return new(iriService.GetIriForLocalizedActorname(localizedUsername).Iri);
+                return new(iriService.GetIriForLocalizedActorname(localizedUsername));
             }
-            return new((await GetUriForRemoteUsernameAsync(fediverseUsername)).Iri);
+            return new((await GetUriForRemoteUsernameAsync(fediverseUsername)));
         }
 
         public string GetFediverseUsername(string username, string host)

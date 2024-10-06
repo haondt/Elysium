@@ -10,6 +10,8 @@
         {
             return Iri.ToString();
         }
+
+        public static implicit operator Iri(LocalIri localIri) => localIri.Iri;
     }
 }
 

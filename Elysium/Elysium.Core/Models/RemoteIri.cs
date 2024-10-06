@@ -9,6 +9,8 @@
         {
             return Iri.ToString();
         }
+
+        public static implicit operator Iri(RemoteIri localIri) => localIri.Iri;
     }
 }
 

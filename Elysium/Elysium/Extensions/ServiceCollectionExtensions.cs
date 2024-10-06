@@ -226,6 +226,14 @@ namespace Elysium.Extensions
             });
             // end temporary message model
 
+            services.AddScoped<IComponentDescriptor>(sp => new NeedsAuthenticationComponentDescriptor<CreatePostModalModel>(() => new())
+            {
+                ViewPath = "~/Components/CreatePostModal.cshtml",
+                ConfigureResponse = new(m => m.ConfigureHeadersAction = new HxHeaderBuilder()
+                .ReSwap("none")
+                .Build())
+            });
+
             return services;
         }
 

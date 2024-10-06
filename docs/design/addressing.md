@@ -1,0 +1,22 @@
+- when posting publicly
+  - to: followers
+  - cc: public
+  - type: Note / Page depending on the length
+- when posting to mastodon
+  - type: note
+  - to: followers
+  - cc: public
+- when posting to lemmy
+  - type: Page
+    - todo: what happens if you send a lemmy community a note?
+  - to: the lemmy community
+  - cc: public (lemmy does to: public but elysium will always cc public for consistency)
+- when replying publicly
+  - to: followers
+  - cc: public
+  - cc: {person you are replying to}
+  - inReplyTo: { object you are replying to}
+- when dming
+  - to: {person you are dming}
+  - cc: noone
+  - object gets added to a collection, and the activity of appending to the colleciton gets sent to person you are dming's inbox

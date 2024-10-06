@@ -5,22 +5,22 @@
         public static string ToRelativeTime(this DateTime dateTime)
         {
             var now = DateTime.UtcNow;
-            var timespan = now - dateTime.ToUniversalTime();
+            var timespan = now - dateTime;
 
             if (timespan.TotalSeconds < 1)
                 return "just now";
 
             if (timespan.TotalSeconds < 60)
-                return $"{timespan.Seconds}s";
+                return $"{(int)timespan.TotalSeconds}s";
 
             if (timespan.TotalMinutes < 60)
-                return $"{timespan.Minutes}m";
+                return $"{(int)timespan.TotalMinutes}m";
 
             if (timespan.TotalHours < 24)
-                return $"{timespan.Hours}h";
+                return $"{(int)timespan.TotalHours}h";
 
             if (timespan.TotalDays < 7)
-                return $"{timespan.Days}d";
+                return $"{(int)timespan.TotalDays}d";
 
             if (timespan.TotalDays < 30)
             {

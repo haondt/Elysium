@@ -1,7 +1,9 @@
-﻿namespace Elysium.ActivityPub.Helpers.ActivityCompositor
+﻿using Newtonsoft.Json.Linq;
+
+namespace Elysium.ActivityPub.Helpers.ActivityCompositor
 {
     public interface ICompositionDetails
     {
-        public string Type { get; }
+        public JArray Composit();
     }
 }

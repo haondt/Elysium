@@ -4,6 +4,7 @@ using Elysium.ActivityPub.Models;
 using Elysium.Core.Extensions;
 using Elysium.Core.Models;
 using Elysium.Cryptography.Services;
+using Elysium.Domain;
 using Elysium.Domain.Services;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Services;
@@ -14,7 +15,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Orleans.Streams;
 
-namespace Elysium.Domain
+namespace Elysium.Grains
 {
     // for when we get to the actors url body
     // need to add the public key
@@ -305,17 +306,20 @@ namespace Elysium.Domain
                     return _iriService.GetActorScopedActivityIri(_id, activityId);
                 }, 5); // todo: put this in an appsetting
 
-                var activity = Compositor.Composit(new CreateActivityDetails
+                var activity = new CreateActivityDetails
                 {
-                    Id = activityIri.Iri,
                     Actor = _id.Iri,
-                    Bcc = bccList,
-                    Bto = btoList,
-                    Cc = ccList,
-                    To = toList,
+                    Addressing = new AddressingCompositionDetail
+                    {
+                        Bcc = bccList,
+                        Bto = btoList,
+                        Cc = ccList,
+                        To = toList
+                    },
+                    Identity = new IdentityCompositionDetail { Id = activityIri.Iri },
                     Object = objectIri.Iri,
-                    AttributedTo = _id.Iri,
-                });
+                    Ownership = new OwnershipCompositionDetail { AttributedTo = _id.Iri }
+                }.Composit();
 
 
                 mainObjectResult["@id"] = objectIri.ToString();
@@ -335,11 +339,11 @@ namespace Elysium.Domain
                 // TODO: the activity should also be available at a more well known url, if the type is understood. e.g. toots go at users/fred/toot/12345
 
                 // strip bto, bcc and dereference activity
-                var outgoingActivity = Compositor.Composit(new PrePublishActivityDetails
+                var outgoingActivity = new PrePublishActivityDetails
                 {
                     ReferencedActivityWithBtoBcc = activity,
                     ObjectWithBtoBcc = expandedObject
-                });
+                }.Composit();
 
                 var outgoingCompactedActivity = await _jsonLdService.CompactAsync(_authorGrain, outgoingActivity);
 
@@ -358,9 +362,7 @@ namespace Elysium.Domain
 
             }
             else
-            {
                 throw new NotSupportedException($"ActivityType {type} not yet suported");
-            }
         }
 
 

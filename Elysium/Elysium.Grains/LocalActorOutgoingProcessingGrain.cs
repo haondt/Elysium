@@ -120,7 +120,7 @@ namespace Elysium.Domain
                 // 3) idk bro throw an error
                 // all the GETs should be authored by the instance grain
 
-                if (recipient == ActivityPubConsts.PUBLIC_COLLECTION.Iri)
+                if (recipient == ActivityPubConstants.PUBLIC_COLLECTION.Iri)
                 {
                     await _publicCollectionGrain.IngestReferenceAsync(data.ActivityType, data.ActivityIri.Iri);
                     continue;

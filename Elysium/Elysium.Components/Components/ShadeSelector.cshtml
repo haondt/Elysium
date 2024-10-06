@@ -48,9 +48,51 @@
     @foreach(var shade in Model.ShadeSelections)
     {
         <div class="is-flex is-flex-direction-column" style="gap:10px;">
-            <button
-                class="
-                    ml-1 button is-flex is-flex-direction-row actor-button is-justify-content-flex-start
+            <div class="is-flex is-flex-direction-row" style="gap:10px">
+                <button
+                    class="
+                        ml-1 button is-flex is-flex-direction-row actor-button
+                        is-justify-content-flex-start is-flex-grow-1
+                        @if(shade.IsPrimary)
+                        {
+                            <text>is-primary main</text>
+                        }
+                        else
+                        {
+                            <text>is-link</text>
+                        }
+                        @if(!shade.IsActive)
+                        {
+                            <text>is-outlined</text>
+                        }
+                    "
+                    _="
+                        on mouseenter
+                            remove .is-hidden from the first <.main-feed-help-label/> in me
+                            then add .showing-help to me
+                        end
+                        on mouseleave
+                            add .is-hidden to the first <.main-feed-help-label/> in me
+                            then remove .showing-help from me
+                        end
+                    ">
+
+                    <span class="icon is-medium" style="transition:initial;">
+                        <i class="fas fa-solid fa-ghost fa-xl"></i>
+                    </span>
+
+                    <div class="is-flex is-flex-direction-column is-justify-content-center" style="line-height:0.9;">
+                        <div class="has-text-weight-medium actor-name-label" style="display:flex;">@shade.Text</div>
+                        <strong class="notifications-help-label is-hidden" style="color:inherit;display:flex;">notifications</strong>
+                        <strong class="profile-help-label is-hidden" style="color:inherit;display:flex;">profile</strong>
+                        <strong class="firehose-help-label is-hidden" style="color:inherit;display:flex;">firehose</strong>
+                        <strong class="more-help-label is-hidden" style="color:inherit;display:flex;">more</strong>
+                        <strong class="main-feed-help-label is-hidden" style="color:inherit;display:flex;">main feed</strong>
+                        <strong class="post-help-label is-hidden" style="color:inherit;display:flex;">create post</strong>
+                    </div>
+                </button>
+                <button class="
+                    button
                     @if(shade.IsPrimary)
                     {
                         <text>is-primary main</text>
@@ -63,31 +105,22 @@
                     {
                         <text>is-outlined</text>
                     }
-                "
-                _="
-                    on mouseenter
-                        remove .is-hidden from the first <.main-feed-help-label/> in me
-                        then add .showing-help to me
-                    end
-                    on mouseleave
-                        add .is-hidden to the first <.main-feed-help-label/> in me
-                        then remove .showing-help from me
-                    end
-                ">
-
-                <span class="icon is-medium" style="transition:initial;">
-                    <i class="fas fa-solid fa-ghost fa-xl"></i>
-                </span>
-
-                <div class="is-flex is-flex-direction-column is-justify-content-center" style="line-height:0.9;">
-                    <div class="has-text-weight-medium actor-name-label" style="display:flex;">@shade.Text</div>
-                    <strong class="notifications-help-label is-hidden" style="color:inherit;display:flex;">notifications</strong>
-                    <strong class="profile-help-label is-hidden" style="color:inherit;display:flex;">view profile</strong>
-                    <strong class="firehose-help-label is-hidden" style="color:inherit;display:flex;">firehose</strong>
-                    <strong class="more-help-label is-hidden" style="color:inherit;display:flex;">more</strong>
-                    <strong class="main-feed-help-label is-hidden" style="color:inherit;display:flex;">main feed</strong>
-                </div>
-            </button>
+                    ",
+                    _="
+                        on mouseenter 
+                            remove .is-hidden from the previous <.post-help-label/> 
+                            then add .is-hovered to the previous <.actor-button/>
+                        end
+                        on mouseleave
+                            add .is-hidden to the previous <.post-help-label/>
+                            then remove .is-hovered from the previous <.actor-button/>
+                        end
+                    ", hx-get="/_component/Elysium.Components.Components.CreatePostModalModel">
+                    <span class="icon is-medium" style="transition:initial;">
+                        <i class="fa-regular fa-comment fa-xl"></i>
+                    </span>
+                </button>
+            </div>
 
             <div class="is-flex is-flex-direction-row">
                 @foreach(var action in new List<string> { "notifications", "profile", "firehose", "more" })

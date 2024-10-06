@@ -138,7 +138,7 @@ namespace Elysium.Domain.Services
                 if (settings.Value.SignFetches && await data.Author.IsInASigningMoodAsync())
                 {
                     var date = DateTimeOffset.UtcNow.ToString("r", CultureInfo.InvariantCulture);
-                    var stringToSign = $"(request-target): {method.ToString().ToLower()} {data.Target.Iri.ToString()}\nhost: {location.Host}\ndate: {date}";
+                    var stringToSign = $"(request-target): {method.ToString().ToLower()} {data.Target.Iri}\nhost: {location.Host}\ndate: {date}";
                     var digestHeaderPart = "";
                     if (!string.IsNullOrEmpty(jsonLdPayload))
                     {
