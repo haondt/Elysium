@@ -83,10 +83,15 @@ namespace Elysium.Persistence.Services
                 throw new ArgumentNullException("value");
             }
 
+            var foreignKeySet = foreignKeys.Cast<StorageKey>().ToHashSet();
+
+            if (_storage.TryGetValue(key, out var existing))
+                foreignKeySet.UnionWith(existing.ForeignKeys);
+
             _storage[key] = new MemoryEntry
             {
                 Value = value,
-                ForeignKeys = foreignKeys.Cast<StorageKey>().ToHashSet()
+                ForeignKeys = foreignKeySet
             };
             return Task.CompletedTask;
         }

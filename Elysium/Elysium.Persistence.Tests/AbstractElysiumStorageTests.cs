@@ -226,5 +226,57 @@ namespace Elysium.Persistence.Tests
             var hasKey2 = await elysiumStorage.ContainsKey(carKey2);
             hasKey2.Should().BeTrue();
         }
+
+        [Fact]
+        public async Task WillDeduplicateForeignKeyPrimaryKeyPairs()
+        {
+            var carKey = StorageKey<Car>.Create(Guid.NewGuid().ToString());
+            var manufacturerKey = StorageKey<Manufacturer>.Create(Guid.NewGuid().ToString());
+
+            await elysiumStorage.Set(carKey, new Car { Color = "red" }, [manufacturerKey.Extend<Car>(), manufacturerKey.Extend<Car>()]);
+
+            var result = await elysiumStorage.GetMany(manufacturerKey.Extend<Car>());
+            result.Count.Should().Be(1);
+            result.Single().Value.Color.Should().Be("red");
+        }
+
+        [Fact]
+        public async Task WillAppendForeignKeys()
+        {
+            var carKey = StorageKey<Car>.Create(Guid.NewGuid().ToString());
+            var manufacturerKey1 = StorageKey<Manufacturer>.Create(Guid.NewGuid().ToString()).Extend<Car>();
+            var manufacturerKey2 = StorageKey<Manufacturer>.Create(Guid.NewGuid().ToString()).Extend<Car>();
+            var manufacturerKey3 = StorageKey<Manufacturer>.Create(Guid.NewGuid().ToString()).Extend<Car>();
+
+            await elysiumStorage.Set(carKey, new Car { Color = "red" }, [manufacturerKey1]);
+            await elysiumStorage.Set(carKey, new Car { Color = "blue" }, [manufacturerKey2, manufacturerKey3]);
+
+            var result = await elysiumStorage.GetMany(manufacturerKey1);
+            result.Count.Should().Be(1);
+            result.Single().Value.Color.Should().Be("blue");
+            var result2 = await elysiumStorage.GetMany(manufacturerKey2);
+            result2.Count.Should().Be(1);
+            result2.Single().Value.Color.Should().Be("blue");
+            var result3 = await elysiumStorage.GetMany(manufacturerKey3);
+            result3.Count.Should().Be(1);
+            result3.Single().Value.Color.Should().Be("blue");
+        }
+
+        [Fact]
+        public async Task WillDeleteForeignKeysWhenPrimaryKeyDeleted()
+        {
+            var carKey = StorageKey<Car>.Create(Guid.NewGuid().ToString());
+            var manufacturerKey1 = StorageKey<Manufacturer>.Create(Guid.NewGuid().ToString()).Extend<Car>();
+            var manufacturerKey2 = StorageKey<Manufacturer>.Create(Guid.NewGuid().ToString()).Extend<Car>();
+
+            await elysiumStorage.Set(carKey, new Car { Color = "red" }, [manufacturerKey1]);
+            await elysiumStorage.Set(carKey, new Car { Color = "blue" }, [manufacturerKey2]);
+            await elysiumStorage.Delete(carKey);
+
+            var result = await elysiumStorage.GetMany(manufacturerKey1);
+            result.Count.Should().Be(0);
+            var result2 = await elysiumStorage.GetMany(manufacturerKey2);
+            result2.Count.Should().Be(0);
+        }
     }
 }

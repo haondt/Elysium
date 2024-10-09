@@ -38,7 +38,7 @@ namespace Elysium.Persistence.Services
 
         public async Task<Result<int, StorageResultReason>> DeleteMany<T>(StorageKey<T> foreignKey)
         {
-            var result = await _collection.DeleteManyAsync(q => q.ForeignKeys.Any(fk => fk == foreignKey ));
+            var result = await _collection.DeleteManyAsync(q => q.ForeignKeys.Any(fk => fk == foreignKey));
             return result.DeletedCount == 0 ? new(StorageResultReason.NotFound) : new(checked((int)result.DeletedCount));
         }
 
@@ -47,7 +47,7 @@ namespace Elysium.Persistence.Services
             var result = await _queryableCollection.Where(q => q.PrimaryKey == key)
                 .ToListAsync();
             if (result.Count == 0)
-                return new (StorageResultReason.NotFound);
+                return new(StorageResultReason.NotFound);
             return new(TypeCoercer.Coerce<T>(result.First().Value));
         }
 
@@ -86,15 +86,28 @@ namespace Elysium.Persistence.Services
 
         public Task Set<T>(StorageKey<T> key, T value, List<StorageKey<T>> foreignKeys)
         {
-            return _collection.FindOneAndReplaceAsync<MongoDbElysiumDocument>(d => d.PrimaryKey == key, new MongoDbElysiumDocument
-            {
-                PrimaryKey = key,
-                ForeignKeys = foreignKeys.Cast<StorageKey>().ToList(),
-                Value = value
-            }, new FindOneAndReplaceOptions<MongoDbElysiumDocument, MongoDbElysiumDocument>
-            {
-                IsUpsert = true
-            });
+            var updateDefinition = Builders<MongoDbElysiumDocument>.Update
+                .Set(d => d.Value, value)
+                .SetOnInsert(d => d.PrimaryKey, key)
+                .AddToSetEach(d => d.ForeignKeys, foreignKeys.Cast<StorageKey>());
+
+            return _collection.FindOneAndUpdateAsync<MongoDbElysiumDocument>(
+                d => d.PrimaryKey == key,
+                updateDefinition,
+                new FindOneAndUpdateOptions<MongoDbElysiumDocument, MongoDbElysiumDocument>
+                {
+                    IsUpsert = true
+                });
+
+            //return _collection.FindOneAndReplaceAsync<MongoDbElysiumDocument>(d => d.PrimaryKey == key, new MongoDbElysiumDocument
+            //{
+            //    PrimaryKey = key,
+            //    ForeignKeys = foreignKeys.Cast<StorageKey>().ToList(),
+            //    Value = value
+            //}, new FindOneAndReplaceOptions<MongoDbElysiumDocument, MongoDbElysiumDocument>
+            //{
+            //    IsUpsert = true
+            //});
         }
 
         public Task Set<T>(StorageKey<T> key, T value)

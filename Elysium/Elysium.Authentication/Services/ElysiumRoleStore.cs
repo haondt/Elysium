@@ -1,4 +1,5 @@
-﻿using Elysium.Core.Models;
+﻿using Elysium.Authentication.Exceptions;
+using Elysium.Core.Models;
 using Elysium.Persistence.Services;
 using Haondt.Identity.StorageKey;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +13,8 @@ namespace Elysium.Authentication.Services
             var result = await _storage.GetMany(NormalizedRoleName.GetStorageKey(normalizedRoleName).Extend<RoleIdentity>());
             if (result.Count == 1)
                 return result.First().Value;
+            if (result.Count > 1)
+                throw new InvalidStateException($"Foreign for normalizedRoleName {normalizedRoleName} returned multiple results ({result.Count}).");
             return null;
         }
 

@@ -116,7 +116,7 @@ namespace Elysium.Persistence.Services
 
             if (result == null)
                 return new Result<T, StorageResultReason>(StorageResultReason.NotFound);
-            
+
             var value = JsonConvert.DeserializeObject<T>(result.ToString()!, _serializerSettings)
                 ?? throw new JsonException("Unable to deserialize result");
             return new Result<T, StorageResultReason>(value);
@@ -176,11 +176,12 @@ namespace Elysium.Persistence.Services
                     {
                         var foreignKeyQuery = $@"
                             INSERT INTO {_foreignKeyTableName} (ForeignKey, KeyString, PrimaryKey)
-                            VALUES (@foreignKey, @foreignKeyString, @primaryKey);";
+                            VALUES (@foreignKey, @foreignKeyString, @primaryKey)
+                            ON CONFLICT (ForeignKey, PrimaryKey) DO NOTHING;";
 
                         await using var foreignKeyCommand = new NpgsqlCommand(foreignKeyQuery, connection, transaction);
                         foreignKeyCommand.Parameters.AddWithValue("@primaryKey", keyString);
-                        
+
                         var foreignKeyParam = foreignKeyCommand.Parameters.Add("@foreignKey", NpgsqlTypes.NpgsqlDbType.Text);
                         var foreignKeyStringParam = foreignKeyCommand.Parameters.Add("@foreignKeyString", NpgsqlTypes.NpgsqlDbType.Text);
 
@@ -211,7 +212,7 @@ namespace Elysium.Persistence.Services
 
                 var results = new List<(StorageKey<T>, T)>();
                 await using var reader = await command.ExecuteReaderAsync();
-                
+
                 while (await reader.ReadAsync())
                 {
                     var primaryKeyString = reader.GetString(0);
@@ -221,7 +222,7 @@ namespace Elysium.Persistence.Services
                         ?? throw new JsonException("Unable to deserialize key");
                     var value = JsonConvert.DeserializeObject<T>(valueJson, _serializerSettings)
                         ?? throw new JsonException("Unable to deserialize value");
-                        
+
                     results.Add((primaryKey, value));
                 }
 
@@ -232,7 +233,7 @@ namespace Elysium.Persistence.Services
         public async Task<Result<int, StorageResultReason>> DeleteMany<T>(StorageKey<T> foreignKey)
         {
             var keyString = StorageKeyConvert.Serialize(foreignKey);
-            
+
             var rowsAffected = await WithTransactionAsync(async (connection, transaction) =>
             {
                 var query = $@"

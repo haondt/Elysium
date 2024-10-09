@@ -142,7 +142,8 @@ namespace Elysium.Persistence.Services
                         ForeignKey TEXT,
                         KeyString TEXT NOT NULL,
                         PrimaryKey TEXT,
-                        FOREIGN KEY (PrimaryKey) REFERENCES {_primaryTableName}(PrimaryKey) ON DELETE CASCADE
+                        FOREIGN KEY (PrimaryKey) REFERENCES {_primaryTableName}(PrimaryKey) ON DELETE CASCADE,
+                        UNIQUE (ForeignKey, PrimaryKey)
                      );", connection, transaaction);
                 createForeignKeyTableCommand.ExecuteNonQuery();
             });
@@ -234,8 +235,9 @@ namespace Elysium.Persistence.Services
                     primaryTableInsertCommand.Parameters.Add(parameter);
                     setPrimaryTableInsertCommandParameters.Add((k, v, pk) => parameter.Value = parameterRetriever(k, v, pk));
                 }
-                primaryTableInsertCommand.CommandText = $"INSERT OR REPLACE INTO {_primaryTableName} ({string.Join(',', primaryTableInsertParameters.Select(p => p.Column))})"
-                    + $" VALUES ({string.Join(',', primaryTableInsertParameters.Select(q => $"@{q.ParameterName}"))})";
+                primaryTableInsertCommand.CommandText = $"INSERT INTO {_primaryTableName} ({string.Join(',', primaryTableInsertParameters.Select(p => p.Column))})"
+                    + $" VALUES ({string.Join(',', primaryTableInsertParameters.Select(q => $"@{q.ParameterName}"))})"
+                    + $" ON CONFLICT (PrimaryKey) DO UPDATE SET Value = excluded.Value";
 
                 var foreignKeyTableInsertParameters = new List<(string Column, string ParameterName, Func<StorageKey, StorageKey, string> ParameterRetriever)>
                 {
@@ -267,7 +269,8 @@ namespace Elysium.Persistence.Services
                                 setForeignKeyTableInsertCommandParameters.Add((fk, pk) => parameter.Value = parameterRetriever(fk, pk));
                             }
                             foreignKeyTableInsertCommand.CommandText = $"INSERT INTO {_foreignKeyTableName} ({string.Join(',', foreignKeyTableInsertParameters.Select(p => p.Column))})"
-                                + $" VALUES ({string.Join(',', foreignKeyTableInsertParameters.Select(q => $"@{q.ParameterName}"))})";
+                                + $" VALUES ({string.Join(',', foreignKeyTableInsertParameters.Select(q => $"@{q.ParameterName}"))})"
+                                + $" ON CONFLICT (ForeignKey, PrimaryKey) DO NOTHING";
                         }
 
                         foreach (var setFunc in setForeignKeyTableInsertCommandParameters)
