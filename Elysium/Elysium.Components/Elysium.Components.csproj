@@ -12,4 +12,9 @@
     <PackageReference Include="Haondt.Web.Core" Version="0.0.5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Elysium.Authentication\Elysium.Authentication.csproj" />
+    <ProjectReference Include="..\Elysium.Client\Elysium.Client.csproj" />
+  </ItemGroup>
+
 </Project>

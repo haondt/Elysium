@@ -1,6 +1,6 @@
 ﻿using Elysium.Components.Components;
 using Elysium.Components.Extensions;
-using Elysium.Services;
+using Elysium.Middlewares.Services;
 using Haondt.Web.Core.Extensions;
 using Microsoft.Extensions.Options;
 

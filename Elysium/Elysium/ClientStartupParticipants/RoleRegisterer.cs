@@ -3,7 +3,7 @@ using Elysium.Client.Services;
 using Elysium.Core.Models;
 using Microsoft.AspNetCore.Identity;
 
-namespace Elysium.Services
+namespace Elysium.ClientStartupParticipants
 {
     public class RoleRegisterer(RoleManager<RoleIdentity> roleManager) : IClientStartupParticipant
     {

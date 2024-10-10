@@ -1,4 +1,4 @@
-﻿namespace Elysium.Services
+﻿namespace Elysium.EventHandlers.Authentication
 {
     public class RegistrationSettings
     {

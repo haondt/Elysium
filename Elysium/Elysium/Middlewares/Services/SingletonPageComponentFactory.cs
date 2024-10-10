@@ -2,7 +2,7 @@
 using Haondt.Web.Core.Components;
 using Haondt.Web.Services;
 
-namespace Elysium.Services
+namespace Elysium.Middlewares.Services
 {
     public class SingletonPageComponentFactory(IServiceProvider serviceProvider) : ISingletonPageComponentFactory
     {

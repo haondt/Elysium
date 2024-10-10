@@ -8,7 +8,7 @@ using Haondt.Web.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-namespace Elysium.Services
+namespace Elysium.Middlewares
 {
     public class ElysiumExceptionActionResultFactory(ISingletonComponentFactory componentFactoryFactory, IOptions<ErrorSettings> errorOptions) : IExceptionActionResultFactory
     {

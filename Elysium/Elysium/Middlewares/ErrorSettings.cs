@@ -1,4 +1,4 @@
-﻿namespace Elysium.Services
+﻿namespace Elysium.Middlewares
 {
     public class ErrorSettings
     {

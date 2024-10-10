@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Elysium.Components\Elysium.Components.csproj" />
     <ProjectReference Include="..\Elysium.Cryptography\Elysium.Cryptography.csproj" />
     <ProjectReference Include="..\Elysium.Persistence\Elysium.Persistence.csproj" />
   </ItemGroup>

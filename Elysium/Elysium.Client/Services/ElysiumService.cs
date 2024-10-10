@@ -1,7 +1,7 @@
 ﻿using Elysium.ActivityPub.Helpers;
 using Elysium.ActivityPub.Models;
 using Elysium.Authentication.Constants;
-using Elysium.Components.Components;
+using Elysium.Client.Models;
 using Elysium.Core.Converters;
 using Elysium.Core.Extensions;
 using Elysium.Core.Models;
@@ -142,7 +142,7 @@ namespace Elysium.Client.Services
             throw new NotImplementedException();
         }
 
-        public async Task<(IEnumerable<MediaModel> Creations, string Last)> GetPublicCreations(string? before = null)
+        public async Task<(IEnumerable<MediaDetails> Creations, string Last)> GetPublicCreations(string? before = null)
         {
             // todo: appsettings
             var count = 50;
@@ -156,15 +156,15 @@ namespace Elysium.Client.Services
             {
                 var document = await documentService.GetExpandedDocumentAsync(_instanceAuthor, r);
                 if (!document.IsSuccessful)
-                    return new Optional<MediaModel>();
+                    return new Optional<MediaDetails>();
 
                 var objectObject = ActivityPubJsonNavigator.GetObject(document.Value);
                 var objectId = ActivityPubJsonNavigator.GetId(objectObject);
                 var objectDocument = await documentService.GetExpandedDocumentAsync(_instanceAuthor, Iri.FromUnencodedString(objectId));
                 if (!objectDocument.IsSuccessful)
-                    return new Optional<MediaModel>();
+                    return new Optional<MediaDetails>();
 
-                var model = new MediaModel
+                var model = new MediaDetails
                 {
                     Depth = random.Next(0, 6)
                 };

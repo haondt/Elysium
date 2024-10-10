@@ -14,6 +14,7 @@ namespace Elysium.Client.Extensions
             services.AddScoped<IActivityPubClientService, ActivityPubClientService>();
             services.AddScoped<IElysiumService, ElysiumService>();
             services.AddSingleton<IClientActorActivityDeliveryObserverRegistry, ClientActorActivityDeliveryObserverRegistry>();
+            services.AddScoped<IClientActorActivityHandlerFactory, ClientActorActivityHandlerFactory>();
             services.AddScoped<IUserSessionService, UserSessionService>();
             services.AddElysiumClientGrainFactories();
             services.AddScoped<IClientStartupService, ClientStartupService>();

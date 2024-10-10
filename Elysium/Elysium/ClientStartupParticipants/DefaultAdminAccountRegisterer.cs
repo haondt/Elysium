@@ -3,7 +3,7 @@ using Elysium.Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
-namespace Elysium.Services
+namespace Elysium.ClientStartupParticipants
 {
     public class DefaultAdminAccountRegisterer(
         IOptions<AdminSettings> options,

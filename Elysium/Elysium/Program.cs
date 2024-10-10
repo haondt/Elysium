@@ -25,8 +25,9 @@ builder.Configuration.AddEnvironmentVariables();
 builder.Services
     .AddHaondtWebCoreServices()
     .AddHaondtWebServices(builder.Configuration)
-    .AddElysiumComponentServices() // must come before AddElysiumServices so bulma css overrides get loaded in correct order
     .AddElysiumServices(builder.Configuration)
+    .AddElysiumComponentServices() // must come before AddElysiumHeadEntries so bulma css overrides get loaded in correct order
+    .AddElysiumHeadEntries()
     .AddElysiumComponents()
     .ConfigureStorageKeyConvert()
     .AddElysiumAssetSources()
@@ -51,9 +52,8 @@ app.MapControllers();
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseMiddleware<UnmappedRouteHandlerMiddleware>();
 app.MapHub<ElysiumHub>("/elysiumHub");
-//app.UseAuthentication();
+
 await app.StartAsync();
-//app.Run();
 var client = app.Services.GetRequiredService<IClusterClient>();
 using (var scope = client.ServiceProvider.CreateScope())
 {

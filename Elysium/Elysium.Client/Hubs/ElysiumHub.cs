@@ -4,6 +4,7 @@ using Elysium.Core.Models;
 using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Client;
 using Elysium.GrainInterfaces.Services;
+using Haondt.Web.Core.Extensions;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,6 +29,10 @@ namespace Elysium.Client.Hubs
             if (httpContext == null)
                 return;
 
+            var clientType = httpContext.Request.Query.TryGetValue<string>("client");
+            if (!clientType.HasValue)
+                return;
+
             var sessionService = httpContext.RequestServices.GetRequiredService<ISessionService>();
             if (!sessionService.IsAuthenticated())
                 return;
@@ -42,6 +47,7 @@ namespace Elysium.Client.Hubs
             var deliveryGrain = localGrainFactory.GetGrain<IClientActorActivityDeliveryGrain>(localIri);
             var observer = new ClientActorActivityDeliveryObserver(
                 Context.ConnectionId,
+                clientType.Value,
                 userIdentity.Value,
                 serviceProvider.GetRequiredService<IServiceScopeFactory>(),
                 serviceProvider.GetRequiredService<IHubContext<ElysiumHub>>());

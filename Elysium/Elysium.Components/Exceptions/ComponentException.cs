@@ -1,4 +1,4 @@
-﻿namespace Elysium.Exceptions
+﻿namespace Elysium.Components.Exceptions
 {
     public class ComponentException : Exception
     {
