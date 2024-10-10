@@ -1,6 +1,6 @@
 ﻿using Elysium.Core.Models;
 using Elysium.Domain.Exceptions;
-using Elysium.GrainInterfaces;
+using Elysium.GrainInterfaces.Hosting;
 using Elysium.GrainInterfaces.Reasons;
 using Elysium.GrainInterfaces.Services;
 using Haondt.Core.Models;

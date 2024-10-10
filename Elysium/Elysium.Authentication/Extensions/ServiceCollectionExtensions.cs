@@ -1,5 +1,6 @@
 ﻿using Elysium.Authentication.Components;
 using Elysium.Authentication.Constants;
+using Elysium.Authentication.Persistence;
 using Elysium.Authentication.Services;
 using Elysium.Core.Models;
 using Elysium.Cryptography.Extensions;

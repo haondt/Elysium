@@ -1,6 +1,6 @@
 ﻿using Elysium.ActivityPub.Models;
 using Elysium.Core.Models;
-using Elysium.GrainInterfaces;
+using Elysium.GrainInterfaces.LocalActor;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Hosting.Services;
 using Haondt.Identity.StorageKey;

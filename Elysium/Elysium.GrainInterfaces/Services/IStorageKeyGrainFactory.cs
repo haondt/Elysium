@@ -1,4 +1,5 @@
-﻿using Haondt.Identity.StorageKey;
+﻿using Elysium.GrainInterfaces.Generics;
+using Haondt.Identity.StorageKey;
 
 namespace Elysium.GrainInterfaces.Services
 {

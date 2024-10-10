@@ -1,5 +1,7 @@
 ﻿using Elysium.Core.Models;
-using Elysium.GrainInterfaces;
+using Elysium.GrainInterfaces.Documents;
+using Elysium.GrainInterfaces.Generics;
+using Elysium.GrainInterfaces.InstanceActor;
 using Elysium.GrainInterfaces.Services;
 using Haondt.Core.Models;
 using Haondt.Persistence.Services;

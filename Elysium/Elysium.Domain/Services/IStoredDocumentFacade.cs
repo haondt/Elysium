@@ -1,5 +1,5 @@
 ﻿using Elysium.Core.Models;
-using Elysium.GrainInterfaces;
+using Elysium.GrainInterfaces.Documents;
 using Haondt.Core.Models;
 using Haondt.Persistence.Services;
 using Newtonsoft.Json.Linq;

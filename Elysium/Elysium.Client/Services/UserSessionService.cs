@@ -1,6 +1,7 @@
 ﻿using Elysium.Authentication.Services;
 using Elysium.Core.Models;
-using Elysium.GrainInterfaces;
+using Elysium.GrainInterfaces.Generics;
+using Elysium.GrainInterfaces.LocalActor;
 using Elysium.GrainInterfaces.Reasons;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Hosting.Services;

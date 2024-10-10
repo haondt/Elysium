@@ -1,7 +1,7 @@
 using Elysium.Core.Extensions;
 using Elysium.Cryptography.Extensions;
 using Elysium.Domain.Extensions;
-using Elysium.GrainInterfaces;
+using Elysium.GrainInterfaces.Constants;
 using Elysium.Hosting.Extensions;
 using Elysium.Persistence.Extensions;
 using Elysium.Silo.Extensions;

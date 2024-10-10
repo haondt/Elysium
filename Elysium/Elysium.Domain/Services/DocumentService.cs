@@ -1,6 +1,7 @@
 ﻿using Elysium.Core.Models;
 using Elysium.Domain.Exceptions;
-using Elysium.GrainInterfaces;
+using Elysium.GrainInterfaces.Documents;
+using Elysium.GrainInterfaces.InstanceActor;
 using Elysium.GrainInterfaces.Reasons;
 using Elysium.GrainInterfaces.Services;
 using Elysium.Hosting.Services;

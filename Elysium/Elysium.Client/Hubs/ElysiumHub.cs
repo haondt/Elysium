@@ -1,7 +1,6 @@
 ﻿using Elysium.Authentication.Services;
 using Elysium.Client.Services;
 using Elysium.Core.Models;
-using Elysium.GrainInterfaces;
 using Elysium.GrainInterfaces.Client;
 using Elysium.GrainInterfaces.Services;
 using Haondt.Web.Core.Extensions;
