@@ -1,4 +1,5 @@
 ﻿using Elysium.Core.Models;
+using Elysium.Silo.Api.Extensions;
 using Haondt.Core.Extensions;
 using Orleans.Configuration;
 using StackExchange.Redis;

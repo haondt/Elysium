@@ -37,7 +37,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Domain", "Elysium.D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Persistence.Tests", "Elysium.Persistence.Tests\Elysium.Persistence.Tests.csproj", "{BEFBB7D7-52B6-4144-B8EA-81A1EB4AFA01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Cryptography.Tests", "Elysium.Cryptography.Tests\Elysium.Cryptography.Tests.csproj", "{2E3C6178-DAAD-450F-9AD6-ED86389BF8A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elysium.Cryptography.Tests", "Elysium.Cryptography.Tests\Elysium.Cryptography.Tests.csproj", "{2E3C6178-DAAD-450F-9AD6-ED86389BF8A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elysium.Grains.Tests", "Elysium.Grains.Tests\Elysium.Grains.Tests.csproj", "{1E5F073E-923E-40BC-9908-01547CA65822}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -113,6 +115,10 @@ Global
 		{2E3C6178-DAAD-450F-9AD6-ED86389BF8A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2E3C6178-DAAD-450F-9AD6-ED86389BF8A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2E3C6178-DAAD-450F-9AD6-ED86389BF8A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E5F073E-923E-40BC-9908-01547CA65822}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E5F073E-923E-40BC-9908-01547CA65822}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E5F073E-923E-40BC-9908-01547CA65822}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E5F073E-923E-40BC-9908-01547CA65822}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -120,6 +126,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{BEFBB7D7-52B6-4144-B8EA-81A1EB4AFA01} = {D532085B-62CD-472A-92BE-A3EE083D48FB}
 		{2E3C6178-DAAD-450F-9AD6-ED86389BF8A4} = {D532085B-62CD-472A-92BE-A3EE083D48FB}
+		{1E5F073E-923E-40BC-9908-01547CA65822} = {D532085B-62CD-472A-92BE-A3EE083D48FB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D4BBC2A1-6F35-448E-A7C2-E478F4C6F65E}

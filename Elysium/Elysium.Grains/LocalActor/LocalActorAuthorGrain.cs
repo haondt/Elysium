@@ -1,7 +1,7 @@
 ﻿using Elysium.Core.Models;
 using Elysium.Cryptography.Services;
 using Elysium.GrainInterfaces.LocalActor;
-using Elysium.GrainInterfaces.Services;
+using Elysium.GrainInterfaces.Services.GrainFactories;
 using Orleans.Concurrency;
 
 namespace Elysium.Grains.LocalActor

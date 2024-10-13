@@ -1,7 +1,7 @@
 ﻿using Elysium.Core.Models;
 using Elysium.Cryptography.Services;
 using Elysium.GrainInterfaces.RemoteActor;
-using Elysium.GrainInterfaces.Services;
+using Elysium.GrainInterfaces.Services.GrainFactories;
 
 namespace Elysium.Grains.RemoteActor
 {

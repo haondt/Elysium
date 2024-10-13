@@ -1,6 +1,7 @@
 ﻿using Elysium.Core.Models;
 using Elysium.Domain.Services;
-using Elysium.GrainInterfaces.Services;
+using Elysium.GrainInterfaces.Generics;
+using Elysium.GrainInterfaces.Services.GrainFactories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;

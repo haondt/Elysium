@@ -11,6 +11,7 @@ using Elysium.GrainInterfaces.Collections;
 using Elysium.GrainInterfaces.InstanceActor;
 using Elysium.GrainInterfaces.LocalActor;
 using Elysium.GrainInterfaces.Services;
+using Elysium.GrainInterfaces.Services.GrainFactories;
 using Elysium.Hosting.Services;
 using Elysium.Persistence.Services;
 using Haondt.Core.Models;

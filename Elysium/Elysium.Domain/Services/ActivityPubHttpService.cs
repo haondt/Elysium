@@ -2,7 +2,7 @@
 using Elysium.Domain.Exceptions;
 using Elysium.GrainInterfaces.Hosting;
 using Elysium.GrainInterfaces.Reasons;
-using Elysium.GrainInterfaces.Services;
+using Elysium.GrainInterfaces.Services.GrainFactories;
 using Haondt.Core.Models;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;

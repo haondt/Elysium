@@ -2,6 +2,6 @@
 {
     public interface IClientStartupService
     {
-        public Task OnStartupAsync();
+        Task OnStartupAsync();
     }
 }

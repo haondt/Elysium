@@ -1,4 +1,4 @@
-﻿namespace Elysium.GrainInterfaces.Services
+﻿namespace Elysium.GrainInterfaces.Services.GrainFactories
 {
     public interface IGrainFactory<TIdentity>
     {

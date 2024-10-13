@@ -1,6 +1,6 @@
 ﻿using Elysium.Core.Models;
 using Elysium.GrainInterfaces.RemoteActor;
-using Elysium.GrainInterfaces.Services;
+using Elysium.GrainInterfaces.Services.GrainFactories;
 using Orleans.Concurrency;
 
 namespace Elysium.Grains.RemoteActor

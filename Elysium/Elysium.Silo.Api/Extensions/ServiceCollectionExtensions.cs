@@ -1,10 +1,12 @@
 ﻿using Elysium.Core.Models;
 using Elysium.Domain.Persistence;
-using Elysium.GrainInterfaces.Services;
+using Elysium.GrainInterfaces.Generics;
+using Elysium.GrainInterfaces.Services.GrainFactories;
 using Elysium.Silo.Api.Services;
+using Elysium.Silo.Api.SiloStartupParticipants;
 using Orleans.Runtime.Hosting;
 
-namespace Elysium.Silo.Extensions
+namespace Elysium.Silo.Api.Extensions
 {
     public static class ServiceCollectionExtensions
     {
@@ -14,6 +16,8 @@ namespace Elysium.Silo.Extensions
             //services.AddScoped<IActivityPubClientService, ActivityPubClientService>();
             services.AddElysiumSiloGrainFactories();
             services.AddSingleton<IDevHandler, DevHandler>();
+
+            services.AddSingleton<ISiloStartupParticipant, QueueStartupParticipant>();
             return services;
         }
 

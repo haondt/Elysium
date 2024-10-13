@@ -1,7 +1,6 @@
-﻿using Elysium.GrainInterfaces.Generics;
-using Haondt.Identity.StorageKey;
+﻿using Haondt.Identity.StorageKey;
 
-namespace Elysium.GrainInterfaces.Services
+namespace Elysium.GrainInterfaces.Generics
 {
     public interface IStorageKeyGrainFactory<T>
     {

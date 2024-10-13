@@ -9,6 +9,8 @@ using Elysium.GrainInterfaces.Constants;
 using Elysium.GrainInterfaces.InstanceActor;
 using Elysium.GrainInterfaces.LocalActor;
 using Elysium.GrainInterfaces.Services;
+using Elysium.GrainInterfaces.Services.GrainFactories;
+using Elysium.Grains.Queueing;
 using Elysium.Hosting.Services;
 using Elysium.Persistence.Services;
 using Haondt.Identity.StorageKey;
@@ -42,7 +44,8 @@ namespace Elysium.Grains.LocalActor
         private readonly IGrainFactory<LocalIri> _localGrainFactory;
         private readonly LocalIri _id;
         private readonly ILocalActorAuthorGrain _authorGrain;
-        private readonly IAsyncStream<LocalActorOutgoingProcessingData> _outgoingStream;
+        //private readonly IAsyncStream<LocalActorOutgoingProcessingData> _outgoingStream;
+        private readonly IQueue<LocalActorOutgoingProcessingData> _outgoingQueue;
         private readonly IAsyncStream<LocalActorIncomingProcessingData> _incomingStream;
 
         private PlaintextCryptographicActorData? _cryptographicActorData;
@@ -56,6 +59,7 @@ namespace Elysium.Grains.LocalActor
             IDocumentService documentService,
             IIriService iriService,
             IGrainFactory grainFactory,
+            IQueueProvider queueProvider,
             IGrainFactory<RemoteIri> remoteGrainFactory,
             IGrainFactory<LocalIri> localGrainFactory)
         {
@@ -74,7 +78,8 @@ namespace Elysium.Grains.LocalActor
 
             var streamProvider = this.GetStreamProvider(GrainConstants.SimpleStreamProvider);
             var outgoingStreamId = StreamId.Create(GrainConstants.LocalActorOutgoingProcessingStream, _id.Iri.ToString());
-            _outgoingStream = streamProvider.GetStream<LocalActorOutgoingProcessingData>(outgoingStreamId);
+            //_outgoingStream = streamProvider.GetStream<LocalActorOutgoingProcessingData>(outgoingStreamId);
+            _outgoingQueue = queueProvider.GetQueue<LocalActorOutgoingProcessingData>(GrainConstants.LocalActorOutgoingProcessingStream);
             var incomingStreamId = StreamId.Create(GrainConstants.LocalActorIncomingProcessingStream, _id.Iri.ToString());
             _incomingStream = streamProvider.GetStream<LocalActorIncomingProcessingData>(incomingStreamId);
         }
@@ -350,7 +355,7 @@ namespace Elysium.Grains.LocalActor
 
                 // dispatch the activity
                 // todo: we can optimize this, since when communicating local -> local there's no point in compacting the activity
-                await _outgoingStream.OnNextAsync(new LocalActorOutgoingProcessingData
+                await _outgoingQueue.Enqueue(new LocalActorOutgoingProcessingData
                 {
                     Activity = outgoingCompactedActivity,
                     ActivityType = type,

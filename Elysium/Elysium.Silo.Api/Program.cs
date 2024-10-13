@@ -2,8 +2,11 @@ using Elysium.Core.Extensions;
 using Elysium.Cryptography.Extensions;
 using Elysium.Domain.Extensions;
 using Elysium.GrainInterfaces.Constants;
+using Elysium.Grains.Extensions;
 using Elysium.Hosting.Extensions;
 using Elysium.Persistence.Extensions;
+using Elysium.Silo.Api.Extensions;
+using Elysium.Silo.Api.Services;
 using Elysium.Silo.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +30,7 @@ builder.Host
         .AddElysiumStorageGrainStorage(GrainConstants.SimpleStreamProvider)
         .AddElysiumStorageGrainStorage(GrainConstants.GrainDocumentStorage)
         .AddElysiumStorageGrainStorage(GrainConstants.GrainStorage)
+        .AddStartupTask<SiloStartupService>()
         .AddMemoryStreams(GrainConstants.SimpleStreamProvider))
     .ConfigureServices((context, services) =>
     {
@@ -34,6 +38,7 @@ builder.Host
             .ConfigureStorageKeyConvert()
             .AddElysiumSiloServices()
             .AddElysiumGrainServices(context.Configuration)
+            .AddQueues(context.Configuration)
             .AddElysiumDomainServices(context.Configuration)
             .AddElysiumCryptoServices(context.Configuration)
             .AddElysiumHostingServices(context.Configuration)
@@ -50,4 +55,4 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 
 app.MapControllers();
-app.Run();
+await app.RunAsync();

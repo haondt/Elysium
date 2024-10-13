@@ -3,7 +3,7 @@ using Elysium.Core.Models;
 using Elysium.GrainInterfaces.Generics;
 using Elysium.GrainInterfaces.LocalActor;
 using Elysium.GrainInterfaces.Reasons;
-using Elysium.GrainInterfaces.Services;
+using Elysium.GrainInterfaces.Services.GrainFactories;
 using Elysium.Hosting.Services;
 using Elysium.Persistence.Exceptions;
 using Haondt.Core.Models;

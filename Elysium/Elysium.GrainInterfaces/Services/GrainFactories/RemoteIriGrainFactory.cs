@@ -1,6 +1,6 @@
 ﻿using Elysium.Core.Models;
 
-namespace Elysium.GrainInterfaces.Services
+namespace Elysium.GrainInterfaces.Services.GrainFactories
 {
     public class RemoteIriGrainFactory(IGrainFactory grainFactory) : IGrainFactory<RemoteIri>
     {

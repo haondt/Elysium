@@ -6,7 +6,7 @@ using Elysium.GrainInterfaces.Client;
 using Elysium.GrainInterfaces.Constants;
 using Elysium.GrainInterfaces.InstanceActor;
 using Elysium.GrainInterfaces.LocalActor;
-using Elysium.GrainInterfaces.Services;
+using Elysium.GrainInterfaces.Services.GrainFactories;
 using Elysium.Hosting.Services;
 using Haondt.Core.Models;
 using Microsoft.Extensions.Logging;

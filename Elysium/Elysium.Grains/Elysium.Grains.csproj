@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Orleans.EventSourcing" Version="8.2.0" />
     <PackageReference Include="Microsoft.Orleans.Sdk" Version="8.2.0" />
     <PackageReference Include="Microsoft.Orleans.Streaming" Version="8.2.0" />
+    <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +20,10 @@
     <ProjectReference Include="..\Elysium.Domain\Elysium.Domain.csproj" />
     <ProjectReference Include="..\Elysium.GrainInterfaces\Elysium.GrainInterfaces.csproj" />
     <ProjectReference Include="..\Elysium.Persistence\Elysium.Persistence.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Queueing\Redis\" />
   </ItemGroup>
 
 </Project>

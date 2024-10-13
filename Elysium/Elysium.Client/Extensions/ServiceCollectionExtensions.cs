@@ -1,7 +1,8 @@
 ﻿using Elysium.Client.Hubs;
 using Elysium.Client.Services;
 using Elysium.Core.Models;
-using Elysium.GrainInterfaces.Services;
+using Elysium.GrainInterfaces.Generics;
+using Elysium.GrainInterfaces.Services.GrainFactories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

@@ -2,7 +2,7 @@
 using Elysium.Client.Services;
 using Elysium.Core.Models;
 using Elysium.GrainInterfaces.Client;
-using Elysium.GrainInterfaces.Services;
+using Elysium.GrainInterfaces.Services.GrainFactories;
 using Haondt.Web.Core.Extensions;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;

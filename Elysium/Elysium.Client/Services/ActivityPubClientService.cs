@@ -1,7 +1,8 @@
 ﻿using Elysium.ActivityPub.Models;
 using Elysium.Core.Models;
+using Elysium.GrainInterfaces.Generics;
 using Elysium.GrainInterfaces.LocalActor;
-using Elysium.GrainInterfaces.Services;
+using Elysium.GrainInterfaces.Services.GrainFactories;
 using Elysium.Hosting.Services;
 using Haondt.Identity.StorageKey;
 using Microsoft.AspNetCore.Identity;

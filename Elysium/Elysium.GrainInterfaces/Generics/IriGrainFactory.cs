@@ -1,6 +1,7 @@
 ﻿using Elysium.Core.Models;
+using Elysium.GrainInterfaces.Services.GrainFactories;
 
-namespace Elysium.GrainInterfaces.Services
+namespace Elysium.GrainInterfaces.Generics
 {
     public class IriGrainFactory(IGrainFactory grainFactory) : IGrainFactory<Iri>
     {

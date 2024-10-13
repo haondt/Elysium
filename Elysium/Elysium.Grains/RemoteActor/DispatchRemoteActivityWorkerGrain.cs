@@ -3,7 +3,7 @@ using Elysium.Domain.Services;
 using Elysium.GrainInterfaces.Constants;
 using Elysium.GrainInterfaces.LocalActor;
 using Elysium.GrainInterfaces.RemoteActor;
-using Elysium.GrainInterfaces.Services;
+using Elysium.GrainInterfaces.Services.GrainFactories;
 using Microsoft.Extensions.Logging;
 using Orleans.Streams;
 
