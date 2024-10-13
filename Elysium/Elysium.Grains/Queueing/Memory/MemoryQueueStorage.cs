@@ -25,10 +25,8 @@ namespace Elysium.Grains.Queueing.Memory
 
         public async Task<StorageKey<T>> Enqueue(T payload)
         {
-            Console.WriteLine("enqueueing data!");
             var key = StorageKey<MemoryQueueStorage>.Create(Guid.NewGuid().ToString()).Extend<T>();
             await queue.Writer.WriteAsync((key, payload));
-            Console.WriteLine("done enqueueing data!");
             return key;
         }
     }
