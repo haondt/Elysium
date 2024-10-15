@@ -13,5 +13,7 @@ namespace Elysium.Grains.LocalActor
         public required Iri Sender { get; set; }
         [Id(2)]
         public required ActivityType ActivityType { get; set; }
+        [Id(3)]
+        public required LocalIri ActorIri { get; set; }
     }
 }

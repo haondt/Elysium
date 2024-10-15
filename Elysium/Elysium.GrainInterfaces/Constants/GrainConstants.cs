@@ -6,13 +6,10 @@
         public const string GrainDocumentStorage = "Documents";
         public const string GrainStorage = "Grains";
 
-        // stream providers
-        public const string SimpleStreamProvider = "SimpleStreamProvider";
-
-        // streams
-        public const string DispatchRemoteActivityStream = "DispatchRemoteActivityStream";
-        public const string LocalActorOutgoingProcessingStream = "LocalActorOutgoingProcessingStream";
-        public const string LocalActorIncomingProcessingStream = "LocalActorIncomingProcessingStream";
-
+        // queues
+        public const string RemoteActorOutgoingDataQueue = "RemoteActorOutgoingDataQueue";
+        public const string RemoteActorIncomingDataQueue = "RemoteActorIncomingDataQueue";
+        public const string LocalActorOutgoingProcessingQueue = "LocalActorOutgoingProcessingQueue";
+        public const string LocalActorIncomingProcessingQueue = "LocalActorIncomingProcessingQueue";
     }
 }

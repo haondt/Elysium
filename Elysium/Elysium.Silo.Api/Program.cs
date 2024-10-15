@@ -15,9 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddControllers()
-    .AddNewtonsoftJson(options =>
-    {
-    })
+    .AddNewtonsoftJson()
     .AddApplicationPart(typeof(Elysium.ActivityPub.Api.Controllers.ActorController).Assembly);
 
 builder.Configuration.AddEnvironmentVariables();
@@ -27,11 +25,9 @@ builder.Configuration.AddEnvironmentVariables();
 builder.Host
     .UseOrleans((context, builder) => builder
         .ConfigureCluster(context.Configuration)
-        .AddElysiumStorageGrainStorage(GrainConstants.SimpleStreamProvider)
         .AddElysiumStorageGrainStorage(GrainConstants.GrainDocumentStorage)
         .AddElysiumStorageGrainStorage(GrainConstants.GrainStorage)
-        .AddStartupTask<SiloStartupService>()
-        .AddMemoryStreams(GrainConstants.SimpleStreamProvider))
+        .AddStartupTask<SiloStartupService>())
     .ConfigureServices((context, services) =>
     {
         services

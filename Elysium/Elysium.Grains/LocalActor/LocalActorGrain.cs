@@ -16,7 +16,6 @@ using Elysium.Persistence.Services;
 using Haondt.Identity.StorageKey;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Orleans.Streams;
 
 namespace Elysium.Grains.LocalActor
 {
@@ -44,9 +43,8 @@ namespace Elysium.Grains.LocalActor
         private readonly IGrainFactory<LocalIri> _localGrainFactory;
         private readonly LocalIri _id;
         private readonly ILocalActorAuthorGrain _authorGrain;
-        //private readonly IAsyncStream<LocalActorOutgoingProcessingData> _outgoingStream;
         private readonly IQueue<LocalActorOutgoingProcessingData> _outgoingQueue;
-        private readonly IAsyncStream<LocalActorIncomingProcessingData> _incomingStream;
+        private readonly IQueue<LocalActorIncomingProcessingData> _incomingQueue;
 
         private PlaintextCryptographicActorData? _cryptographicActorData;
 
@@ -76,12 +74,8 @@ namespace Elysium.Grains.LocalActor
             _id = localGrainFactory.GetIdentity(this);
             _authorGrain = localGrainFactory.GetGrain<ILocalActorAuthorGrain>(_id);
 
-            var streamProvider = this.GetStreamProvider(GrainConstants.SimpleStreamProvider);
-            var outgoingStreamId = StreamId.Create(GrainConstants.LocalActorOutgoingProcessingStream, _id.Iri.ToString());
-            //_outgoingStream = streamProvider.GetStream<LocalActorOutgoingProcessingData>(outgoingStreamId);
-            _outgoingQueue = queueProvider.GetQueue<LocalActorOutgoingProcessingData>(GrainConstants.LocalActorOutgoingProcessingStream);
-            var incomingStreamId = StreamId.Create(GrainConstants.LocalActorIncomingProcessingStream, _id.Iri.ToString());
-            _incomingStream = streamProvider.GetStream<LocalActorIncomingProcessingData>(incomingStreamId);
+            _outgoingQueue = queueProvider.GetQueue<LocalActorOutgoingProcessingData>(GrainConstants.LocalActorOutgoingProcessingQueue);
+            _incomingQueue = queueProvider.GetQueue<LocalActorIncomingProcessingData>(GrainConstants.LocalActorIncomingProcessingQueue);
         }
 
         public override async Task OnActivateAsync(CancellationToken cancellationToken)
@@ -220,11 +214,12 @@ namespace Elysium.Grains.LocalActor
         public async Task IngestActivityAsync(Iri sender, ActivityType activityType, JToken activity)
         {
             // todo: save the activity (id) in my inbox grain, if it has an id
-            await _incomingStream.OnNextAsync(new LocalActorIncomingProcessingData
+            await _incomingQueue.EnqueueAsync(new LocalActorIncomingProcessingData
             {
                 Activity = activity,
                 ActivityType = activityType,
-                Sender = sender
+                Sender = sender,
+                ActorIri = _id
             });
         }
 
@@ -360,8 +355,8 @@ namespace Elysium.Grains.LocalActor
                     Activity = outgoingCompactedActivity,
                     ActivityType = type,
                     Recipients = recepients.ToList(),
-                    ActivityIri = activityIri
-
+                    ActivityIri = activityIri,
+                    ActorIri = _id
                 });
 
                 return (activityIri, outgoingCompactedActivity);

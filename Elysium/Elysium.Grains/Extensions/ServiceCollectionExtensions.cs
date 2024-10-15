@@ -1,11 +1,13 @@
 ﻿using Elysium.GrainInterfaces.Constants;
 using Elysium.GrainInterfaces.Queueing;
+using Elysium.GrainInterfaces.RemoteActor;
 using Elysium.GrainInterfaces.Services.GrainFactories;
 using Elysium.Grains.Hosting;
 using Elysium.Grains.InstanceActor;
 using Elysium.Grains.LocalActor;
 using Elysium.Grains.Queueing;
 using Elysium.Grains.Queueing.Memory;
+using Elysium.Grains.RemoteActor;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,9 +47,13 @@ namespace Elysium.Grains.Extensions
 
         public static IServiceCollection AddElysiumQueues(this IServiceCollection services, IConfiguration configuration)
         {
-            // configuration ? maybe
+            // todo: add configuration for the storage type
             services.AddQueue<LocalActorOutgoingProcessingData, LocalActorOutgoingProcessingQueueConsumer>(
-                GrainConstants.LocalActorOutgoingProcessingStream, QueueStorageType.Memory, configuration);
+                GrainConstants.LocalActorOutgoingProcessingQueue, QueueStorageType.Memory, configuration);
+            services.AddQueue<LocalActorIncomingProcessingData, LocalActorIncomingProcessingQueueConsumer>(
+                GrainConstants.LocalActorIncomingProcessingQueue, QueueStorageType.Memory, configuration);
+            services.AddQueue<OutgoingRemoteActivityData, OutgoingRemoteActivityDataQueueConsumer>(
+                GrainConstants.RemoteActorOutgoingDataQueue, QueueStorageType.Memory, configuration);
 
             return services;
         }

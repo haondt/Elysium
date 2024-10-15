@@ -10,7 +10,7 @@ namespace Elysium.Grains.Queueing
         private readonly IGrainFactory<QueueWorkerIdentity> _workerGrainFactory;
         private readonly string _identity;
         private IQueueStorage<T> _storage;
-        private QueueWorkerRegistry<T> _workerRegistry = new(10);
+        private QueueWorkerRegistry<T> _workerRegistry = new(10); // todo: appsettings
 
         public QueueGrain(IQueueStorageProvider storageProvider,
         IGrainFactory<QueueWorkerIdentity> workerGrainFactory)
