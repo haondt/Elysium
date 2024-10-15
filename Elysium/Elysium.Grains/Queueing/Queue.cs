@@ -2,7 +2,7 @@
 {
     public class Queue<T>(IQueueStorage<T> storage) : IQueue<T>
     {
-        public Task Enqueue(T payload)
+        public Task EnqueueAsync(T payload)
         {
             return storage.Enqueue(payload);
         }

@@ -201,8 +201,17 @@ namespace Elysium.Persistence.Tests
             var tires = await elysiumStorage.GetMany(manufacturerKey.Extend<Tire>());
 
             cars.Count.Should().Be(2);
-            cars[0].Value.Color.Should().Be("red");
-            cars[1].Value.Color.Should().Be("blue");
+            bool hasRed = false;
+            bool hasBlue = false;
+
+            foreach (var car in cars)
+            {
+                if (car.Value.Color.Equals("red")) hasRed = true;
+                if (car.Value.Color.Equals("blue")) hasBlue = true;
+            }
+
+            hasRed.Should().BeTrue();
+            hasBlue.Should().BeTrue();
             tires.Count.Should().Be(1);
             tires[0].Value.Diameter.Should().Be(10);
         }

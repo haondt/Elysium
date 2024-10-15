@@ -2,6 +2,6 @@
 {
     public interface IQueue<T>
     {
-        Task Enqueue(T payload);
+        Task EnqueueAsync(T payload);
     }
 }

@@ -23,7 +23,7 @@ namespace Elysium.Grains.Extensions
             return services;
         }
 
-        public static IServiceCollection AddQueues(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddQueues(this IServiceCollection services)
         {
             // GrainConstants.LocalActorOutgoingProcessingStream
 
@@ -35,13 +35,19 @@ namespace Elysium.Grains.Extensions
             services.AddSingleton<IGrainFactory<QueueWorkerIdentity>, QueueWorkerGrainFactory>();
             services.AddSingleton<IQueueConsumerProvider, QueueConsumerProvider>();
 
-            // configuration ? maybe
-            services.AddQueue<LocalActorOutgoingProcessingData, LocalActorOutgoingProcessingQueueConsumer>(
-                GrainConstants.LocalActorOutgoingProcessingStream, QueueStorageType.Memory, configuration);
 
             // maybe
             services.AddSingleton<ITypedQueueStorageProvider, MemoryQueueStorageProvider>();
             //services.AddSingleton<ITypedQueueStorageProvider, RedisQueueStorageProvider>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddElysiumQueues(this IServiceCollection services, IConfiguration configuration)
+        {
+            // configuration ? maybe
+            services.AddQueue<LocalActorOutgoingProcessingData, LocalActorOutgoingProcessingQueueConsumer>(
+                GrainConstants.LocalActorOutgoingProcessingStream, QueueStorageType.Memory, configuration);
 
             return services;
         }

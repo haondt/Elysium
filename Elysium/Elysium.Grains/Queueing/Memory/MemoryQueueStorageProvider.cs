@@ -17,6 +17,7 @@ namespace Elysium.Grains.Queueing.Memory
             return new MemoryQueueStorage<T>(typedQueueData.QueueChannel, typedQueueData.Stage);
         }
     }
+
     public class QueueData<T>
     {
         public Channel<(StorageKey<T> Key, T Payload)> QueueChannel { get; set; } = Channel.CreateUnbounded<(StorageKey<T>, T)>(new UnboundedChannelOptions

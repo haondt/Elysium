@@ -355,7 +355,7 @@ namespace Elysium.Grains.LocalActor
 
                 // dispatch the activity
                 // todo: we can optimize this, since when communicating local -> local there's no point in compacting the activity
-                await _outgoingQueue.Enqueue(new LocalActorOutgoingProcessingData
+                await _outgoingQueue.EnqueueAsync(new LocalActorOutgoingProcessingData
                 {
                     Activity = outgoingCompactedActivity,
                     ActivityType = type,
