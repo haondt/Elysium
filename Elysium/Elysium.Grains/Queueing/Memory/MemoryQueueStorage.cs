@@ -29,6 +29,18 @@ namespace Elysium.Grains.Queueing.Memory
             await queue.Writer.WriteAsync((key, payload));
             return key;
         }
+
+        public async Task RequeueDeadletters()
+        {
+            var deadletters = stage.ToList();
+            foreach (var deadletter in deadletters)
+            {
+                if (!stage.TryRemove(deadletter.Key, out _))
+                    continue;
+
+                await Enqueue(deadletter.Value);
+            }
+        }
     }
 
     public class MemoryQueueStorage { }

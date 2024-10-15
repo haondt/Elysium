@@ -7,7 +7,9 @@ using Elysium.Grains.InstanceActor;
 using Elysium.Grains.LocalActor;
 using Elysium.Grains.Queueing;
 using Elysium.Grains.Queueing.Memory;
+using Elysium.Grains.Queueing.Redis;
 using Elysium.Grains.RemoteActor;
+using Haondt.Core.Extensions;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +27,7 @@ namespace Elysium.Grains.Extensions
             return services;
         }
 
-        public static IServiceCollection AddQueues(this IServiceCollection services)
+        public static IServiceCollection AddQueues(this IServiceCollection services, IConfiguration configuration)
         {
             // GrainConstants.LocalActorOutgoingProcessingStream
 
@@ -36,24 +38,26 @@ namespace Elysium.Grains.Extensions
             services.AddSingleton<IQueueStorageProvider, QueueStorageProvider>();
             services.AddSingleton<IGrainFactory<QueueWorkerIdentity>, QueueWorkerGrainFactory>();
             services.AddSingleton<IQueueConsumerProvider, QueueConsumerProvider>();
+            services.Configure<QueueSettings>(configuration.GetSection(nameof(QueueSettings)));
 
-
-            // maybe
             services.AddSingleton<ITypedQueueStorageProvider, MemoryQueueStorageProvider>();
-            //services.AddSingleton<ITypedQueueStorageProvider, RedisQueueStorageProvider>();
+
+            var queueSettings = configuration.GetSection<QueueSettings>();
+            if (queueSettings.Redis != null)
+                services.AddSingleton<ITypedQueueStorageProvider, RedisQueueStorageProvider>();
 
             return services;
         }
 
         public static IServiceCollection AddElysiumQueues(this IServiceCollection services, IConfiguration configuration)
         {
-            // todo: add configuration for the storage type
+            var queueSettings = configuration.GetSection<QueueSettings>();
             services.AddQueue<LocalActorOutgoingProcessingData, LocalActorOutgoingProcessingQueueConsumer>(
-                GrainConstants.LocalActorOutgoingProcessingQueue, QueueStorageType.Memory, configuration);
+                GrainConstants.LocalActorOutgoingProcessingQueue, queueSettings.LocalActorOutgoingQueueStorageType, configuration);
             services.AddQueue<LocalActorIncomingProcessingData, LocalActorIncomingProcessingQueueConsumer>(
-                GrainConstants.LocalActorIncomingProcessingQueue, QueueStorageType.Memory, configuration);
+                GrainConstants.LocalActorIncomingProcessingQueue, queueSettings.LocalActorIncomingQueueStorageType, configuration);
             services.AddQueue<OutgoingRemoteActivityData, OutgoingRemoteActivityDataQueueConsumer>(
-                GrainConstants.RemoteActorOutgoingDataQueue, QueueStorageType.Memory, configuration);
+                GrainConstants.RemoteActorOutgoingDataQueue, queueSettings.RemoteActorOutgoingQueueStorageType, configuration);
 
             return services;
         }

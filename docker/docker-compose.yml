@@ -62,6 +62,8 @@ services:
     container_name: redis
     networks:
       - elysium
+    ports:
+      - 6379:6379
     image: redis
 
   # only needed for mongodb driver

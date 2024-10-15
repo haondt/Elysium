@@ -22,8 +22,4 @@
     <ProjectReference Include="..\Elysium.Persistence\Elysium.Persistence.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Queueing\Redis\" />
-  </ItemGroup>
-
 </Project>

@@ -34,7 +34,7 @@ builder.Host
             .ConfigureStorageKeyConvert()
             .AddElysiumSiloServices()
             .AddElysiumGrainServices(context.Configuration)
-            .AddQueues()
+            .AddQueues(context.Configuration)
             .AddElysiumQueues(context.Configuration)
             .AddElysiumDomainServices(context.Configuration)
             .AddElysiumCryptoServices(context.Configuration)

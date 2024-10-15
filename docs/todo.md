@@ -47,6 +47,6 @@
 - instanceActorAuthorGrain can be made into a static class
 - replace orleans streams with durable queue based on redis
 - confirmation before closing modals
+- enable persistence in redis for queues
 
 ## currently doing
-- add unstable warning in sign up ui

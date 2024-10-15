@@ -19,7 +19,7 @@ namespace Elysium.Grains.Tests.Queues
                 .AddStartupTask<QueueSiloStartupTask>();
             siloBuilder.ConfigureServices(services =>
             {
-                services.AddQueues();
+                services.AddQueues(siloBuilder.Configuration);
                 services.AddQueue<Job, JobConsumer>(JobConstants.Queue1, QueueStorageType.Memory, siloBuilder.Configuration);
                 services.AddQueue<Job, JobConsumer>(JobConstants.Queue2, QueueStorageType.Memory, siloBuilder.Configuration);
             });
