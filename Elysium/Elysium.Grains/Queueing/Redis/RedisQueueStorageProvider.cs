@@ -9,7 +9,7 @@ namespace Elysium.Grains.Queueing.Redis
 {
     public class RedisQueueStorageProvider : ITypedQueueStorageProvider
     {
-        public QueueStorageType Type => QueueStorageType.Memory;
+        public QueueStorageType Type => QueueStorageType.Redis;
         private readonly ConcurrentDictionary<string, object> _queues = new();
 
         private static JsonSerializerSettings SerializerSettings = CreateSerializerSettings();
