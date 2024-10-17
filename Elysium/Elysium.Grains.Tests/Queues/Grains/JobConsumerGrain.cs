@@ -78,7 +78,7 @@ namespace Elysium.Grains.Tests.Queues.Grains
                 && !block.Task.IsCompleted)
                 return Task.CompletedTask;
 
-            queueInfo.ExecutionBlocks[jobId] = new TaskCompletionSource();
+            queueInfo.ExecutionBlocks[jobId] = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
             return Task.CompletedTask;
         }

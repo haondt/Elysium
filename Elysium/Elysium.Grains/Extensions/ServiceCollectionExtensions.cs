@@ -43,7 +43,7 @@ namespace Elysium.Grains.Extensions
             services.AddSingleton<ITypedQueueStorageProvider, MemoryQueueStorageProvider>();
 
             var queueSettings = configuration.GetSection<QueueSettings>();
-            if (queueSettings.Redis != null)
+            if (queueSettings.Redis.Enabled)
                 services.AddSingleton<ITypedQueueStorageProvider, RedisQueueStorageProvider>();
 
             return services;
